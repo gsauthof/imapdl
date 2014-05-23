@@ -1,0 +1,7 @@
+22 serialization::archive 10 0 0 0 8 7 hello
+ 1 3 7 10 ok
+ 0 4 7 world
+ 1 2 7 20 ok
+ 1 1 5 lol
+ 1 1 5 bye
+ 2 0 0  3 0 0 

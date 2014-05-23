@@ -1,0 +1,9 @@
+[submodule "cmake/ragel"]
+	path = cmake/ragel
+	url = git@github.com:gsauthof/cmake-ragel.git
+[submodule "libixxx"]
+	path = libixxx
+	url = git@github.com:gsauthof/libixxx.git
+[submodule "libbuffer"]
+	path = libbuffer
+	url = git@github.com:gsauthof/libbuffer.git

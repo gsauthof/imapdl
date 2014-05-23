@@ -1,0 +1,222 @@
+22 serialization::archive 10 0 1 1 304 159 * OK [CAPABILITY IMAP4 IMAP4rev1 LITERAL+ ID AUTH=LOGIN AUTH=PLAIN AUTH=GSSAPI SASL-IR] imap.CeBiTec.Uni-Bielefeld.DE Cyrus IMAP v2.3.13-CeBiTec server ready
+ 0 31 30 A000 LOGIN juser123 muchvery
+ 1 59 356 A000 OK [CAPABILITY IMAP4 IMAP4rev1 LITERAL+ ID LOGINDISABLED AUTH=LOGIN AUTH=PLAIN AUTH=GSSAPI ACL RIGHTS=kxte QUOTA MAILBOX-REFERRALS NAMESPACE UIDPLUS NO_ATOMIC_RENAME UNSELECT CHILDREN MULTIAPPEND BINARY SORT SORT=MODSEQ THREAD=ORDEREDSUBJECT THREAD=REFERENCES ANNOTATEMORE CATENATE CONDSTORE SCAN IDLE LISTEXT LIST-SUBSCRIBED URLAUTH] User logged in
+ 0 1 19 A001 SELECT INBOX
+ 1 88 355 * FLAGS (\Answered \Flagged \Draft \Deleted \Seen)
+* OK [PERMANENTFLAGS (\Answered \Flagged \Draft \Deleted \Seen \*)]  
+* 3 EXISTS
+* 3 RECENT
+* OK [UNSEEN 1]  
+* OK [UIDVALIDITY 1204039922]  
+* OK [UIDNEXT 23258]  
+* OK [NOMODSEQ] Sorry, modsequences have not been enabled on this mailbox
+* OK [URLMECH INTERNAL]
+A001 OK [READ-WRITE] Completed
+ 0 0 85 A002 FETCH 1:* (UID FLAGS BODY.PEEK[HEADER.FIELDS (date from subject)] BODY.PEEK[])
+ 1 35 4096 * 1 FETCH (FLAGS (\Recent) UID 23255 BODY[HEADER.FIELDS (date from subject)] {94}
+Date: Sat, 3 May 2014 22:27:17 +0200
+From: Georg Sauthoff <mail@georg.so>
+Subject: test1
+
+ BODY[] {3231}
+Return-Path: <gsauthof@TechFak.Uni-Bielefeld.DE>
+Received: from smtp-relay.CeBiTec.Uni-Bielefeld.DE (snape.CeBiTec.Uni-Bielefeld.DE [129.70.160.84])
+	 by imap.CeBiTec.Uni-Bielefeld.DE (Cyrus v2.3.13-CeBiTec) with LMTPA;
+	 Sat, 03 May 2014 22:27:31 +0200
+X-Sieve: CMU Sieve 2.3
+Received: from localhost (localhost.CeBiTec.Uni-Bielefeld.DE [127.0.0.1])
+	by smtp-relay.CeBiTec.Uni-Bielefeld.DE (Postfix) with ESMTP id AA435897
+	for <gsauthof@cebitec.uni-bielefeld.de>; Sat,  3 May 2014 22:27:30 +0200 (CEST)
+X-Virus-Scanned: amavisd-new at cebitec.uni-bielefeld.de
+X-Spam-Flag: NO
+X-Spam-Score: -0.631
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.631 required=6.31 tests=[AWL=-1.246,
+	BAYES_40=-0.185, L_P0F_UNKN=0.8] autolearn=no
+X-Amavis-OS-Fingerprint: UNKNOWN [S10:61:1:60:M1460,S,T,N,W7:.:?:?] (up: 4720
+	hrs), (link: ethernet/modem), [129.70.137.17:59678]
+Received: from smtp-relay.CeBiTec.Uni-Bielefeld.DE ([127.0.0.1])
+	by localhost (malfoy.CeBiTec.Uni-Bielefeld.DE [127.0.0.1]) (amavisd-new, port 10024)
+	with LMTP id yqmUad6aaG8a for <gsauthof@cebitec.uni-bielefeld.de>;
+	Sat,  3 May 2014 22:27:29 +0200 (CEST)
+Received: from smarthost.TechFak.Uni-Bielefeld.DE (smarthost.TechFak.Uni-Bielefeld.DE [129.70.137.17])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by smtp-relay.CeBiTec.Uni-Bielefeld.DE (Postfix) with ESMTPS id 47F34896
+	for <gsauthof@cebitec.uni-bielefeld.de>; Sat,  3 May 2014 22:27:29 +0200 (CEST)
+Received: from mailin.techfak.uni-bielefeld.de (mailin.TechFak.Uni-Bielefeld.DE [IPv6:2001:638:504:2014:ffff::22])
+	by smarthost.TechFak.Uni-Bielefeld.DE (Postfix) with ESMTP id E87868000F
+	for <gsauthof@cebitec.uni-bielefeld.de>; Sat,  3 May 2014 22:27:26 +0200 (CEST)
+Received: by mailin.techfak.uni-bielefeld.de (Postfix, from userid 19744)
+	id E8BCEB764; Sat,  3 May 2014 22:27:28 +0200 (CEST)
+X-Original-To: gsauthof@techfak.uni-bielefeld.de
+Delivered-To: gsauthof@techfak.uni-bielefeld.de
+X-policyd-weight:  NOT_IN_SBL_XBL_SPAMHAUS=-1.5 NOT_IN_SPAMCOP=-1.5 CL_IP_EQ_FROM_MX=-3.1; rate: -6.1
+Received: from georg.so (georg.so [IPv6:2a00:1828:2000:164::12])
+	by mailin.techfak.uni-bielefeld.de (Postfix) with ESMTP id EDB7FAFD9
+	for <gsauthof@techfak.uni-bielefeld.de>; Sat,  3 May 2014 22:27:18 +0200 (CEST)
+Received: from x220.localdomain (unknown [IPv6:2001:1a80:303a:0:f2de:f1ff:fef6:29b4])
+	(Authenticated sender: georg)
+	by georg.so (Postfix) with ESMTPSA id 86F3E2D8815B
+	for <gsauthof@techfak.uni-bielefeld.de>; Sat,  3 May 2014 22:27:17 +0200 (CEST)
+Received: by x220.localdomain (Postfix, from userid 1000)
+	id 0CA7E122CDA; Sat,  3 May 2014 22:27:17 +0200 (CEST)
+Date: Sat, 3 May 2014 22:27:17 +0200
+From: Georg Sauthoff <mail@georg.so>
+To: gsauthof@techfak.uni-bielefeld.de
+Subject: test1
+Message-ID: <20140503202717.GA2493@x220.fritz.box>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+User-Agent: Mutt/1.5.21 (2010-09-15)
+
+test message 1
+-- 
+No one can create decent software who is distrustful of the
+user's intelligence, or whose attitude is patronizing.  (free
+after William Strunk, Jr. and E.B. White, The Elements of Style,
+p. 70, 1959)
+
+)
+* 2 FETCH (FLAGS (\Recent) UID 23256 BODY[HEADER.FIELDS (date from subject)] {94}
+Date: Sat, 3 May 2014 22:27:37 +0200
+From: Georg Sauthoff <mail@georg.so>
+Subject: test2
+
+ BODY[] {3073}
+Return-Path: <gsauthof@TechFak.Uni-Bielefeld.DE>
+Received: from smtp-relay.CeBiTec.Uni-Bielefeld.DE (snape.CeBiTec.Uni-Bielefeld.DE [129.70.160.84])
+	 by imap.CeBiTec.Uni-Bielefeld.DE (Cyrus v2.3.13-CeBiTec) with LMTPA;
+	 Sat, 03 May 2014 22:27:48 +0200
+X-Sieve: CMU Sieve 2.3
+Received: from localhost (localhost.CeBiTec.Uni-Bielefeld.DE [127.0.0.1])
+	by smtp-relay.CeBiTec.Uni-Bielefeld.DE (Postfix) with ESMTP id BD33E899
+	for <gsauthof@cebitec.uni-bielefeld.de>; Sat 1 2 4096 ,  3 May 2014 22:27:47 +0200 (CEST)
+X-Virus-Scanned: amavisd-new at cebitec.uni-bielefeld.de
+X-Spam-Flag: NO
+X-Spam-Score: -0.73
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.73 required=6.31 tests=[AWL=-0.790,
+	BAYES_20=-0.74, L_P0F_UNKN=0.8] autolearn=no
+X-Amavis-OS-Fingerprint: UNKNOWN [S10:61:1:60:M1460,S,T,N,W7:.:?:?] (up: 4720
+	hrs), (link: ethernet/modem), [129.70.137.17:59679]
+Received: from smtp-relay.CeBiTec.Uni-Bielefeld.DE ([127.0.0.1])
+	by localhost (malfoy.CeBiTec.Uni-Bielefeld.DE [127.0.0.1]) (amavisd-new, port 10024)
+	with LMTP id axki+T3RyxIT for <gsauthof@cebitec.uni-bielefeld.de>;
+	Sat,  3 May 2014 22:27:46 +0200 (CEST)
+Received: from smarthost.TechFak.Uni-Bielefeld.DE (smarthost.TechFak.Uni-Bielefeld.DE [129.70.137.17])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by smtp-relay.CeBiTec.Uni-Bielefeld.DE (Postfix) with ESMTPS id 46049898
+	for <gsauthof@cebitec.uni-bielefeld.de>; Sat,  3 May 2014 22:27:46 +0200 (CEST)
+Received: from mailin.techfak.uni-bielefeld.de (mailin.TechFak.Uni-Bielefeld.DE [IPv6:2001:638:504:2014:ffff::22])
+	by smarthost.TechFak.Uni-Bielefeld.DE (Postfix) with ESMTP id F21998000D
+	for <gsauthof@cebitec.uni-bielefeld.de>; Sat,  3 May 2014 22:27:43 +0200 (CEST)
+Received: by mailin.techfak.uni-bielefeld.de (Postfix, from userid 19744)
+	id EFCA3B764; Sat,  3 May 2014 22:27:45 +0200 (CEST)
+X-Original-To: gsauthof@techfak.uni-bielefeld.de
+Delivered-To: gsauthof@techfak.uni-bielefeld.de
+X-policyd-weight: using cached result; rate: -6.1
+Received: from georg.so (georg.so [IPv6:2a00:1828:2000:164::12])
+	by mailin.techfak.uni-bielefeld.de (Postfix) with ESMTP id 9C9DCAFD9
+	for <gsauthof@techfak.uni-bielefeld.de>; Sat,  3 May 2014 22:27:37 +0200 (CEST)
+Received: from x220.localdomain (unknown [IPv6:2001:1a80:303a:0:f2de:f1ff:fef6:29b4])
+	(Authenticated sender: georg)
+	by georg.so (Postfix) with ESMTPSA id 658702D8815B
+	for <gsauthof@techfak.uni-bielefeld.de>; Sat,  3 May 2014 22:27:37 +0200 (CEST)
+Received: by x220.localdomain (Postfix, from userid 1000)
+	id 21F07122CDE; Sat,  3 May 2014 22:27:37 +0200 (CEST)
+Date: Sat, 3 May 2014 22:27:37 +0200
+From: Georg Sauthoff <mail@georg.so>
+To: gsauthof@techfak.uni-bielefeld.de
+Subject: test2
+Message-ID: <20140503202737.GB2493@x220.fritz.box>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+User-Agent: Mutt/1.5.21 (2010-09-15)
+
+test message 2
+-- 
+'Welcome in the internet [..] Have fun online...' (Vodafone
+WebSessions popup status window, 2011)
+
+)
+* 3 FETCH (FLAGS (\Recent) UID 23257 BODY[HEADER.FIELDS (date from subject)] {94}
+Date: Sat, 3 May 2014 22:28:02 +0200
+From: Georg Sauthoff <mail@georg.so>
+Subject: test3
+
+ BODY[] {2984}
+Return-Path: <gsauthof@TechFak.Uni-Bielefeld.DE>
+Received: from smtp-relay.CeBiTec.Uni-Bielefeld.DE (snape.CeBiTec.Uni-Bielefeld.DE [129.70.160.84])
+	 by imap.CeBiTec.Uni-Bielefeld.DE (Cyrus v2.3.13-CeBiTec) with LMTPA;
+	 Sat, 03 May 2014 22:28:13 +0200
+X-Sieve: CMU Sieve 2.3
+Received: from localhost (localhost.CeBiTec.Uni-Bielefeld.DE [127.0.0.1])
+	by smtp-relay.CeBiTec.Uni-Bielefeld.DE (Postfix) with ESMTP id 292DA89B
+	for <gsauthof@cebitec.uni-bielefeld.de>; Sat,  3 May 2014 22:28:13 +0200 (CEST)
+X-Virus-Scanned: amavisd-new at cebitec.uni-bielefeld.de
+X-Spam-Flag: NO
+X-Spam-Score: -0.354
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.354 required=6.31 tests=[AWL=-0.969,
+	BAYES_40=-0.185, L_P0F_UNKN=0.8] autolearn=no
+X-Amavis-OS-Fingerprint: UNKNOWN [S10:61:1:60:M1460,S,T,N,W7:.:?:?] (up: 4720
+	hrs), (link: ethernet/modem), [129.70.137.17:59683]
+Received: from smtp-relay.CeBiTec.Uni-Bielefeld.DE ([127.0.0.1])
+	by localhost (malfoy.CeBiTec.Uni-Bielefeld.DE [127.0.0.1]) (amavisd-new, port 10024)
+	with LMTP id iU4dije09QUU for <gsauthof@cebitec.uni-bielefeld.de>;
+	Sat,  3 May 2014 22:28:12 +0200 (CEST)
+Received: from smarthost.TechFak.Uni-Bielefeld.DE (smarthost.TechFak.Uni-Bielefeld.DE [129.70.137.17])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	 1 2 1715 (No client certificate requested)
+	by smtp-relay.CeBiTec.Uni-Bielefeld.DE (Postfix) with ESMTPS id D8DBF89A
+	for <gsauthof@cebitec.uni-bielefeld.de>; Sat,  3 May 2014 22:28:11 +0200 (CEST)
+Received: from mailin.techfak.uni-bielefeld.de (mailin.TechFak.Uni-Bielefeld.DE [IPv6:2001:638:504:2014:ffff::22])
+	by smarthost.TechFak.Uni-Bielefeld.DE (Postfix) with ESMTP id 9281F8000F
+	for <gsauthof@cebitec.uni-bielefeld.de>; Sat,  3 May 2014 22:28:09 +0200 (CEST)
+Received: by mailin.techfak.uni-bielefeld.de (Postfix, from userid 19744)
+	id 92CA7B764; Sat,  3 May 2014 22:28:11 +0200 (CEST)
+X-Original-To: gsauthof@techfak.uni-bielefeld.de
+Delivered-To: gsauthof@techfak.uni-bielefeld.de
+X-policyd-weight: using cached result; rate: -6.1
+Received: from georg.so (georg.so [IPv6:2a00:1828:2000:164::12])
+	by mailin.techfak.uni-bielefeld.de (Postfix) with ESMTP id 42972AFD9
+	for <gsauthof@techfak.uni-bielefeld.de>; Sat,  3 May 2014 22:28:03 +0200 (CEST)
+Received: from x220.localdomain (unknown [IPv6:2001:1a80:303a:0:f2de:f1ff:fef6:29b4])
+	(Authenticated sender: georg)
+	by georg.so (Postfix) with ESMTPSA id E4D282D8815B
+	for <gsauthof@techfak.uni-bielefeld.de>; Sat,  3 May 2014 22:28:02 +0200 (CEST)
+Received: by x220.localdomain (Postfix, from userid 1000)
+	id A294F122CDE; Sat,  3 May 2014 22:28:02 +0200 (CEST)
+Date: Sat, 3 May 2014 22:28:02 +0200
+From: Georg Sauthoff <mail@georg.so>
+To: gsauthof@techfak.uni-bielefeld.de
+Subject: test3
+Message-ID: <20140503202802.GC2493@x220.fritz.box>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+User-Agent: Mutt/1.5.21 (2010-09-15)
+
+test message 3
+-- 
+foo bar
+
+)
+A002 OK Completed (0.000 sec)
+ 0 1 50 A003 UID STORE 23255:23257 FLAGS.SILENT \DELETED
+ 1 42 19 A003 OK Completed
+ 0 0 30 A004 UID EXPUNGE 23255:23257
+ 1 70 82 * 1 EXPUNGE
+* 1 EXPUNGE
+* 1 EXPUNGE
+* 0 EXISTS
+* 0 RECENT
+A004 OK Completed
+ 0 0 13 A005 LOGOUT
+ 1 30 42 * BYE LOGOUT received
+A005 OK Completed
+ 2 0 0  3 0 0 
