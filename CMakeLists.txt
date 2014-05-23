@@ -113,7 +113,10 @@ target_link_libraries(client
   ${OPENSSL_CRYPTO_LIBRARY}
   )
 
-add_executable(replay example/replay.cc)
+add_executable(replay
+  example/replay.cc
+  trace/trace.cc
+  )
 target_link_libraries(replay
   ${Boost_SYSTEM_LIBRARY}
   ${Boost_SERIALIZATION_LIBRARY}

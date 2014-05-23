@@ -40,6 +40,7 @@ using namespace ixxx;
 #include <thread>
 #include <chrono>
 #include <memory>
+#include <stdexcept>
 using namespace std;
 
 #include <botan/pipe.h>
@@ -85,13 +86,13 @@ class Replay_Server {
   public:
     Replay_Server(int &rc, const string &filename,
         const string &log_filename,
-        bool use_ssl = true, unsigned port = 6666);
+        bool use_ssl = true, unsigned limit = 119, unsigned port = 6666);
 
     void operator()();
 };
 Replay_Server::Replay_Server(int &rc, const string &filename,
     const string &log_filename,
-    bool use_ssl, unsigned port)
+    bool use_ssl, unsigned limit, unsigned port)
   :
     rc_(&rc),
     filename_(filename),
@@ -99,7 +100,7 @@ Replay_Server::Replay_Server(int &rc, const string &filename,
 {
   string prefix(ut_prefix());
   prefix += '/';
-  opts_.limit = 119;
+  opts_.limit = limit;
   opts_.use_ssl = use_ssl;
   opts_.key = prefix + "server.key";
   opts_.cert =  prefix + "server.crt";
@@ -191,6 +192,59 @@ static void test_basic(bool use_ssl)
     BOOST_CHECK_EQUAL_COLLECTIONS(sums.begin(), sums.end(), ref.begin(), ref.end());
 }
 
+static void test_logindisabled()
+{
+  bool use_ssl = false;
+  int rc = 0;
+  thread replay_server{Replay_Server{rc, "logindisabled.trace", "ut_logindisabled_server.log", use_ssl, 10}};
+
+  this_thread::sleep_for(chrono::seconds{1});
+
+  string prefix(ut_prefix());
+  prefix += '/';
+  string configfile{prefix+"cp.conf"};
+  char cconfigfile[128] = {0};
+  strncpy(cconfigfile, configfile.c_str(), sizeof(cconfigfile)-1);
+  char *argv[] = {
+    (char*)"imapcp",
+    (char*)"--account", (char*)"fake",
+    (char*)"--log", (char*)"ut_logindisabled.log", (char*)"--log_v",
+    (char*)"--maildir", (char*)"tmp/cp/basicmd",
+    (char*)"-v6",
+    (char*)"--gwait", (char*)"400",
+    (char*)"--config", cconfigfile,
+    (char*)"--ssl", (char*)(use_ssl?"yes":"no"),
+    0
+  };
+  int argc = sizeof(argv)/sizeof(char*)-1;
+
+  IMAP::Copy::Options opts{argc, argv};
+  boost::log::sources::severity_logger<Log::Severity> lg(std::move(Log::create(
+          static_cast<Log::Severity>(opts.severity),
+          static_cast<Log::Severity>(opts.file_severity),
+          opts.logfile)));
+
+  boost::asio::io_service io_service;
+  boost::asio::ssl::context context(boost::asio::ssl::context::sslv23);
+
+  unique_ptr<Net::Client::Base> net_client;
+  if (use_ssl) {
+    unique_ptr<Net::Client::Base> c(
+        new Net::TCP::SSL::Client::Base(io_service, context, opts, lg));
+    net_client = std::move(c);
+  } else {
+    unique_ptr<Net::Client::Base> c(
+        new Net::TCP::Client::Base(io_service, opts, lg));
+    net_client = std::move(c);
+  }
+
+  IMAP::Copy::Client client(opts, std::move(net_client), lg);
+  BOOST_CHECK_THROW(io_service.run(), std::runtime_error);
+
+  replay_server.join();
+  BOOST_CHECK_EQUAL(rc, 23);
+}
+
 struct Log_Fixture {
   boost::log::sources::severity_logger<Log::Severity> lg;
   Log_Fixture()
@@ -227,6 +281,12 @@ BOOST_AUTO_TEST_SUITE( imapcp )
     //test_basic(lg, false);
     boost::log::core::get()->remove_all_sinks();
     test_basic(false);
+  }
+
+  BOOST_AUTO_TEST_CASE( logindisabled )
+  {
+    boost::log::core::get()->remove_all_sinks();
+    test_logindisabled();
   }
 
 BOOST_AUTO_TEST_SUITE_END()

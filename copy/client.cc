@@ -304,6 +304,9 @@ namespace IMAP {
     void Client::do_login()
     {
       BOOST_LOG_FUNCTION();
+      if (capabilities_.find(IMAP::Server::Response::Capability::LOGINDISABLED)
+          != capabilities_.end())
+        THROW_MSG("Cannot login because server has LOGINDISABLED");
       BOOST_LOG_SEV(lg_, Log::DEBUG) << "Clearing capabilities";
       capabilities_.clear();
       string tag;
