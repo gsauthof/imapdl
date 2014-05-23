@@ -13,21 +13,26 @@ recommended to include this repository as Git [submodule][gitm].
 
 ## Features
 
-- [Maildir][maildir] support - makes sure to [fsync][fsync] at the right times
-  to minimize data loss in the case of power failure
-- written in C++ with some C++11 features
-- asynchronous IO using [Boost ASIO][asio]
-- robust IMAP protocol lexer implemented in [Ragel][ragel]
+- [Maildir][maildir] support - client makes sure to [fsync][fsync] at the right
+  times to minimize data loss in the case of power failure
+- [SSL][ssl] enabled by default
+- In case the connection is interrupted during a fetch operation, the UIDs of
+  completely fetched messages are written to a journal and expunged on next
+  program start before the remaining messages are fetched. Useful, when e.g.
+  retrieving a large mailbox over an unreliable mobile network
+  (think: UMTS when travelling in a high speed train).
+- Workarounds for some IMAP server bugs (deviations from the RFC)
+- Uses the UIDPLUS extension if available  - thus, excluding side effects with
+  concurrently established server connections when purging messages
+- Plain [tilde expansion][tilde] in local mailbox paths
+- Configuration via [JSON][json] [run control][rc] file
+- Written in C++ with some C++11 features
+- Asynchronous IO using [Boost ASIO][asio]
+- Robust IMAP protocol lexer implemented in [Ragel][ragel]
 - Before commands are send to the server they are locally parsed with a Ragel
   grammar that implements the server side of the IMAP spec - thus, the client
   verifies that it does not violate [RFC3501][rfc3501] in an obvious way.
-- workarounds for some IMAP server bugs (deviations from the RFC)
-- high test coverage with unittests
-- [SSL][ssl] enabled by default
-- uses the UIDPLUS extensio if available  - thus, excluding side effects with
-  concurrently established server connections when purging messages
-- plain [tilde expansion][tilde] in local mailbox paths
-- configuration via [JSON][json] [run control][rc] file
+- High test coverage with unittests
 
 ## Compile
 

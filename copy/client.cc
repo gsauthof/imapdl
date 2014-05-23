@@ -36,7 +36,10 @@ using namespace Memory;
 #include <functional>
 using namespace std;
 
+#include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
 
+#include "serialize.h"
 
 namespace IMAP {
   namespace Copy {
@@ -89,12 +92,46 @@ namespace IMAP {
         writer_(tags_, std::bind(&Client::to_cmd, this, std::placeholders::_1)),
         maildir_(opts_.maildir),
         tmp_dir_(maildir_.tmp_dir_fd()),
-        fetch_timer_(client_->io_service())
+        fetch_timer_(client_->io_service()),
+        mailbox_(opts_.mailbox)
     {
       BOOST_LOG_FUNCTION();
       buffer_proxy_.set(&buffer_);
+      read_journal();
       do_signal_wait();
       do_resolve();
+    }
+    Client::~Client()
+    {
+      try {
+        write_journal();
+      } catch (...) {
+        // don't throw exceptions in destructor ...
+      }
+    }
+
+    void Client::read_journal()
+    {
+      if (fs::exists(opts_.journal_file)) {
+        Journal journal;
+        BOOST_LOG_SEV(lg_, Log::MSG) << "Reading journal " << opts_.journal_file << " ...";
+        journal.read(opts_.journal_file);
+        uidvalidity_ = journal.uidvalidity_;
+        uids_ = journal.uids_;
+        mailbox_ = journal.mailbox_;
+        task_ = Task::CLEANUP;
+        fs::remove(opts_.journal_file);
+      }
+    }
+    void Client::write_journal()
+    {
+      if (uids_.empty())
+        return;
+      if (!opts_.del)
+        return;
+      BOOST_LOG_SEV(lg_, Log::MSG) << "Writing journal " << opts_.journal_file << " ...";
+      Journal journal(opts_.mailbox, uidvalidity_, uids_);
+      journal.write(opts_.journal_file);
     }
 
     void Client::to_cmd(vector<char> &x)
@@ -226,6 +263,68 @@ namespace IMAP {
     void Client::command()
     {
       BOOST_LOG_FUNCTION();
+      switch (task_) {
+        case Task::FIRST_:
+        case Task::LAST_:
+          break;
+        case Task::CLEANUP:
+          cleanup_command();
+          break;
+        case Task::DOWNLOAD:
+          download_command();
+          break;
+      }
+    }
+
+    void Client::cleanup_command()
+    {
+      BOOST_LOG_FUNCTION();
+      switch (state_) {
+        case State::FIRST_:
+        case State::LAST_:
+        case State::DISCONNECTED:
+          break;
+        case State::ESTABLISHED:
+          break;
+        case State::GOT_INITIAL_CAPABILITIES:
+          do_login();
+          break;
+        case State::LOGGED_IN:
+          do_capabilities();
+          break;
+        case State::GOT_CAPABILITIES:
+          BOOST_LOG_SEV(lg_, Log::MSG) << "Deleting messages from last time ...";
+          do_select();
+          break;
+        case State::SELECTED_MAILBOX:
+          do_store();
+          break;
+        case State::FETCHING:
+        case State::FETCHED:
+          // should not visit here in that state/task
+          break;
+        case State::STORED:
+          do_uid_or_simple_expunge();
+          break;
+        case State::EXPUNGED:
+          uids_.clear();
+          task_ = Task::DOWNLOAD;
+          state_ = State::GOT_CAPABILITIES;
+          mailbox_ = opts_.mailbox;
+          BOOST_LOG_SEV(lg_, Log::MSG) << "Deleting messages from last time ... finished";
+          command();
+          break;
+        case State::LOGGING_OUT:
+        case State::LOGGED_OUT:
+        case State::END:
+          // should not visit here in that task/state
+          break;
+      }
+    }
+
+    void Client::download_command()
+    {
+      BOOST_LOG_FUNCTION();
       switch (state_) {
         case State::FIRST_:
         case State::LAST_:
@@ -262,6 +361,7 @@ namespace IMAP {
           // should not visit here in that state
           break;
         case State::LOGGED_OUT:
+          uids_.clear();
           do_quit();
           break;
         case State::END:
@@ -315,8 +415,9 @@ namespace IMAP {
 
       exists_ = 0;
       recent_ = 0;
-      uidvalidity_ = 0;
-      uids_.clear();
+      // Don't reset them on login in case the values are loaded from a journal
+      //uidvalidity_ = 0;
+      //uids_.clear();
 
       BOOST_LOG(lg_) << "Logging in as |" << opts_.username << "| [" << tag << "]";
       BOOST_LOG_SEV(lg_, Log::INSANE) << "Password: |" << opts_.password << "|";
@@ -327,9 +428,9 @@ namespace IMAP {
     {
       BOOST_LOG_FUNCTION();
       string tag;
-      writer_.select(opts_.mailbox, tag);
+      writer_.select(mailbox_, tag);
       tag_to_state_[tag] = State::SELECTED_MAILBOX;
-      BOOST_LOG(lg_) << "Selecting mailbox: |" << opts_.mailbox << "|" << " [" << tag << ']';
+      BOOST_LOG(lg_) << "Selecting mailbox: |" << mailbox_ << "|" << " [" << tag << ']';
       do_write();
     }
 
@@ -561,6 +662,7 @@ namespace IMAP {
       }
       BOOST_LOG(lg_) << "Switch from state " << state_ << " to " << i->second
         << " [" << tag << "]";
+      tags_.pop(tag);
       state_ = i->second;
       tag_to_state_.erase(i);
       command();
@@ -583,6 +685,11 @@ namespace IMAP {
     {
       BOOST_LOG_FUNCTION();
       BOOST_LOG(lg_) << "UIDVALIDITY: " << n;
+      if (uidvalidity_ != n) {
+        BOOST_LOG_SEV(lg_, Log::DEBUG) << "Replacing UIDVALIDITY "
+          << uidvalidity_ << " with " << n;
+        uids_.clear();
+      }
       uidvalidity_ = n;
     }
 
@@ -592,10 +699,20 @@ namespace IMAP {
       flags_.clear();
       if (state_ == State::FETCHING) {
         BOOST_LOG(lg_) << "Fetching message: " << number;
+        last_uid_ = 0;
+        if (opts_.simulate_error == fetched_messages_ + 1) {
+          ostringstream o;
+          o << "Simulated error after fetched message: " << fetched_messages_;
+          THROW_MSG(o.str());
+        }
       }
     }
     void Client::imap_data_fetch_end()
     {
+      if (!last_uid_)
+        THROW_MSG("Did not retrieve any UID");
+      BOOST_LOG_SEV(lg_, Log::DEBUG) << "Storing UID: " << last_uid_;
+      uids_.push(last_uid_);
     }
     void Client::imap_section_empty()
     {
@@ -658,7 +775,7 @@ namespace IMAP {
       BOOST_LOG_FUNCTION();
       if (state_ == State::FETCHING) {
         BOOST_LOG_SEV(lg_, Log::DEBUG) << "UID: " << number;
-        uids_.push(number);
+        last_uid_ = number;
       }
     }
 

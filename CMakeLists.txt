@@ -71,6 +71,7 @@ add_executable(ut
   copy/options.cc
   copy/client.cc
   copy/id.cc
+  copy/serialize.cc
   net/tcp_client.cc
   trace/trace.cc
   log/log.cc
@@ -126,6 +127,8 @@ add_executable(server
   example/server.cc
   example/server_main.cc
   net/ssl_util.cc
+  lex_util.cc
+  trace/trace.cc
   )
 target_link_libraries(server
   ${Boost_SYSTEM_LIBRARY}
@@ -143,6 +146,7 @@ add_executable(imapdl
   copy/options.cc
   copy/client.cc
   copy/id.cc
+  copy/serialize.cc
   net/tcp_client.cc
   net/ssl_util.cc
   net/ssl_verification.cc

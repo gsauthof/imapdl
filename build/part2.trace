@@ -1,0 +1,112 @@
+22 serialization::archive 10 0 1 1 370 159 * OK [CAPABILITY IMAP4 IMAP4rev1 LITERAL+ ID AUTH=LOGIN AUTH=PLAIN AUTH=GSSAPI SASL-IR] imap.CeBiTec.Uni-Bielefeld.DE Cyrus IMAP v2.3.13-CeBiTec server ready
+ 0 18 30 A000 LOGIN juser123 muchvery
+ 1 72 356 A000 OK [CAPABILITY IMAP4 IMAP4rev1 LITERAL+ ID LOGINDISABLED AUTH=LOGIN AUTH=PLAIN AUTH=GSSAPI ACL RIGHTS=kxte QUOTA MAILBOX-REFERRALS NAMESPACE UIDPLUS NO_ATOMIC_RENAME UNSELECT CHILDREN MULTIAPPEND BINARY SORT SORT=MODSEQ THREAD=ORDEREDSUBJECT THREAD=REFERENCES ANNOTATEMORE CATENATE CONDSTORE SCAN IDLE LISTEXT LIST-SUBSCRIBED URLAUTH] User logged in
+ 0 1 19 A001 SELECT INBOX
+ 1 48 355 * FLAGS (\Answered \Flagged \Draft \Deleted \Seen)
+* OK [PERMANENTFLAGS (\Answered \Flagged \Draft \Deleted \Seen \*)]  
+* 3 EXISTS
+* 0 RECENT
+* OK [UNSEEN 1]  
+* OK [UIDVALIDITY 1204039922]  
+* OK [UIDNEXT 23372]  
+* OK [NOMODSEQ] Sorry, modsequences have not been enabled on this mailbox
+* OK [URLMECH INTERNAL]
+A001 OK [READ-WRITE] Completed
+ 0 0 50 A002 UID STORE 23369:23370 FLAGS.SILENT \DELETED
+ 1 46 19 A002 OK Completed
+ 0 0 30 A003 UID EXPUNGE 23369:23370
+ 1 52 69 * 1 EXPUNGE
+* 1 EXPUNGE
+* 1 EXISTS
+* 0 RECENT
+A003 OK Completed
+ 0 0 19 A004 SELECT INBOX
+ 1 49 355 * FLAGS (\Answered \Flagged \Draft \Deleted \Seen)
+* OK [PERMANENTFLAGS (\Answered \Flagged \Draft \Deleted \Seen \*)]  
+* 1 EXISTS
+* 0 RECENT
+* OK [UNSEEN 1]  
+* OK [UIDVALIDITY 1204039922]  
+* OK [UIDNEXT 23372]  
+* OK [NOMODSEQ] Sorry, modsequences have not been enabled on this mailbox
+* OK [URLMECH INTERNAL]
+A004 OK [READ-WRITE] Completed
+ 0 0 85 A005 FETCH 1:* (UID FLAGS BODY.PEEK[HEADER.FIELDS (date from subject)] BODY.PEEK[])
+ 1 47 3388 * 1 FETCH (FLAGS () UID 23371 BODY[HEADER.FIELDS (date from subject)] {95}
+Date: Fri, 23 May 2014 21:06:27 +0200
+From: Georg Sauthoff <mail@georg.so>
+Subject: test3
+
+ BODY[] {3167}
+Return-Path: <gsauthof@TechFak.Uni-Bielefeld.DE>
+Received: from smtp-relay.CeBiTec.Uni-Bielefeld.DE (snape.CeBiTec.Uni-Bielefeld.DE [129.70.160.84])
+	 by imap.CeBiTec.Uni-Bielefeld.DE (Cyrus v2.3.13-CeBiTec) with LMTPA;
+	 Fri, 23 May 2014 21:06:30 +0200
+X-Sieve: CMU Sieve 2.3
+Received: from localhost (localhost.CeBiTec.Uni-Bielefeld.DE [127.0.0.1])
+	by smtp-relay.CeBiTec.Uni-Bielefeld.DE (Postfix) with ESMTP id 62B2ED5A
+	for <gsauthof@cebitec.uni-bielefeld.de>; Fri, 23 May 2014 21:06:30 +0200 (CEST)
+X-Virus-Scanned: amavisd-new at cebitec.uni-bielefeld.de
+X-Spam-Flag: NO
+X-Spam-Score: -0.147
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.147 required=6.31 tests=[AWL=-0.207,
+	BAYES_20=-0.74, L_P0F_UNKN=0.8] autolearn=no
+X-Amavis-OS-Fingerprint: UNKNOWN [S10:61:1:60:M1460,S,T,N,W7:.:?:?] (up: 9506
+	hrs), (link: ethernet/modem), [129.70.137.17:38076]
+Received: from smtp-relay.CeBiTec.Uni-Bielefeld.DE ([127.0.0.1])
+	by localhost (malfoy.CeBiTec.Uni-Bielefeld.DE [127.0.0.1]) (amavisd-new, port 10024)
+	with LMTP id Cv55UEXl0muB for <gsauthof@cebitec.uni-bielefeld.de>;
+	Fri, 23 May 2014 21:06:29 +0200 (CEST)
+Received: from smarthost.TechFak.Uni-Bielefeld.DE (smarthost.TechFak.Uni-Bielefeld.DE [129.70.137.17])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by smtp-relay.CeBiTec.Uni-Bielefeld.DE (Postfix) with ESMTPS id 634C6D56
+	for <gsauthof@cebitec.uni-bielefeld.de>; Fri, 23 May 2014 21:06:29 +0200 (CEST)
+Received: from mailin.techfak.uni-bielefeld.de (mailin.TechFak.Uni-Bielefeld.DE [IPv6:2001:638:504:2014:ffff::22])
+	by smarthost.TechFak.Uni-Bielefeld.DE (Postfix) with ESMTP id 219468000F
+	for <gsauthof@cebitec.uni-bielefeld.de>; Fri, 23 May 2014 21:06:27 +0200 (CEST)
+Received: by mailin.techfak.uni-bielefeld.de (Postfix, from userid 19744)
+	id 21F8EB767; Fri, 23 May 2014 21:06:29 +0200 (CEST)
+X-Original-To: gsauthof@techfak.uni-bielefeld.de
+Delivered-To: gsauthof@techfak.uni-bielefeld.de
+X-policyd-weight: using cached result; rate: -6.1
+Received: from georg.so (georg.so [IPv6:2a00:1828:2000:164::12])
+	by mailin.techfak.uni-bielefeld.de (Postfix) with ESMTP id C6559B764
+	for <gsauthof@techfak.uni-bielefeld.de>; Fri, 23 May 2014 21:06:27 +0200 (CEST)
+Received: from x220.localdomain (unknown [IPv6:2001:1a80:303a:0:f2de:f1ff:fef6:29b4])
+	(Authenticated sender: georg)
+	by georg.so (Postfix) with ESMTPSA id 7535B2D88049
+	for <gsauthof@techfak.uni-bielefeld.de>; Fri, 23 May 2014 21:06:27 +0200 (CEST)
+Received: by x220.localdomain (Postfix, from userid 1000)
+	id 1FD93122E50; Fri, 23 May 2014 21:06:27 +0200 (CEST)
+Date: Fri, 23 May 2014 21:06:27 +0200
+From: Georg Sauthoff <mail@georg.so>
+To: gsauthof@techfak.uni-bielefeld.de
+Subject: test3
+Message-ID: <20140523190627.GC25356@x220.fritz.box>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+User-Agent: Mutt/1.5.21 (2010-09-15)
+
+
+-- 
+"Don't put two demo cameras where they are within each other's
+field of vision; this causes problems." (Allen H. Blum III, Duke
+Nukem 3D, Sector Tags Reference Guide, 12. Tips from the
+Levelord, 1996)
+
+)
+A005 OK Completed (0.000 sec)
+ 0 2 44 A006 UID STORE 23371 FLAGS.SILENT \DELETED
+ 1 45 19 A006 OK Completed
+ 0 0 24 A007 UID EXPUNGE 23371
+ 1 51 56 * 1 EXPUNGE
+* 0 EXISTS
+* 0 RECENT
+A007 OK Completed
+ 0 0 13 A008 LOGOUT
+ 1 44 42 * BYE LOGOUT received
+A008 OK Completed
+ 2 0 0  3 0 0 

@@ -18,30 +18,31 @@
     along with imapdl.  If not, see <http://www.gnu.org/licenses/>.
 
 }}} */
-#ifndef SEQUENCE_SET_H
-#define SEQUENCE_SET_H
+#ifndef IMAP_COPY_SERIALIZE_H
+#define IMAP_COPY_SERIALIZE_H
 
+#include <string>
 #include <vector>
-#include <inttypes.h>
-#include <stddef.h>
+#include <utility>
+#include <stdint.h>
 
-class Sequence_Set_Priv;
-class Sequence_Set {
+class Sequence_Set;
 
-  private:
-    Sequence_Set_Priv *d {nullptr};
-    Sequence_Set(const Sequence_Set&) =delete;
-    Sequence_Set &operator=(const Sequence_Set&) =delete;
-  public:
-    Sequence_Set();
-    ~Sequence_Set();
-    void   push(uint32_t id);
-    void   copy(std::vector<std::pair<uint32_t, uint32_t> > &v) const;
-    size_t size() const;
-    void   clear();
-    bool   empty() const;
+namespace IMAP {
+  namespace Copy {
 
-    Sequence_Set &operator=(const std::vector<std::pair<uint32_t, uint32_t> > &v);
-};
+    struct Journal {
+      std::string mailbox_;
+      uint32_t uidvalidity_ {0};
+      std::vector<std::pair<uint32_t, uint32_t> > uids_;
+
+      Journal();
+      Journal(const std::string &mailbox, uint32_t uidvalidity, const Sequence_Set &set);
+      void read(const std::string &filename);
+      void write(const std::string &filename);
+    };
+
+  }
+}
 
 #endif

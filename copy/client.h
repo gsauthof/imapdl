@@ -42,6 +42,12 @@
 
 namespace IMAP {
   namespace Copy {
+    enum class Task {
+      FIRST_,
+      CLEANUP,
+      DOWNLOAD,
+      LAST_
+    };
     enum class State {
       FIRST_,
       DISCONNECTED,
@@ -65,44 +71,51 @@ namespace IMAP {
     class Options;
     class Client : public IMAP::Client::Callback::Null {
       private:
-        const Options &opts_;
-        std::unique_ptr<Net::Client::Base> client_;
+        const Options                                         &opts_;
+        std::unique_ptr<Net::Client::Base>                     client_;
         boost::log::sources::severity_logger< Log::Severity > &lg_;
-        boost::asio::signal_set signals_;
-        unsigned signaled_ {0};
+        boost::asio::signal_set                                signals_;
+        unsigned                                               signaled_ {0};
 
-        Memory::Buffer::Proxy buffer_proxy_;
+        Memory::Buffer::Proxy  buffer_proxy_;
         Memory::Buffer::Vector tag_buffer_;
         Memory::Buffer::Vector buffer_;
-        Memory::Buffer::File file_buffer_;
-        IMAP::Client::Lexer lexer_;
+        Memory::Buffer::File   file_buffer_;
+        IMAP::Client::Lexer    lexer_;
 
-        std::unordered_set<IMAP::Server::Response::Capability> capabilities_;
+        std::unordered_set<IMAP::Server::Response::Capability>       capabilities_;
         boost::asio::basic_waitable_timer<std::chrono::steady_clock> login_timer_;
 
-        IMAP::Client::Tag tags_;
-        vector<char> cmd_;
+        IMAP::Client::Tag    tags_;
+        vector<char>         cmd_;
         IMAP::Client::Writer writer_;
 
-        State state_ { State::DISCONNECTED };
+        Task                         task_         {Task::DOWNLOAD};
+        State                        state_        {State::DISCONNECTED };
         std::map<std::string, State> tag_to_state_;
 
-        unsigned exists_ {0};
-        unsigned recent_ {0};
-        unsigned uidvalidity_ {0};
+        unsigned exists_        {0};
+        unsigned recent_        {0};
+        unsigned uidvalidity_   {0};
 
+        uint32_t     last_uid_  {0};
         Sequence_Set uids_;
 
-        Maildir maildir_;
-        Memory::Dir tmp_dir_;
-        bool full_body_ {false};
-        std::string flags_;
+        Maildir      maildir_;
+        Memory::Dir  tmp_dir_;
+        bool         full_body_ {false};
+        std::string  flags_;
 
-        std::chrono::time_point<std::chrono::steady_clock> fetch_start_;
+        std::chrono::time_point<std::chrono::steady_clock>           fetch_start_;
         size_t fetch_bytes_start_ {0};
-        size_t fetched_messages_ {0};
+        size_t fetched_messages_  {0};
 
         boost::asio::basic_waitable_timer<std::chrono::steady_clock> fetch_timer_;
+
+        std::string mailbox_;
+
+        void read_journal();
+        void write_journal();
 
         void to_cmd(vector<char> &x);
 
@@ -114,6 +127,8 @@ namespace IMAP {
         void stop_fetch_timer();
 
         void command();
+        void cleanup_command();
+        void download_command();
 
         bool has_uidplus() const;
 
@@ -141,6 +156,7 @@ namespace IMAP {
         Client(IMAP::Copy::Options &opts,
             std::unique_ptr<Net::Client::Base> &&net_client,
             boost::log::sources::severity_logger< Log::Severity > &lg);
+        ~Client();
 
         void imap_status_code_capability_begin() override;
         void imap_capability_begin() override;

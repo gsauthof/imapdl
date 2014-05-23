@@ -34,6 +34,7 @@ class Sequence_Set_Priv {
     Sequence_Set_Priv();
     ~Sequence_Set_Priv();
     void   push(uint32_t id);
+    void   push(uint32_t fst, uint32_t snd);
     void   copy(std::vector<std::pair<uint32_t, uint32_t> > &v) const;
     size_t size() const;
     void   clear();
@@ -48,6 +49,11 @@ Sequence_Set_Priv::~Sequence_Set_Priv()
 void Sequence_Set_Priv::push(uint32_t id)
 {
   ISet::interval_type i(id, id);
+  iset_.insert(i);
+}
+void Sequence_Set_Priv::push(uint32_t fst, uint32_t snd)
+{
+  ISet::interval_type i(fst, snd);
   iset_.insert(i);
 }
 void Sequence_Set_Priv::copy(std::vector<std::pair<uint32_t, uint32_t> > &v) const
@@ -94,4 +100,15 @@ size_t Sequence_Set::size() const
 void Sequence_Set::clear()
 {
   d->clear();
+}
+
+Sequence_Set &Sequence_Set::operator=(const std::vector<std::pair<uint32_t, uint32_t> > &v)
+{
+  for (auto &x : v)
+    d->push(x.first, x.second);
+  return *this;
+}
+bool Sequence_Set::empty() const
+{
+  return size() == 0;
 }

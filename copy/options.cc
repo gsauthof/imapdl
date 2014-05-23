@@ -47,33 +47,35 @@ namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 
 namespace OPT {
-  static const char HELP_S[]        = "help,h"        ;
-  static const char HELP[]          = "help"          ;
-  static const char HOST[]          = "host"          ;
-  static const char SERVICE[]       = "port"          ;
-  static const char LOCAL_ADDRESS[] = "bind"          ;
-  static const char LOCAL_PORT[]    = "lport"         ;
-  static const char IP[]            = "ip"            ;
-  static const char FINGERPRINT[]   = "fp"            ;
-  static const char CIPHER[]        = "cipher"        ;
-  static const char CIPHER_PRESET[] = "cipher_preset" ;
-  static const char USE_SSL[]       = "ssl"           ;
-  static const char CA_FILE[]       = "ca"            ;
-  static const char CA_PATH[]       = "ca_path"       ;
-  static const char CERT_HOST[]     = "cert_host"     ;
-  static const char TRACEFILE[]     = "trace"         ;
-  static const char LOGFILE[]       = "log"           ;
-  static const char SEVERITY[]      = "verbose"       ;
-  static const char SEVERITY_S[]    = "verbose,v"     ;
-  static const char FILE_SEVERITY[] = "log_v"         ;
-  static const char ACCOUNT[]       = "account"       ;
-  static const char CONFIGFILE[]    = "config"        ;
-  static const char DELETE[]        = "delete"        ;
-  static const char DELETE_S[]      = "delete,d"      ;
-  static const char MAILBOX[]       = "mailbox"       ;
-  static const char MAILDIR[]       = "maildir"       ;
-  static const char TLS1[]          = "tls1"          ;
-  static const char GREETING_WAIT[] = "gwait"         ;
+  static const char HELP_S[]         = "help,h"        ;
+  static const char HELP[]           = "help"          ;
+  static const char HOST[]           = "host"          ;
+  static const char SERVICE[]        = "port"          ;
+  static const char LOCAL_ADDRESS[]  = "bind"          ;
+  static const char LOCAL_PORT[]     = "lport"         ;
+  static const char IP[]             = "ip"            ;
+  static const char FINGERPRINT[]    = "fp"            ;
+  static const char CIPHER[]         = "cipher"        ;
+  static const char CIPHER_PRESET[]  = "cipher_preset" ;
+  static const char USE_SSL[]        = "ssl"           ;
+  static const char CA_FILE[]        = "ca"            ;
+  static const char CA_PATH[]        = "ca_path"       ;
+  static const char CERT_HOST[]      = "cert_host"     ;
+  static const char TRACEFILE[]      = "trace"         ;
+  static const char LOGFILE[]        = "log"           ;
+  static const char SEVERITY[]       = "verbose"       ;
+  static const char SEVERITY_S[]     = "verbose,v"     ;
+  static const char FILE_SEVERITY[]  = "log_v"         ;
+  static const char ACCOUNT[]        = "account"       ;
+  static const char CONFIGFILE[]     = "config"        ;
+  static const char DELETE[]         = "delete"        ;
+  static const char DELETE_S[]       = "delete,d"      ;
+  static const char MAILBOX[]        = "mailbox"       ;
+  static const char MAILDIR[]        = "maildir"       ;
+  static const char TLS1[]           = "tls1"          ;
+  static const char GREETING_WAIT[]  = "gwait"         ;
+  static const char SIMULATE_ERROR[] = "sim_error"     ;
+  static const char JOURNAL_FILE[]   = "journal"       ;
 }
 
 namespace KEY {
@@ -98,6 +100,7 @@ namespace KEY {
   static const char DELETE[]        = "delete"        ;
   static const char MAILBOX[]       = "mailbox"       ;
   static const char MAILDIR[]       = "maildir"       ;
+  static const char JOURNAL_FILE[]   = "journal"       ;
 
   static const unordered_set<const char*> set = {
     USERNAME,
@@ -120,6 +123,7 @@ namespace KEY {
     DELETE,
     MAILBOX,
     MAILDIR,
+    JOURNAL_FILE
   };
 }
 
@@ -215,6 +219,13 @@ namespace IMAP {
            "enable/disable use of TLSv1 - disabling means that only TLSv1.1/TLSv1.2 "
            "are allowed. (default: true)")
         ;
+      po::options_description test_group("Test Options");
+      test_group.add_options()
+        (OPT::SIMULATE_ERROR,
+           po::value<unsigned>(&simulate_error)
+           ->default_value(0)
+           , "simulate an error before fetching the n-th message")
+        ;
       po::options_description imap_group("IMAP Options");
       imap_group.add_options()
         (OPT::ACCOUNT, po::value<string>(&account)->default_value("default"),
@@ -243,6 +254,10 @@ namespace IMAP {
         (OPT::MAILDIR, po::value<string>(&maildir)
            //->required(),
            , "maildir destination")
+        (OPT::JOURNAL_FILE, po::value<string>(&journal_file)
+         ->default_value("", "$HOME/.config/"  + string(ID::argv0) + "/$ACCOUNT.journal"),
+           "write already fetched and not yet expunged messages to a journal "
+           "for expunging on the next connect")
         ;
 
       po::options_description hidden_group;
@@ -255,6 +270,7 @@ namespace IMAP {
       visible_group.add(general_group);
       visible_group.add(net_group);
       visible_group.add(ssl_group);
+      visible_group.add(test_group);
       visible_group.add(imap_group);
       po::options_description all;
       all.add(visible_group);
@@ -301,6 +317,12 @@ namespace IMAP {
       }
       if (!file_severity)
         file_severity = severity;
+      if (journal_file.empty()) {
+        ostringstream o;
+        o << ansi::getenv("HOME") << "/.config/" << ID::argv0 << '/'
+          << account << ".journal";
+        journal_file = o.str();
+      }
     }
     void Options::verify()
     {
@@ -435,6 +457,7 @@ R"({
       del           = sub_tree.get<bool>           (KEY::DELETE       , false   );
       mailbox       = sub_tree.get<string>         (KEY::MAILBOX      , "INBOX" );
       maildir       = sub_tree.get<string>         (KEY::MAILDIR      , ""      );
+      journal_file  = sub_tree.get<string>         (KEY::JOURNAL_FILE , ""      );
     }
     std::ostream &Options::print(std::ostream &o) const
     {

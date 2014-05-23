@@ -39,15 +39,17 @@ namespace IMAP {
         std::ostream &print(std::ostream &o) const;
 
         std::string logfile;
-        bool        use_ssl       {true};
+        bool        use_ssl        {true};
         std::string account;
         std::string configfile;
         std::string mailbox;
         std::string maildir;
-        bool        del           {false};
+        bool        del            {false};
         std::string username;
         std::string password;
-        unsigned    greeting_wait {100};
+        unsigned    greeting_wait  {100};
+        unsigned    simulate_error {0};
+        std::string journal_file;
 
     };
     std::ostream &operator<<(std::ostream &o, const Options &opts);

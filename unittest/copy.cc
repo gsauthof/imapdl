@@ -245,6 +245,147 @@ static void test_logindisabled()
   BOOST_CHECK_EQUAL(rc, 23);
 }
 
+class Client_Frontend {
+  private:
+    IMAP::Copy::Options opts;
+    boost::log::sources::severity_logger<Log::Severity> lg;
+    boost::asio::io_service io_service;
+    boost::asio::ssl::context context;
+    unique_ptr<Net::Client::Base> net_client;
+    IMAP::Copy::Client client;
+  public:
+    Client_Frontend(int argc, char **argv, bool use_ssl)
+      :
+        opts(argc, argv),
+        lg(std::move(Log::create(
+                static_cast<Log::Severity>(opts.severity),
+                static_cast<Log::Severity>(opts.file_severity),
+                opts.logfile))),
+        context(boost::asio::ssl::context::sslv23),
+        net_client(use_ssl?
+            (static_cast<Net::Client::Base*>(new Net::TCP::SSL::Client::Base(io_service, context, opts, lg)))
+            :
+            (static_cast<Net::Client::Base*>(new Net::TCP::Client::Base(io_service, opts, lg)))
+            ),
+
+        client(opts, std::move(net_client), lg)
+
+        {
+        }
+    void run()
+    {
+      io_service.run();
+    }
+};
+
+static void test_partial_1(bool use_ssl)
+{
+  string maildir{"tmp/cp/partial"};
+  string journal{"tmp/fake.journal"};
+  fs::remove_all(maildir);
+  fs::remove(journal);
+  int rc = 0;
+  thread replay_server{Replay_Server{rc, "part1.trace", "ut_partial1_server.log", use_ssl, 5}};
+
+  this_thread::sleep_for(chrono::seconds{1});
+
+  string prefix(ut_prefix());
+  prefix += '/';
+  string configfile{prefix+"cp.conf"};
+  char cconfigfile[128] = {0};
+  strncpy(cconfigfile, configfile.c_str(), sizeof(cconfigfile)-1);
+  char *argv[] = {
+    (char*)"imapcp",
+    (char*)"--account", (char*)"fake",
+    (char*)"--log", (char*)"ut_partial1.log", (char*)"--log_v",
+    (char*)"--maildir", (char*)"tmp/cp/partial",
+    (char*)"-v6",
+    (char*)"--gwait", (char*)"400",
+    (char*)"--config", cconfigfile,
+    (char*)"--ssl", (char*)(use_ssl?"yes":"no"),
+    (char*)"--journal", (char*)journal.c_str(),
+    0
+  };
+  int argc = sizeof(argv)/sizeof(char*)-1;
+  {
+    Client_Frontend client(argc, argv, true);
+    BOOST_CHECK_THROW(client.run(), std::runtime_error);
+  }
+
+  replay_server.join();
+  BOOST_CHECK_EQUAL(rc, 23);
+
+  set<string> sums;
+  fs::directory_iterator begin(maildir + "/new");
+  fs::directory_iterator end;
+  for (auto i = begin; i != end; ++i) {
+    string t{(*i).path().generic_string()};
+    string sum{sha256_sum(t)};
+    sums.insert(sum);
+  }
+  array<const char*, 2> ref = {{
+    "3ed2b804502b2b81f7aa37494401d21fd4314121c52174c68ebf739b7e57abd5",
+      "a7f858db4ee1035f87b9df1ecbde7bb9d27da2b8aa044380d5706c3b5784039d"
+  }};
+  BOOST_CHECK_EQUAL_COLLECTIONS(sums.begin(), sums.end(), ref.begin(), ref.end());
+
+  BOOST_CHECK_EQUAL(fs::exists(journal), true);
+}
+
+static void test_partial_2(bool use_ssl)
+{
+  string maildir{"tmp/cp/partial"};
+  string journal{"tmp/fake.journal"};
+  BOOST_CHECK_EQUAL(fs::exists(journal), true);
+  int rc = 0;
+  thread replay_server{Replay_Server{rc, "part2.trace", "ut_partial2_server.log", use_ssl}};
+
+  this_thread::sleep_for(chrono::seconds{1});
+
+  string prefix(ut_prefix());
+  prefix += '/';
+  string configfile{prefix+"cp.conf"};
+  char cconfigfile[128] = {0};
+  strncpy(cconfigfile, configfile.c_str(), sizeof(cconfigfile)-1);
+  char *argv[] = {
+    (char*)"imapcp",
+    (char*)"--account", (char*)"fake",
+    (char*)"--log", (char*)"ut_partial2.log", (char*)"--log_v",
+    (char*)"--maildir", (char*)"tmp/cp/partial",
+    (char*)"-v6",
+    (char*)"--gwait", (char*)"400",
+    (char*)"--config", cconfigfile,
+    (char*)"--ssl", (char*)(use_ssl?"yes":"no"),
+    (char*)"--journal", (char*)journal.c_str(),
+    0
+  };
+  int argc = sizeof(argv)/sizeof(char*)-1;
+  {
+    Client_Frontend client(argc, argv, true);
+    client.run();
+  }
+
+  replay_server.join();
+  BOOST_CHECK_EQUAL(rc, 0);
+
+  set<string> sums;
+  fs::directory_iterator begin(maildir + "/new");
+  fs::directory_iterator end;
+  for (auto i = begin; i != end; ++i) {
+    string t{(*i).path().generic_string()};
+    string sum{sha256_sum(t)};
+    sums.insert(sum);
+  }
+  array<const char*, 3> ref = {{
+    "3ed2b804502b2b81f7aa37494401d21fd4314121c52174c68ebf739b7e57abd5",
+      "4c473d113c4b7a7efb33797380e6c230055571b528f5f1392ffb176e3de88a5b",
+      "a7f858db4ee1035f87b9df1ecbde7bb9d27da2b8aa044380d5706c3b5784039d"
+  }};
+  BOOST_CHECK_EQUAL_COLLECTIONS(sums.begin(), sums.end(), ref.begin(), ref.end());
+
+  BOOST_CHECK_EQUAL(fs::exists(journal), false);
+}
+
 struct Log_Fixture {
   boost::log::sources::severity_logger<Log::Severity> lg;
   Log_Fixture()
@@ -287,6 +428,14 @@ BOOST_AUTO_TEST_SUITE( imapcp )
   {
     boost::log::core::get()->remove_all_sinks();
     test_logindisabled();
+  }
+
+  BOOST_AUTO_TEST_CASE( partial )
+  {
+    boost::log::core::get()->remove_all_sinks();
+    test_partial_1(true);
+    boost::log::core::get()->remove_all_sinks();
+    test_partial_2(true);
   }
 
 BOOST_AUTO_TEST_SUITE_END()
