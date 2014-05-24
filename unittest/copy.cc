@@ -123,128 +123,6 @@ void Replay_Server::operator()()
   }
 }
 
-static void test_basic(bool use_ssl)
-{
-    string maildir{"tmp/cp/basicmd"};
-    fs::remove_all(maildir);
-    int rc = 0;
-    thread replay_server{Replay_Server{rc, "cp_basic.trace", "ut_cp_server.log", use_ssl}};
-
-    this_thread::sleep_for(chrono::seconds{1});
-
-    string prefix(ut_prefix());
-    prefix += '/';
-    string configfile{prefix+"cp.conf"};
-    char cconfigfile[128] = {0};
-    strncpy(cconfigfile, configfile.c_str(), sizeof(cconfigfile)-1);
-    char *argv[] = {
-      (char*)"imapcp",
-      (char*)"--account", (char*)"fake",
-      (char*)"--log", (char*)"ut_cp.log", (char*)"--log_v",
-      (char*)"--maildir", (char*)"tmp/cp/basicmd",
-      (char*)"-v6",
-      (char*)"--gwait", (char*)"400",
-      (char*)"--config", cconfigfile,
-      (char*)"--ssl", (char*)(use_ssl?"yes":"no"),
-      0
-    };
-    int argc = sizeof(argv)/sizeof(char*)-1;
-
-    IMAP::Copy::Options opts{argc, argv};
-    boost::log::sources::severity_logger<Log::Severity> lg(std::move(Log::create(
-            static_cast<Log::Severity>(opts.severity),
-            static_cast<Log::Severity>(opts.file_severity),
-            opts.logfile)));
-
-    boost::asio::io_service io_service;
-    boost::asio::ssl::context context(boost::asio::ssl::context::sslv23);
-
-      unique_ptr<Net::Client::Base> net_client;
-      if (use_ssl) {
-        unique_ptr<Net::Client::Base> c(
-            new Net::TCP::SSL::Client::Base(io_service, context, opts, lg));
-        net_client = std::move(c);
-      } else {
-        unique_ptr<Net::Client::Base> c(
-            new Net::TCP::Client::Base(io_service, opts, lg));
-        net_client = std::move(c);
-      }
-
-    IMAP::Copy::Client client(opts, std::move(net_client), lg);
-    io_service.run();
-
-    replay_server.join();
-    BOOST_CHECK_EQUAL(rc, 0);
-
-    set<string> sums;
-    fs::directory_iterator begin(maildir + "/new");
-    fs::directory_iterator end;
-    for (auto i = begin; i != end; ++i) {
-      string t{(*i).path().generic_string()};
-      string sum{sha256_sum(t)};
-      sums.insert(sum);
-    }
-    array<const char*, 3> ref = {{
-      "6a8c8af376177fad7261d487fac2f5ebfa977820420470841335f6cbe9cb0bfa",
-      "a456fb5e0073393d887806c852d775b9eb8276c6a0d7ee3b3345bfe1a5e1658a",
-      "cb48864719e554c91fbf77849d06b8c8b23107eabe932d05cd332ce21f868d5b"
-    }};
-    BOOST_CHECK_EQUAL_COLLECTIONS(sums.begin(), sums.end(), ref.begin(), ref.end());
-}
-
-static void test_logindisabled()
-{
-  bool use_ssl = false;
-  int rc = 0;
-  thread replay_server{Replay_Server{rc, "logindisabled.trace", "ut_logindisabled_server.log", use_ssl, 10}};
-
-  this_thread::sleep_for(chrono::seconds{1});
-
-  string prefix(ut_prefix());
-  prefix += '/';
-  string configfile{prefix+"cp.conf"};
-  char cconfigfile[128] = {0};
-  strncpy(cconfigfile, configfile.c_str(), sizeof(cconfigfile)-1);
-  char *argv[] = {
-    (char*)"imapcp",
-    (char*)"--account", (char*)"fake",
-    (char*)"--log", (char*)"ut_logindisabled.log", (char*)"--log_v",
-    (char*)"--maildir", (char*)"tmp/cp/basicmd",
-    (char*)"-v6",
-    (char*)"--gwait", (char*)"400",
-    (char*)"--config", cconfigfile,
-    (char*)"--ssl", (char*)(use_ssl?"yes":"no"),
-    0
-  };
-  int argc = sizeof(argv)/sizeof(char*)-1;
-
-  IMAP::Copy::Options opts{argc, argv};
-  boost::log::sources::severity_logger<Log::Severity> lg(std::move(Log::create(
-          static_cast<Log::Severity>(opts.severity),
-          static_cast<Log::Severity>(opts.file_severity),
-          opts.logfile)));
-
-  boost::asio::io_service io_service;
-  boost::asio::ssl::context context(boost::asio::ssl::context::sslv23);
-
-  unique_ptr<Net::Client::Base> net_client;
-  if (use_ssl) {
-    unique_ptr<Net::Client::Base> c(
-        new Net::TCP::SSL::Client::Base(io_service, context, opts, lg));
-    net_client = std::move(c);
-  } else {
-    unique_ptr<Net::Client::Base> c(
-        new Net::TCP::Client::Base(io_service, opts, lg));
-    net_client = std::move(c);
-  }
-
-  IMAP::Copy::Client client(opts, std::move(net_client), lg);
-  BOOST_CHECK_THROW(io_service.run(), std::runtime_error);
-
-  replay_server.join();
-  BOOST_CHECK_EQUAL(rc, 23);
-}
-
 class Client_Frontend {
   private:
     IMAP::Copy::Options opts;
@@ -277,6 +155,90 @@ class Client_Frontend {
       io_service.run();
     }
 };
+
+static void test_basic(bool use_ssl)
+{
+    string maildir{"tmp/cp/basicmd"};
+    fs::remove_all(maildir);
+    int rc = 0;
+    thread replay_server{Replay_Server{rc, "cp_basic.trace", "ut_cp_server.log", use_ssl}};
+
+    this_thread::sleep_for(chrono::seconds{1});
+
+    string prefix(ut_prefix());
+    prefix += '/';
+    string configfile{prefix+"cp.conf"};
+    char cconfigfile[128] = {0};
+    strncpy(cconfigfile, configfile.c_str(), sizeof(cconfigfile)-1);
+    char *argv[] = {
+      (char*)"imapcp",
+      (char*)"--account", (char*)"fake",
+      (char*)"--log", (char*)"ut_cp.log", (char*)"--log_v",
+      (char*)"--maildir", (char*)"tmp/cp/basicmd",
+      (char*)"-v6",
+      (char*)"--gwait", (char*)"400",
+      (char*)"--config", cconfigfile,
+      (char*)"--ssl", (char*)(use_ssl?"yes":"no"),
+      0
+    };
+    int argc = sizeof(argv)/sizeof(char*)-1;
+
+    Client_Frontend client(argc, argv, use_ssl);
+    client.run();
+
+    replay_server.join();
+    BOOST_CHECK_EQUAL(rc, 0);
+
+    set<string> sums;
+    fs::directory_iterator begin(maildir + "/new");
+    fs::directory_iterator end;
+    for (auto i = begin; i != end; ++i) {
+      string t{(*i).path().generic_string()};
+      string sum{sha256_sum(t)};
+      sums.insert(sum);
+    }
+    array<const char*, 3> ref = {{
+      "6a8c8af376177fad7261d487fac2f5ebfa977820420470841335f6cbe9cb0bfa",
+      "a456fb5e0073393d887806c852d775b9eb8276c6a0d7ee3b3345bfe1a5e1658a",
+      "cb48864719e554c91fbf77849d06b8c8b23107eabe932d05cd332ce21f868d5b"
+    }};
+    BOOST_CHECK_EQUAL_COLLECTIONS(sums.begin(), sums.end(), ref.begin(), ref.end());
+}
+
+
+static void test_logindisabled()
+{
+  bool use_ssl = false;
+  int rc = 0;
+  thread replay_server{Replay_Server{rc, "logindisabled.trace", "ut_logindisabled_server.log", use_ssl, 10}};
+
+  this_thread::sleep_for(chrono::seconds{1});
+
+  string prefix(ut_prefix());
+  prefix += '/';
+  string configfile{prefix+"cp.conf"};
+  char cconfigfile[128] = {0};
+  strncpy(cconfigfile, configfile.c_str(), sizeof(cconfigfile)-1);
+  char *argv[] = {
+    (char*)"imapcp",
+    (char*)"--account", (char*)"fake",
+    (char*)"--log", (char*)"ut_logindisabled.log", (char*)"--log_v",
+    (char*)"--maildir", (char*)"tmp/cp/basicmd",
+    (char*)"-v6",
+    (char*)"--gwait", (char*)"400",
+    (char*)"--config", cconfigfile,
+    (char*)"--ssl", (char*)(use_ssl?"yes":"no"),
+    0
+  };
+  int argc = sizeof(argv)/sizeof(char*)-1;
+
+  Client_Frontend client(argc, argv, use_ssl);
+  BOOST_CHECK_THROW(client.run(), std::runtime_error);
+
+  replay_server.join();
+  BOOST_CHECK_EQUAL(rc, 23);
+}
+
 
 static void test_partial_1(bool use_ssl)
 {
