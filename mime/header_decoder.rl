@@ -270,7 +270,6 @@ field_name = (ftext+) >field_start %field_finish
 #header = (header_field )+
 #  ;
 
-#field_body =
 header =
   start: (
     field_name ': ' @buffer_clear -> fb_start
@@ -336,7 +335,6 @@ header =
           @space_start     -> foldmark_state    |
     ftext @ins_trail_space
           @hold_it
-          #@cb_header       -> final             |
           # yields: 'state reference start resolves to multiple entry points' error
           #@cb_header       -> start |
           @cb_header       -> start_header      |
