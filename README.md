@@ -11,6 +11,8 @@ other IMAP clients/servers because it includes [Ragel][ragel] based parsers for
 the client and server side of the IMAP protocol. For such use cases it is
 recommended to include this repository as Git [submodule][gitm].
 
+(last change to this readme file: 2014-05-27)
+
 ## Features
 
 - [Maildir][maildir] support - client makes sure to [fsync][fsync] at the right
@@ -21,6 +23,8 @@ recommended to include this repository as Git [submodule][gitm].
   program start before the remaining messages are fetched. Useful, when e.g.
   retrieving a large mailbox over an unreliable mobile network
   (think: UMTS when travelling in a high speed train).
+- display From/Subject/Date headers during fetching (when INFO severity level
+  is turned on)
 - Workarounds for some IMAP server bugs (deviations from the RFC)
 - Uses the UIDPLUS extension if available  - thus, excluding side effects with
   concurrently established server connections when purging messages
