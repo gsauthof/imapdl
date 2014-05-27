@@ -618,14 +618,12 @@ namespace IMAP {
     {
       const char *p  = begin;
       const char *pe = end;
-      buffer_.resume(p);
-      tag_buffer_.resume(p);
+      Buffer::Resume bur(buffer_, p, pe);
+      Buffer::Resume tar(tag_buffer_, p, pe);
       %% write exec;
       if (cs == %%{write error;}%%) {
         throw_lex_error("IMAP server automaton in error state", begin, p, pe);
       }
-      buffer_.stop(pe);
-      tag_buffer_.stop(pe);
     }
 
     bool Lexer::in_start() const

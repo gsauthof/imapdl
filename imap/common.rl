@@ -56,6 +56,10 @@ action return_minus
   fret;
 }
 
+action buffer_clear
+{
+  buffer_.clear();
+}
 action buffer_begin
 {
   buffer_.start(p);
@@ -68,9 +72,9 @@ action buffer_stop
 {
   buffer_.stop(p);
 }
-action buffer_resume
+action buffer_cont
 {
-  buffer_.resume(p);
+  buffer_.cont(p);
 }
 action buffer_end
 {
@@ -78,7 +82,7 @@ action buffer_end
 }
 action buffer_add_char
 {
-  buffer_.resume(p);
+  buffer_.cont(p);
   buffer_.stop(p+1);
 }
 action number_begin
@@ -95,7 +99,7 @@ action number_end
 }
 action literal_tail_begin
 {
-  buffer_.start(p);
+  buffer_.cont(p);
 }
 action call_literal_tail
 {
@@ -125,54 +129,7 @@ action literal_tail_cond_return_exl_finish
 
 # }}}
 
-
-# RFC2234
-#         CHAR           =  %x01-7F
-#                                ; any 7-bit US-ASCII character,
-#                                  excluding NUL
-
-CHAR = 0x01 .. 0x7f ;
-
-
-# CHAR8           = %x01-ff
-#                     ; any OCTET except NUL, %x00
-
-CHAR8 = [^\0] ;
-
-# RFC2234
-# SP             =  %x20
-
-SP   = ' ' ;
-
-# RFC2234
-# DIGIT          =  %x30-39
-#                               ; 0-9
-
-DIGIT = [0-9] ;
-
-
-
-# RFC2234
-#         CTL            =  %x00-1F / %x7F
-#                                ; controls
-
-CTL = 0x0 .. 0x1f  | 0x7f ;
-
-
-CR = '\r' ;
-LF = '\n' ;
-
-# RFC2234
-# CRLF        =  %d13.10
-
-CRLF = CR LF ;
-
-
-# RFC2234
-# DQUOTE         =  %x22
-#                                ; " (Double Quote)
-
-DQUOTE = '"' ;
+include abnf "rfc/abnf.rl";
 
 
 # resp-specials   = "]"
@@ -207,11 +164,6 @@ atom = ATOM_CHAR+ ;
 
 number = DIGIT{1,10} >number_begin %number_end ;
 
-# digit-nz        = %x31-39
-#                    ; 1-9
-
-digit_nz = [1-9] ;
-
 # nz-number       = digit-nz *DIGIT
 #                    ; Non-zero unsigned 32-bit integer
 #                    ; (0 < n < 4,294,967,296)
@@ -229,17 +181,13 @@ literal_tail := (CHAR8*) >literal_tail_begin $literal_tail_cond_return;
 # assume that it is not called for empty literals
 literal_tail_convert :=
   (   ( (CHAR8 - (CR|LF))+ )  $literal_tail_cond_return
-                              >buffer_resume
+                              >buffer_cont
                               %buffer_stop
     | ( CR @literal_tail_cond_return_exl_finish LF @buffer_add_char
                                                    @literal_tail_cond_return )
   ) **     >literal_tail_begin  ;
 
-literal = '{' number >number_begin %number_end '}' CRLF @call_literal_tail ;
-
-# TEXT-CHAR       = <any CHAR except CR and LF>
-
-TEXT_CHAR = CHAR - [\r\n] ;
+literal = '{' number >number_begin %number_end '}' CRLF @buffer_clear  @call_literal_tail ;
 
 # QUOTED-CHAR     = <any TEXT-CHAR except quoted-specials> /
 #                   "\" quoted-specials
@@ -254,7 +202,7 @@ QUOTED_CHAR = ( TEXT_CHAR - quoted_specials )
 # seems that there may be only one state chart per machine
 # quoted_tail =
 #   start: (
-#     (TEXT_CHAR - quoted_specials)+   >buffer_resume %buffer_stop -> start |
+#     (TEXT_CHAR - quoted_specials)+   >buffer_cont %buffer_stop -> start |
 #     '\\' quoted_specials             @buffer_add_char             -> start |
 #     DQUOTE                           @buffer_end                  -> final
 #   );
@@ -262,7 +210,7 @@ QUOTED_CHAR = ( TEXT_CHAR - quoted_specials )
 # ** = longest-match Kleene Star
 quoted_tail =
    (
-     (TEXT_CHAR - quoted_specials)+   >buffer_resume %buffer_stop |
+     (TEXT_CHAR - quoted_specials)+   >buffer_cont %buffer_stop |
      ('\\' quoted_specials @buffer_add_char )
    ) **
    DQUOTE  @buffer_end ;

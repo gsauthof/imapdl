@@ -483,11 +483,6 @@ action cb_section_empty
 include imap_common "imap/common.rl";
 
 
-# RFC2234
-# ALPHA          =  %x41-5A / %x61-7A   ; A-Z / a-z
-
-ALPHA =  [A-Za-z] ;
-
 # text            = 1*TEXT-CHAR
 
 text = TEXT_CHAR + ;
@@ -1095,16 +1090,13 @@ namespace IMAP {
     {
       const char *p  = begin;
       const char *pe = end;
-      buffer_.resume(p);
-      tag_buffer_.resume(p);
-      number_buffer_.resume(p);
+      Buffer::Resume bur(buffer_, p, pe);
+      Buffer::Resume tar(tag_buffer_, p, pe);
+      Buffer::Resume nur(number_buffer_, p, pe);
       %% write exec;
       if (cs == %%{write error;}%%) {
         throw_lex_error("IMAP client automaton in error state", begin, p, pe);
       }
-      buffer_.stop(pe);
-      tag_buffer_.stop(pe);
-      number_buffer_.stop(pe);
     }
 
     bool Lexer::in_start() const

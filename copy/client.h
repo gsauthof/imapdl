@@ -121,6 +121,8 @@ namespace IMAP {
 
         void do_signal_wait();
 
+        void pp_header();
+
         void print_fetch_stats();
         void start_fetch_timer();
         void resume_fetch_timer();

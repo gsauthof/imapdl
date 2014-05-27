@@ -25,6 +25,8 @@ find_package(Boost 1.54
     log_setup
     # needed by log
     thread
+    #
+    locale
   REQUIRED)
 
 include_directories(
@@ -36,6 +38,11 @@ include_directories(
 RAGEL_TARGET(imap_client_lexer imap/client_lexer.rl ${CMAKE_CURRENT_BINARY_DIR}/imap_client_lexer.cc COMPILE_FLAGS -I${CMAKE_CURRENT_SOURCE_DIR})
 RAGEL_TARGET(imap_server_lexer imap/server_lexer.rl ${CMAKE_CURRENT_BINARY_DIR}/imap_server_lexer.cc COMPILE_FLAGS -I${CMAKE_CURRENT_SOURCE_DIR})
 
+RAGEL_TARGET(mime_base64_decoder mime/base64_decoder.rl ${CMAKE_CURRENT_BINARY_DIR}/mime_base64_decoder.cc)
+RAGEL_TARGET(mime_base64_decoder_main mime/base64_decoder_main.rl ${CMAKE_CURRENT_BINARY_DIR}/mime_base64_decoder_main.cc)
+RAGEL_TARGET(mime_q_decoder mime/q_decoder.rl ${CMAKE_CURRENT_BINARY_DIR}/mime_q_decoder.cc)
+RAGEL_TARGET(mime_q_decoder_main mime/q_decoder_main.rl ${CMAKE_CURRENT_BINARY_DIR}/mime_q_decoder_main.cc)
+RAGEL_TARGET(mime_header_decoder mime/header_decoder.rl ${CMAKE_CURRENT_BINARY_DIR}/mime_header_decoder.cc)
 
 add_subdirectory(libixxx)
 add_subdirectory(libbuffer)
@@ -76,6 +83,11 @@ add_executable(ut
   trace/trace.cc
   log/log.cc
   net/ssl_verification.cc
+
+  ${RAGEL_mime_base64_decoder_main_OUTPUTS}
+  ${RAGEL_mime_q_decoder_main_OUTPUTS}
+  ${RAGEL_mime_header_decoder_OUTPUTS}
+  unittest/mime.cc
   )
 target_link_libraries(ut
   ${Boost_LIBRARIES}
@@ -87,6 +99,7 @@ target_link_libraries(ut
   ${Boost_LOG_LIBRARY}
   ${Boost_LOG_SETUP_LIBRARY}
   ${Boost_THREAD_LIBRARY}
+  ${Boost_LOCALE_LIBRARY}
   # for ut comparison
   ${LIB_BOTAN}
 
@@ -160,6 +173,7 @@ add_executable(imapdl
   maildir/maildir.cc
   sequence_set.cc
   trace/trace.cc
+  ${RAGEL_mime_header_decoder_OUTPUTS}
   )
 target_link_libraries(imapdl
   ixxx_static
@@ -172,6 +186,7 @@ target_link_libraries(imapdl
   ${Boost_LOG_LIBRARY}
   ${Boost_LOG_SETUP_LIBRARY}
   ${Boost_THREAD_LIBRARY}
+  ${Boost_LOCALE_LIBRARY}
 
   ${OPENSSL_SSL_LIBRARY}
   ${OPENSSL_CRYPTO_LIBRARY}

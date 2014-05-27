@@ -29,6 +29,7 @@ using namespace Memory;
 #include <boost/log/sources/record_ostream.hpp>
 #include <boost/log/attributes/named_scope.hpp>
 #include <boost/system/error_code.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <sstream>
 #include <stdexcept>
@@ -40,6 +41,7 @@ using namespace std;
 namespace fs = boost::filesystem;
 
 #include "serialize.h"
+#include <mime/header_decoder.h>
 
 namespace IMAP {
   namespace Copy {
@@ -718,6 +720,35 @@ namespace IMAP {
     {
       full_body_ = true;
     }
+    void Client::pp_header()
+    {
+      if (    static_cast<Log::Severity>(opts_.severity)      < Log::Severity::INFO
+           && static_cast<Log::Severity>(opts_.file_severity) < Log::Severity::INFO)
+        return;
+
+      string s(buffer_.begin(), buffer_.end());
+      BOOST_LOG_SEV(lg_, Log::DEBUG) << "Header: |" << s << "|";
+
+      using namespace MIME::Header;
+      Buffer::Vector f;
+      Buffer::Vector b;
+      map<string, string> fields;
+      Decoder d(f, b, [&f, &b, &fields](){
+            string name(f.begin(), f.end());
+            string body(b.begin(), b.end());
+            fields.emplace(boost::to_upper_copy(name), body);
+          });
+      d.set_ending_policy(Decoder::Ending::LF);
+      try {
+        d.read(buffer_.begin(), buffer_.end());
+      } catch (const std::runtime_error &e) {
+        BOOST_LOG_SEV(lg_, Log::ERROR) << e.what();
+      }
+      for (auto &i : fields) {
+        BOOST_LOG(lg_) << setw(10) << left << i.first << ' ' << i.second;
+      }
+      d.clear();
+    }
     void Client::imap_body_section_inner()
     {
       if (state_ == State::FETCHING) {
@@ -745,6 +776,8 @@ namespace IMAP {
           }
           full_body_ = false;
           ++fetched_messages_;
+        } else {
+          pp_header();
         }
       }
     }
