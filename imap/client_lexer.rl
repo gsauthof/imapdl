@@ -1088,8 +1088,9 @@ namespace IMAP {
 
     void Lexer::read(const char *begin, const char *end)
     {
-      const char *p  = begin;
-      const char *pe = end;
+      const char *p   = begin;
+      const char *pe  = end;
+      const char *eof = nullptr;
       Buffer::Resume bur(buffer_, p, pe);
       Buffer::Resume tar(tag_buffer_, p, pe);
       Buffer::Resume nur(number_buffer_, p, pe);

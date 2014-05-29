@@ -123,7 +123,6 @@ namespace IMAP {
     class Lexer {
       private:
         int                      cs             {0};
-        const char              *eof            {nullptr};
         vector<int>              stack_vector_;
         int                     *stack          {nullptr};
         int                      top            {0};
