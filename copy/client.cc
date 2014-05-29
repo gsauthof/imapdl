@@ -41,7 +41,6 @@ using namespace std;
 namespace fs = boost::filesystem;
 
 #include "serialize.h"
-#include <mime/header_decoder.h>
 
 namespace IMAP {
   namespace Copy {
@@ -83,7 +82,7 @@ namespace IMAP {
 
     Client::Client(IMAP::Copy::Options &opts,
         std::unique_ptr<Net::Client::Base> &&net_client,
-        boost::log::sources::severity_logger< Log::Severity > &lg)
+        boost::log::sources::severity_logger<Log::Severity> &lg)
       :
         opts_(opts),
         client_(std::move(net_client)),
@@ -95,10 +94,16 @@ namespace IMAP {
         maildir_(opts_.maildir),
         tmp_dir_(maildir_.tmp_dir_fd()),
         fetch_timer_(client_->io_service()),
-        mailbox_(opts_.mailbox)
+        mailbox_(opts_.mailbox),
+        header_decoder_(field_name_, field_body_, [this](){
+            string name(field_name_.begin(), field_name_.end());
+            string body(field_body_.begin(), field_body_.end());
+            fields_.emplace(boost::to_upper_copy(name), body);
+        })
     {
       BOOST_LOG_FUNCTION();
       buffer_proxy_.set(&buffer_);
+      header_decoder_.set_ending_policy(MIME::Header::Decoder::Ending::LF);
       read_journal();
       do_signal_wait();
       do_resolve();
@@ -726,28 +731,24 @@ namespace IMAP {
            && static_cast<Log::Severity>(opts_.file_severity) < Log::Severity::INFO)
         return;
 
-      string s(buffer_.begin(), buffer_.end());
-      BOOST_LOG_SEV(lg_, Log::DEBUG) << "Header: |" << s << "|";
+      if (    static_cast<Log::Severity>(opts_.severity)      >= Log::Severity::DEBUG
+           || static_cast<Log::Severity>(opts_.file_severity) >= Log::Severity::DEBUG) 
+      {
+        string s(buffer_.begin(), buffer_.end());
+        BOOST_LOG_SEV(lg_, Log::DEBUG) << "Header: |" << s << "|";
+      }
 
-      using namespace MIME::Header;
-      Buffer::Vector f;
-      Buffer::Vector b;
-      map<string, string> fields;
-      Decoder d(f, b, [&f, &b, &fields](){
-            string name(f.begin(), f.end());
-            string body(b.begin(), b.end());
-            fields.emplace(boost::to_upper_copy(name), body);
-          });
-      d.set_ending_policy(Decoder::Ending::LF);
       try {
-        d.read(buffer_.begin(), buffer_.end());
+        header_decoder_.read(buffer_.begin(), buffer_.end());
+        header_decoder_.verify_finished();
       } catch (const std::runtime_error &e) {
         BOOST_LOG_SEV(lg_, Log::ERROR) << e.what();
       }
-      for (auto &i : fields) {
+      for (auto &i : fields_) {
         BOOST_LOG(lg_) << setw(10) << left << i.first << ' ' << i.second;
       }
-      d.clear();
+      header_decoder_.clear();
+      fields_.clear();
     }
     void Client::imap_body_section_inner()
     {

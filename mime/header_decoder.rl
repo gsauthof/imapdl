@@ -409,6 +409,11 @@ namespace MIME {
     void Decoder::clear()
     {
       %% write init;
+      field_buffer_.clear();
+      buffer_.clear();
+      charset_buffer_.clear();
+      language_buffer_.clear();
+      space_buffer_.clear();
     }
     void Decoder::read(const char *begin, const char *end)
     {

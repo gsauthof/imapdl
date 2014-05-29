@@ -30,7 +30,8 @@
 #include <maildir/maildir.h>
 #include <buffer/buffer.h>
 #include <buffer/file.h>
-#include "sequence_set.h"
+#include <sequence_set.h>
+#include <mime/header_decoder.h>
 
 #include <memory>
 #include <unordered_set>
@@ -113,6 +114,11 @@ namespace IMAP {
         boost::asio::basic_waitable_timer<std::chrono::steady_clock> fetch_timer_;
 
         std::string mailbox_;
+
+        MIME::Header::Decoder header_decoder_;
+        Memory::Buffer::Vector field_name_;
+        Memory::Buffer::Vector field_body_;
+        std::map<std::string, std::string> fields_;
 
         void read_journal();
         void write_journal();
