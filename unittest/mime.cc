@@ -124,6 +124,24 @@ BOOST_AUTO_TEST_SUITE(mime)
         }
       }
 
+      BOOST_AUTO_TEST_CASE(empty)
+      {
+        using namespace MIME::Base64;
+        Buffer::Vector v;
+        Decoder d(v);
+        const char inp[] = " ";
+        BOOST_CHECK_THROW(d.read(inp, inp + sizeof(inp) - 1), std::runtime_error);
+      }
+
+      BOOST_AUTO_TEST_CASE(invalid)
+      {
+        using namespace MIME::Base64;
+        Buffer::Vector v;
+        Decoder d(v);
+        const char inp[] = "ZUJheS1SZWNobnVuZyB2b20_RnJlaXRhZywgMzEuIEF1Z3VzdCAyMDEy";
+        BOOST_CHECK_THROW(d.read(inp, inp + sizeof(inp) - 1), std::runtime_error);
+      }
+
     BOOST_AUTO_TEST_SUITE_END()
 
   BOOST_AUTO_TEST_SUITE_END()
@@ -182,6 +200,24 @@ BOOST_AUTO_TEST_SUITE(mime)
         string t(v.begin(), v.end());
         BOOST_CHECK_EQUAL(t, "Best\xe4tigung  f\xfcr ");
         //BOOST_CHECK(d.next() == inp2+sizeof(inp2)-3);
+      }
+
+      BOOST_AUTO_TEST_CASE(empty)
+      {
+        using namespace MIME::Q;
+        Buffer::Vector v;
+        Decoder d(v);
+        const char inp[] = " ";
+        BOOST_CHECK_THROW(d.read(inp, inp + sizeof(inp) - 1), std::runtime_error);
+      }
+
+      BOOST_AUTO_TEST_CASE(invalid)
+      {
+        using namespace MIME::Q;
+        Buffer::Vector v;
+        Decoder d(v);
+        const char inp[] = "Best=E4ti gung=20";
+        BOOST_CHECK_THROW(d.read(inp, inp + sizeof(inp) - 1), std::runtime_error);
       }
 
     BOOST_AUTO_TEST_SUITE_END()
@@ -577,6 +613,48 @@ BOOST_AUTO_TEST_SUITE(mime)
         d.read(inp, inp + sizeof(inp) - 1);
         boost::algorithm::hex(v.begin(), v.end(), ostream_iterator<char>(o));
         BOOST_CHECK_EQUAL(o.str(), r.str());
+      }
+
+      BOOST_AUTO_TEST_CASE(empty_q)
+      {
+        using namespace MIME::Header;
+        Buffer::Vector v;
+        Buffer::Proxy p;
+        Decoder d(p, v, [](){});
+        d.set_ending_policy(Decoder::Ending::LF);
+        const char inp[] =
+          "Subject: =?utf-8?q?""?=\n"
+          "\n"
+          ;
+        BOOST_CHECK_THROW(d.read(inp, inp + sizeof(inp) - 1), std::runtime_error);
+      }
+
+      BOOST_AUTO_TEST_CASE(empty_b)
+      {
+        using namespace MIME::Header;
+        Buffer::Vector v;
+        Buffer::Proxy p;
+        Decoder d(p, v, [](){});
+        d.set_ending_policy(Decoder::Ending::LF);
+        const char inp[] =
+          "Subject: =?utf-8?b?""?=\n"
+          "\n"
+          ;
+        BOOST_CHECK_THROW(d.read(inp, inp + sizeof(inp) - 1), std::runtime_error);
+      }
+
+      BOOST_AUTO_TEST_CASE(empty_charset)
+      {
+        using namespace MIME::Header;
+        Buffer::Vector v;
+        Buffer::Proxy p;
+        Decoder d(p, v, [](){});
+        d.set_ending_policy(Decoder::Ending::LF);
+        const char inp[] =
+          "Subject: =?""?q?foo_bar?=\n"
+          "\n"
+          ;
+        BOOST_CHECK_THROW(d.read(inp, inp + sizeof(inp) - 1), std::runtime_error);
       }
 
     BOOST_AUTO_TEST_SUITE_END()

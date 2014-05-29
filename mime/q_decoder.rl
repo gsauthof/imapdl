@@ -114,7 +114,7 @@ q_quoted   = '=' @clear_hex q_hex q_hex @end_hex
 underscore = '_' @push_underscore
   ;
 
-q_encoded_word = ( q_word | q_quoted | underscore )* >conv_buffer_start
+q_encoded_word = ( q_word | q_quoted | underscore )+ >conv_buffer_start
   ;
 
 }%%

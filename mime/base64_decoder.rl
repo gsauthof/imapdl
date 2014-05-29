@@ -120,6 +120,11 @@ base64_alph =
 
 b_encoded_word =
   start: (
+    base64_alph                  -> s2
+    # don't allow empty encoded words
+    #(print-base64_alph) @hold_it -> final
+  ),
+  b_start: (
     base64_alph                  -> s2    |
     (print-base64_alph) @hold_it -> final
   ),
@@ -131,7 +136,7 @@ b_encoded_word =
     pad         -> e4
   ),
   s4: (
-    base64_alph @finish_unit     -> start |
+    base64_alph @finish_unit     -> b_start |
     pad         @finish_pad1     -> final
   ),
   e4: (

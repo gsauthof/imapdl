@@ -35,7 +35,7 @@ machine q_main;
 
 include q_decoder "mime/q_decoder.rl";
 
-q_main :=  q_encoded_word ;
+q_main :=  q_encoded_word %!conv_buffer_stop ;
 
 }%%
 
