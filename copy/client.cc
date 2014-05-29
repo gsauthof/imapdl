@@ -40,7 +40,7 @@ using namespace std;
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
 
-#include "serialize.h"
+#include "journal.h"
 
 namespace IMAP {
   namespace Copy {

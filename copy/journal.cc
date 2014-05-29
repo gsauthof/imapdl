@@ -18,7 +18,7 @@
     along with imapdl.  If not, see <http://www.gnu.org/licenses/>.
 
 }}} */
-#include "serialize.h"
+#include "journal.h"
 #include "client.h"
 
 #include <boost/archive/text_iarchive.hpp>

@@ -79,7 +79,7 @@ add_executable(ut
   copy/options.cc
   copy/client.cc
   copy/id.cc
-  copy/serialize.cc
+  copy/journal.cc
   net/tcp_client.cc
   trace/trace.cc
   log/log.cc
@@ -161,7 +161,7 @@ add_executable(imapdl
   copy/options.cc
   copy/client.cc
   copy/id.cc
-  copy/serialize.cc
+  copy/journal.cc
   net/tcp_client.cc
   net/ssl_util.cc
   net/ssl_verification.cc
