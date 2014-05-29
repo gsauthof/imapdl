@@ -19,6 +19,7 @@
 
 }}} */
 #include <boost/test/unit_test.hpp>
+#include <boost/algorithm/hex.hpp>
 
 #include <mime/base64_decoder.h>
 #include <mime/q_decoder.h>
@@ -556,6 +557,26 @@ BOOST_AUTO_TEST_SUITE(mime)
         //d.clear();
         v.clear();
         BOOST_CHECK_THROW(d.read(inp2, inp2 + sizeof(inp2) - 1), std::runtime_error);
+      }
+      BOOST_AUTO_TEST_CASE(escape)
+      {
+        using namespace MIME::Header;
+        Buffer::Vector v;
+        Buffer::Proxy p;
+        Decoder d(p, v, [](){});
+        d.set_ending_policy(Decoder::Ending::LF);
+        const char inp[] =
+          "Subject: =?utf-8?q?=1b]0;Foo_Bar=07?=\n"
+          "\n"
+          ;
+        // output without escaping of control characters
+        //const char ref[] = "\x1b]0;Foo Bar\x07";
+        const char ref[] = "\\x1B]0;Foo Bar\\x07";
+        ostringstream o, r;
+        boost::algorithm::hex(ref, ref+sizeof(ref)-1, ostream_iterator<char>(r));
+        d.read(inp, inp + sizeof(inp) - 1);
+        boost::algorithm::hex(v.begin(), v.end(), ostream_iterator<char>(o));
+        BOOST_CHECK_EQUAL(o.str(), r.str());
       }
 
     BOOST_AUTO_TEST_SUITE_END()

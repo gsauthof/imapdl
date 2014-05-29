@@ -360,6 +360,8 @@ header_main :=  header ;
 
 #include <boost/locale/encoding.hpp>
 
+#include <ascii/control_sanitizer.h>
+
 namespace MIME {
   namespace Header {
     void default_convert(const std::pair<const char*, const char*> &charset,
@@ -370,7 +372,15 @@ namespace MIME {
       string s(inp.first, inp.second);
       string cs(charset.first, charset.second);
       string result(boost::locale::conv::to_utf<char>(s, cs));
-      out = std::move(result);
+
+      Memory::Buffer::Vector v;
+      ASCII::Control::Sanitizer sani(v);
+      sani.read(result.data(), result.data() + result.size());
+      if (sani.seen_ctl()) {
+        out = std::move(string(v.begin(), v.end()));
+      } else {
+        out = std::move(result);
+      }
     }
 
     %% write data;

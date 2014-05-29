@@ -43,6 +43,7 @@ RAGEL_TARGET(mime_base64_decoder_main mime/base64_decoder_main.rl ${CMAKE_CURREN
 RAGEL_TARGET(mime_q_decoder mime/q_decoder.rl ${CMAKE_CURRENT_BINARY_DIR}/mime_q_decoder.cc)
 RAGEL_TARGET(mime_q_decoder_main mime/q_decoder_main.rl ${CMAKE_CURRENT_BINARY_DIR}/mime_q_decoder_main.cc)
 RAGEL_TARGET(mime_header_decoder mime/header_decoder.rl ${CMAKE_CURRENT_BINARY_DIR}/mime_header_decoder.cc)
+RAGEL_TARGET(ascii_control_sanitizer ascii/control_sanitizer.rl ${CMAKE_CURRENT_BINARY_DIR}/ascii_control_sanitizer.cc)
 
 add_subdirectory(libixxx)
 add_subdirectory(libbuffer)
@@ -87,6 +88,7 @@ add_executable(ut
   ${RAGEL_mime_base64_decoder_main_OUTPUTS}
   ${RAGEL_mime_q_decoder_main_OUTPUTS}
   ${RAGEL_mime_header_decoder_OUTPUTS}
+  ${RAGEL_ascii_control_sanitizer_OUTPUTS}
   unittest/mime.cc
   )
 target_link_libraries(ut
