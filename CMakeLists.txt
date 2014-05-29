@@ -176,6 +176,7 @@ add_executable(imapdl
   sequence_set.cc
   trace/trace.cc
   ${RAGEL_mime_header_decoder_OUTPUTS}
+  ${RAGEL_ascii_control_sanitizer_OUTPUTS}
   )
 target_link_libraries(imapdl
   ixxx_static
