@@ -134,19 +134,24 @@ A collection of small example programs for testing some related features:
 
 ### Links
 
-- [RFC 3501 - INTERNET MESSAGE ACCESS PROTOCOL - VERSION 4rev1](http://tools.ietf.org/html/rfc3501)
-- [RFC 2683 - IMAP4 Implementation Recommendations](http://tools.ietf.org/html/rfc2683)
-- [RFC 2180 - IMAP4 Multi-Accessed Mailbox Practice](http://tools.ietf.org/html/rfc2180)
+- [RFC 3501 - INTERNET MESSAGE ACCESS PROTOCOL - VERSION 4rev1](http://tools.ietf.org/html/rfc3501), Proposed STD, 2003
+- [RFC 2683 - IMAP4 Implementation Recommendations](http://tools.ietf.org/html/rfc2683), Informational, 1999
+- [RFC 2180 - IMAP4 Multi-Accessed Mailbox Practice](http://tools.ietf.org/html/rfc2180), Informational, 1997
 - [Internet Message Access Protocol (IMAP) Capabilities Registry](http://www.iana.org/assignments/imap-capabilities/imap-capabilities.xhtml)
-- [RFC 4315 - Internet Message Access Protocol (IMAP) - UIDPLUS extension](http://tools.ietf.org/html/rfc4315)
-- [RFC 6855 - IMAP Support for UTF-8](http://tools.ietf.org/html/rfc6855)
-- [RFC 3629 - UTF-8, a transformation format of ISO 10646, Syntax of UTF-8 Byte Sequences](http://tools.ietf.org/html/rfc3629#section-4)
-- [RFC 2971 - IMAP4 ID extension](http://tools.ietf.org/html/rfc2971)
-- [RFC 4466 - Collected Extensions to IMAP4 ABNF](http://tools.ietf.org/html/rfc4466)
-- [RFC 2595 - Using TLS with IMAP, POP3 and ACAP](http://tools.ietf.org/html/rfc2595)
-- [RFC 2234 - Augmented BNF for Syntax Specifications: ABNF](http://tools.ietf.org/html/rfc2234)
-- [RFC 822 - Standard for the Format of ARPA Internet Text Messages, Notational Conventions](http://tools.ietf.org/html/rfc822#section-2) - as a reference for pre-RFC2234 ABNF constructs
-- [RFC 2822 - Internet Message Format](http://tools.ietf.org/html/rfc2822)
+- [RFC 4315 - Internet Message Access Protocol (IMAP) - UIDPLUS extension](http://tools.ietf.org/html/rfc4315), Proposed STD, 2005
+- [RFC 6855 - IMAP Support for UTF-8](http://tools.ietf.org/html/rfc6855), Proposed STD, 2013
+- [RFC 3629 - UTF-8, a transformation format of ISO 10646, Section 4 Syntax of UTF-8 Byte Sequences](http://tools.ietf.org/html/rfc3629#section-4), STD, 2003
+- [RFC 2971 - IMAP4 ID extension](http://tools.ietf.org/html/rfc2971), Proposed STD, 2000
+- [RFC 4466 - Collected Extensions to IMAP4 ABNF](http://tools.ietf.org/html/rfc4466), Proposed STD, 2006
+- [RFC 2595 - Using TLS with IMAP, POP3 and ACAP](http://tools.ietf.org/html/rfc2595), Proposed STD, 1999
+- [RFC 2234 - Augmented BNF for Syntax Specifications: ABNF](http://tools.ietf.org/html/rfc2234), Proposed STD, 1997
+- [RFC 822 - Standard for the Format of ARPA Internet Text Messages, Section 2 Notational Conventions](http://tools.ietf.org/html/rfc822#section-2) - as a reference for pre-RFC2234 ABNF constructs, STD, 1982
+- [RFC 2822 - Internet Message Format](http://tools.ietf.org/html/rfc2822), Proposed STD, 2001
+- [RFC 2047 - MIME (Multipurpose Internet Mail Extensions) Part Three](http://tools.ietf.org/html/rfc2047): Message Header Extensions for Non-ASCII Text, [Section 4 Encodings](http://tools.ietf.org/html/rfc2047#section-4), Draft STD, 1996
+- [RFC 2045 - Multipurpose Internet Mail Extensions (MIME) Part One](http://tools.ietf.org/html/rfc2045): Format of Internet Message Bodies, [Section 6.8 Base64 Content-Transfer-Encoding](http://tools.ietf.org/html/rfc2045#section-6.8), Draft STD, 1996
+- [RFC 2231 - MIME Parameter Value and Encoded Word Extensions](http://tools.ietf.org/html/rfc2231): Character Sets, Languages, and Continuations, Proposed STD, 1997
+- [RFC 1766 - Tags for Identifying Language](http://tools.ietf.org/html/rfc1766), Proposed STD, 1995
+- [RFC 5646 - Tags for Identifying Language](http://tools.ietf.org/html/rfc5646), BCP 47, 2009
 
 
 [asio]:    http://www.boost.org/doc/libs/1_55_0/libs/asio/
