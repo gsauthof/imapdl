@@ -98,7 +98,7 @@ q_printable = 0x21..0x7E
 q_alph = q_printable - q_specials
   ;
 
-q_word = (q_alph q_alph**) >conv_buffer_cont %conv_buffer_stop %^conv_buffer_stop
+q_word = (q_alph q_alph**) >conv_buffer_cont %conv_buffer_stop
   ;
 
 # RFC specifies that uppercase 'A'..'F' "should" be used, but apparently
