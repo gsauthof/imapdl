@@ -60,11 +60,11 @@ action buffer_clear
 {
   buffer_.clear();
 }
-action buffer_begin
+action buffer_start
 {
   buffer_.start(p);
 }
-action buffer_begin_next
+action buffer_start_next
 {
   buffer_.start(p+1);
 }
@@ -76,7 +76,7 @@ action buffer_cont
 {
   buffer_.cont(p);
 }
-action buffer_end
+action buffer_finish
 {
   buffer_.finish(p);
 }
@@ -85,12 +85,12 @@ action buffer_add_char
   buffer_.cont(p);
   buffer_.stop(p+1);
 }
-action number_begin
+action number_start
 {
   number_buffer_.start(p);
   number_ = 0;
 }
-action number_end
+action number_finish
 {
   number_buffer_.finish(p);
   number_ = boost::lexical_cast<uint32_t>(
@@ -162,13 +162,13 @@ atom = ATOM_CHAR+ ;
 #                    ; Unsigned 32-bit integer
 #                    ; (0 <= n < 4,294,967,296)
 
-number = DIGIT{1,10} >number_begin %number_end ;
+number = DIGIT{1,10} >number_start %number_finish ;
 
 # nz-number       = digit-nz *DIGIT
 #                    ; Non-zero unsigned 32-bit integer
 #                    ; (0 < n < 4,294,967,296)
 
-nz_number = (digit_nz DIGIT {0,10} ) >number_begin %number_end ;
+nz_number = (digit_nz DIGIT {0,10} ) >number_start %number_finish ;
 
 # literal         = "{" number "}" CRLF *CHAR8
 #                    ; Number represents the number of CHAR8s
@@ -187,7 +187,7 @@ literal_tail_convert :=
                                                    @literal_tail_cond_return )
   ) **     >literal_tail_begin  ;
 
-literal = '{' number >number_begin %number_end '}' CRLF @buffer_clear  @call_literal_tail ;
+literal = '{' number >number_start %number_finish '}' CRLF @buffer_clear  @call_literal_tail ;
 
 # QUOTED-CHAR     = <any TEXT-CHAR except quoted-specials> /
 #                   "\" quoted-specials
@@ -204,7 +204,7 @@ QUOTED_CHAR = ( TEXT_CHAR - quoted_specials )
 #   start: (
 #     (TEXT_CHAR - quoted_specials)+   >buffer_cont %buffer_stop -> start |
 #     '\\' quoted_specials             @buffer_add_char             -> start |
-#     DQUOTE                           @buffer_end                  -> final
+#     DQUOTE                           @buffer_finish                  -> final
 #   );
 
 # ** = longest-match Kleene Star
@@ -213,9 +213,9 @@ quoted_tail =
      (TEXT_CHAR - quoted_specials)+   >buffer_cont %buffer_stop |
      ('\\' quoted_specials @buffer_add_char )
    ) **
-   DQUOTE  @buffer_end ;
+   DQUOTE  @buffer_finish ;
 
-quoted = DQUOTE @buffer_begin_next quoted_tail ;
+quoted = DQUOTE @buffer_start_next quoted_tail ;
 
 # string          = quoted / literal
 
@@ -310,17 +310,17 @@ non_extensions = /Answered/i
 
 # assuming that those flags are case insensitive like most other tokens ...
 flag = (
-       ( '\\' >buffer_begin
-              ( /Answered/i %buffer_end %cb_flag_answered
-              | /Flagged/i  %buffer_end %cb_flag_flagged
-              | /Deleted/i  %buffer_end %cb_flag_deleted
-              | /Seen/i     %buffer_end %cb_flag_seen
-              | /Draft/i    %buffer_end %cb_flag_draft
+       ( '\\' >buffer_start
+              ( /Answered/i %buffer_finish %cb_flag_answered
+              | /Flagged/i  %buffer_finish %cb_flag_flagged
+              | /Deleted/i  %buffer_finish %cb_flag_deleted
+              | /Seen/i     %buffer_finish %cb_flag_seen
+              | /Draft/i    %buffer_finish %cb_flag_draft
               # flag_extension
-              | (atom - non_extensions) %buffer_end %cb_flag_atom
+              | (atom - non_extensions) %buffer_finish %cb_flag_atom
               )
        )
-     | flag_keyword >buffer_begin %buffer_end )
+     | flag_keyword >buffer_start %buffer_finish )
      ;
 
 

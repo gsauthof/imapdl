@@ -434,11 +434,11 @@ action cb_capability_within
 }
 # <-- automatically generated
 
-action tag_buffer_begin
+action tag_start
 {
   tag_buffer_.start(p);
 }
-action tag_buffer_end
+action tag_finish
 {
   tag_buffer_.finish(p);
 }
@@ -575,7 +575,7 @@ capability :=
         /IMAP4rev1/i             %cb_capability_imap4rev1             |
 
         atom
-  ) >cb_capability_begin >buffer_begin %buffer_end %cb_capability_end
+  ) >cb_capability_begin >buffer_start %buffer_finish %cb_capability_end
 
   # '\r' is for when calling capability data from an untagged
   # response
@@ -695,7 +695,7 @@ resp_text_code = /ALERT/i          %cb_status_code_alert
 
 # resp-text       = ["[" resp-text-code "]" SP] text
 
-resp_textP = ( '[' resp_text_code ']' SP )?  textNB >buffer_begin %buffer_end
+resp_textP = ( '[' resp_text_code ']' SP )?  textNB >buffer_start %buffer_finish
 
           |
 # work around Cyrus 2.3.13 bug where it directly sends a CRLF
@@ -715,9 +715,9 @@ resp_textP = ( '[' resp_text_code ']' SP )?  textNB >buffer_begin %buffer_end
 #
 # "* OK [HIGHESTMODSEQ 15336]\r\n"
 
-resp_text = '[' resp_text_code ']' @buffer_begin @buffer_end
-                ( SP textNB >buffer_begin %buffer_end )?
-          | textNB >buffer_begin %buffer_end
+resp_text = '[' resp_text_code ']' @buffer_start @buffer_finish
+                ( SP textNB >buffer_start %buffer_finish )?
+          | textNB >buffer_start %buffer_finish
 ;
 
 # resp-cond-bye   = "BYE" SP resp-text
@@ -738,7 +738,7 @@ resp_cond_state = ( /OK/i %status_ok | /NO/i %status_no | /BAD/i %status_bad )
 
 # response-tagged = tag SP resp-cond-state CRLF
 
-response_tagged = tag                  >tag_buffer_begin %tag_buffer_end
+response_tagged = tag                  >tag_start %tag_finish
                   SP                   @cb_tagged_status_begin
                   resp_cond_state CRLF @cb_tagged_status_end ;
 

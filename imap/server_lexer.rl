@@ -341,7 +341,7 @@ userid = astring
 # login           = "LOGIN" SP userid SP password
 
 login = /LOGIN/i SP userid   >userid_begin %userid_end
-                 SP password >buffer_begin %buffer_end
+                 SP password >buffer_start %buffer_finish
                  %cb_login
   ;
 
