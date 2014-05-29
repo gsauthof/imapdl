@@ -52,7 +52,9 @@ action return_minus
   // violates C standard when called on: *begin = ' ' and it matches ...
   // because p is decremented below the memory block start
   // only incremented it one above the block end is allowed by the standard
-  --p;
+  //--p;
+  // equivalent is:
+  fhold;
   fret;
 }
 
