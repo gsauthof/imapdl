@@ -66,7 +66,7 @@ namespace IMAP {
         Memory::Buffer::Proxy        buffer_;
         Memory::Buffer::Proxy        tag_buffer_;
         IMAP::Server::Callback::Null null_cb_;
-        IMAP::Server::Lexer          lexer_;
+        IMAP::Server::Parser         parser_;
 
         Tag      &generate_;
         Write_Fn  write_fn_;

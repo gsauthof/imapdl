@@ -82,7 +82,7 @@ namespace IMAP {
         Memory::Buffer::Vector tag_buffer_;
         Memory::Buffer::Vector buffer_;
         Memory::Buffer::File   file_buffer_;
-        IMAP::Client::Lexer    lexer_;
+        IMAP::Client::Parser   parser_;
 
         std::unordered_set<IMAP::Server::Response::Capability>       capabilities_;
         boost::asio::basic_waitable_timer<std::chrono::steady_clock> login_timer_;

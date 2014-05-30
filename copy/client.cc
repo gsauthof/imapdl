@@ -88,7 +88,7 @@ namespace IMAP {
         client_(std::move(net_client)),
         lg_(lg),
         signals_(client_->io_service(), SIGINT, SIGTERM),
-        lexer_(buffer_proxy_, tag_buffer_, *this),
+        parser_(buffer_proxy_, tag_buffer_, *this),
         login_timer_(client_->io_service()),
         writer_(tags_, std::bind(&Client::to_cmd, this, std::placeholders::_1)),
         maildir_(opts_.maildir),
@@ -585,7 +585,7 @@ namespace IMAP {
                 THROW_ERROR(ec);
               }
             } else {
-              lexer_.read(client_->input().data(), client_-> input().data() + size);
+              parser_.read(client_->input().data(), client_-> input().data() + size);
               if (state_ != State::LOGGED_OUT) // && client_->is_open())
                 do_read();
             }

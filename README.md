@@ -32,7 +32,7 @@ recommended to include this repository as Git [submodule][gitm].
 - Configuration via [JSON][json] [run control][rc] file
 - Written in C++ with some C++11 features
 - Asynchronous IO using [Boost ASIO][asio]
-- Robust IMAP protocol lexer implemented in [Ragel][ragel]
+- Robust IMAP protocol parser implemented in [Ragel][ragel]
 - Before commands are send to the server they are locally parsed with a Ragel
   grammar that implements the server side of the IMAP spec - thus, the client
   verifies that it doesn't violate [RFC3501][rfc3501] in any obvious way.

@@ -1077,7 +1077,7 @@ namespace IMAP {
 
     %% write data;
 
-    Lexer::Lexer(Buffer::Base &buffer,
+    Parser::Parser(Buffer::Base &buffer,
       Buffer::Base &tag_buffer,
       Callback::Base &cb)
       :
@@ -1086,7 +1086,7 @@ namespace IMAP {
       %% write init;
     }
 
-    void Lexer::read(const char *begin, const char *end)
+    void Parser::read(const char *begin, const char *end)
     {
       const char *p   = begin;
       const char *pe  = end;
@@ -1100,25 +1100,25 @@ namespace IMAP {
       }
     }
 
-    bool Lexer::in_start() const
+    bool Parser::in_start() const
     {
       return cs == %%{write start;}%%;
     }
-    bool Lexer::finished() const
+    bool Parser::finished() const
     {
       // return cs >= %%{write first_final;}%%;
       // for this machine: start state == final state
       return in_start();
     }
 
-    void Lexer::verify_finished() const
+    void Parser::verify_finished() const
     {
       if (!finished())
         throw runtime_error("IMAP client automaton not in final state");
     }
 
     // e.g. for mailbox/maildir we want to convert - which is the default
-    void Lexer::set_convert_crlf(bool b)
+    void Parser::set_convert_crlf(bool b)
     {
       convert_crlf_ = b;
     }

@@ -27,7 +27,7 @@ using namespace std;
 
 using namespace Memory;
 
-BOOST_AUTO_TEST_SUITE( imap_server_lexer )
+BOOST_AUTO_TEST_SUITE( imap_server_parser )
 
   BOOST_AUTO_TEST_SUITE( basic )
 
@@ -44,8 +44,8 @@ BOOST_AUTO_TEST_SUITE( imap_server_lexer )
       using namespace IMAP::Server;
       Buffer::Proxy proxy;
       Callback::Null cb;
-      Lexer l(proxy, proxy, cb);
-      l.read(begin, end);
+      Parser p(proxy, proxy, cb);
+      p.read(begin, end);
     }
 
     BOOST_AUTO_TEST_CASE( login_fail )
@@ -68,8 +68,8 @@ BOOST_AUTO_TEST_SUITE( imap_server_lexer )
           }
       };
       CB cb;
-      Lexer l(proxy, proxy, cb);
-      BOOST_CHECK_THROW(l.read(begin, end), std::runtime_error);
+      Parser p(proxy, proxy, cb);
+      BOOST_CHECK_THROW(p.read(begin, end), std::runtime_error);
     }
 
     BOOST_AUTO_TEST_CASE( bad_tag )
@@ -84,8 +84,8 @@ BOOST_AUTO_TEST_SUITE( imap_server_lexer )
       using namespace IMAP::Server;
       Buffer::Proxy proxy;
       Callback::Null cb;
-      Lexer l(proxy, proxy, cb);
-      BOOST_CHECK_THROW(l.read(begin, end), std::runtime_error);
+      Parser p(proxy, proxy, cb);
+      BOOST_CHECK_THROW(p.read(begin, end), std::runtime_error);
     }
 
     BOOST_AUTO_TEST_CASE( mini_session )
@@ -102,9 +102,9 @@ BOOST_AUTO_TEST_SUITE( imap_server_lexer )
       using namespace IMAP::Server;
       Buffer::Proxy proxy;
       Callback::Null cb;
-      Lexer l(proxy, proxy, cb);
-      l.read(begin, end);
-      BOOST_CHECK_EQUAL(l.finished(), true);
+      Parser p(proxy, proxy, cb);
+      p.read(begin, end);
+      BOOST_CHECK_EQUAL(p.finished(), true);
     }
 
     BOOST_AUTO_TEST_CASE( select_session )
@@ -123,9 +123,9 @@ BOOST_AUTO_TEST_SUITE( imap_server_lexer )
       using namespace IMAP::Server;
       Buffer::Proxy proxy;
       Callback::Null cb;
-      Lexer l(proxy, proxy, cb);
-      l.read(begin, end);
-      BOOST_CHECK_EQUAL(l.finished(), true);
+      Parser p(proxy, proxy, cb);
+      p.read(begin, end);
+      BOOST_CHECK_EQUAL(p.finished(), true);
     }
 
     BOOST_AUTO_TEST_CASE( search )
@@ -146,9 +146,9 @@ BOOST_AUTO_TEST_SUITE( imap_server_lexer )
       using namespace IMAP::Server;
       Buffer::Proxy proxy;
       Callback::Null cb;
-      Lexer l(proxy, proxy, cb);
-      l.read(begin, end);
-      BOOST_CHECK_EQUAL(l.finished(), true);
+      Parser p(proxy, proxy, cb);
+      p.read(begin, end);
+      BOOST_CHECK_EQUAL(p.finished(), true);
     }
 
     BOOST_AUTO_TEST_CASE( store )
@@ -164,9 +164,9 @@ BOOST_AUTO_TEST_SUITE( imap_server_lexer )
       using namespace IMAP::Server;
       Buffer::Proxy proxy;
       Callback::Null cb;
-      Lexer l(proxy, proxy, cb);
-      l.read(begin, end);
-      BOOST_CHECK_EQUAL(l.finished(), true);
+      Parser p(proxy, proxy, cb);
+      p.read(begin, end);
+      BOOST_CHECK_EQUAL(p.finished(), true);
     }
 
     BOOST_AUTO_TEST_CASE( id )
@@ -182,9 +182,9 @@ BOOST_AUTO_TEST_SUITE( imap_server_lexer )
       using namespace IMAP::Server;
       Buffer::Proxy proxy;
       Callback::Null cb;
-      Lexer l(proxy, proxy, cb);
-      l.read(begin, end);
-      BOOST_CHECK_EQUAL(l.finished(), true);
+      Parser p(proxy, proxy, cb);
+      p.read(begin, end);
+      BOOST_CHECK_EQUAL(p.finished(), true);
     }
 
     BOOST_AUTO_TEST_CASE( id_fail )
@@ -198,8 +198,8 @@ BOOST_AUTO_TEST_SUITE( imap_server_lexer )
       using namespace IMAP::Server;
       Buffer::Proxy proxy;
       Callback::Null cb;
-      Lexer l(proxy, proxy, cb);
-      BOOST_CHECK_THROW(l.read(begin, end), std::runtime_error);
+      Parser p(proxy, proxy, cb);
+      BOOST_CHECK_THROW(p.read(begin, end), std::runtime_error);
     }
 
     BOOST_AUTO_TEST_CASE( uidplus )
@@ -215,9 +215,9 @@ BOOST_AUTO_TEST_SUITE( imap_server_lexer )
       using namespace IMAP::Server;
       Buffer::Proxy proxy;
       Callback::Null cb;
-      Lexer l(proxy, proxy, cb);
-      l.read(begin, end);
-      BOOST_CHECK_EQUAL(l.finished(), true);
+      Parser p(proxy, proxy, cb);
+      p.read(begin, end);
+      BOOST_CHECK_EQUAL(p.finished(), true);
     }
 
     BOOST_AUTO_TEST_CASE( close_fail )
@@ -234,8 +234,8 @@ BOOST_AUTO_TEST_SUITE( imap_server_lexer )
       using namespace IMAP::Server;
       Buffer::Proxy proxy;
       Callback::Null cb;
-      Lexer l(proxy, proxy, cb);
-      BOOST_CHECK_THROW(l.read(begin, end), std::runtime_error);
+      Parser p(proxy, proxy, cb);
+      BOOST_CHECK_THROW(p.read(begin, end), std::runtime_error);
     }
 
     BOOST_AUTO_TEST_CASE( close )
@@ -252,9 +252,9 @@ BOOST_AUTO_TEST_SUITE( imap_server_lexer )
       using namespace IMAP::Server;
       Buffer::Proxy proxy;
       Callback::Null cb;
-      Lexer l(proxy, proxy, cb);
-      l.read(begin, end);
-      BOOST_CHECK_EQUAL(l.finished(), true);
+      Parser p(proxy, proxy, cb);
+      p.read(begin, end);
+      BOOST_CHECK_EQUAL(p.finished(), true);
     }
 
   BOOST_AUTO_TEST_SUITE_END()

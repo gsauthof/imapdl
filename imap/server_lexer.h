@@ -18,8 +18,8 @@
     along with imapdl.  If not, see <http://www.gnu.org/licenses/>.
 
 }}} */
-#ifndef IMAP_SERVER_LEXER_H
-#define IMAP_SERVER_LEXER_H
+#ifndef IMAP_SERVER_PARSER_H
+#define IMAP_SERVER_PARSER_H
 
 #include <vector>
 #include <cstdint>
@@ -51,7 +51,7 @@ namespace IMAP {
       };
     }
 
-    class Lexer {
+    class Parser {
       private:
         int                      cs             {0};
         const char              *eof            {nullptr};
@@ -73,7 +73,7 @@ namespace IMAP {
         Callback::Base          &cb_;
         Server::Response::Status status_ { Server::Response::Status::OK };
       public:
-        Lexer(Memory::Buffer::Base &buffer,
+        Parser(Memory::Buffer::Base &buffer,
             Memory::Buffer::Base &tag_buffer,
             Callback::Base &cb);
         void read(const char *begin, const char *end);

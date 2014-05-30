@@ -75,7 +75,7 @@ namespace IMAP {
 
     Writer::Writer(Tag &tag, Write_Fn write_fn)
       :
-        lexer_(buffer_, tag_buffer_, null_cb_),
+        parser_(buffer_, tag_buffer_, null_cb_),
         generate_(tag),
         write_fn_(write_fn)
     {
@@ -83,7 +83,7 @@ namespace IMAP {
     void Writer::write(std::vector<char> &v)
     {
       // to verify that we send conforming IMAP commands
-      lexer_.read(v.data(), v.data()+v.size());
+      parser_.read(v.data(), v.data()+v.size());
       if (write_fn_)
         write_fn_(v);
     }

@@ -40,7 +40,7 @@ namespace fs = boost::filesystem;
 
 using namespace std;
 
-BOOST_AUTO_TEST_SUITE( imap_client_lexer )
+BOOST_AUTO_TEST_SUITE( imap_client_parser )
 
   BOOST_AUTO_TEST_SUITE( basic )
 
@@ -61,13 +61,13 @@ BOOST_AUTO_TEST_SUITE( imap_client_lexer )
         }
       };
       CB cb;
-      IMAP::Client::Lexer l(cb.proxy, cb.proxy, cb);
-      BOOST_CHECK_EQUAL(l.finished(), true);
-      BOOST_CHECK_EQUAL(l.in_start(), true);
-      l.read(begin, end);
+      IMAP::Client::Parser p(cb.proxy, cb.proxy, cb);
+      BOOST_CHECK_EQUAL(p.finished(), true);
+      BOOST_CHECK_EQUAL(p.in_start(), true);
+      p.read(begin, end);
       BOOST_CHECK_EQUAL(cb.t, 1);
-      BOOST_CHECK_EQUAL(l.finished(), true);
-      BOOST_CHECK_EQUAL(l.in_start(), true);
+      BOOST_CHECK_EQUAL(p.finished(), true);
+      BOOST_CHECK_EQUAL(p.in_start(), true);
     }
 
   BOOST_AUTO_TEST_SUITE_END()
@@ -100,8 +100,8 @@ BOOST_AUTO_TEST_SUITE( imap_client_lexer )
         }
       };
       CB cb;
-      IMAP::Client::Lexer l(cb.buffer, cb.tag_buffer, cb);
-      l.read(begin, end);
+      IMAP::Client::Parser p(cb.buffer, cb.tag_buffer, cb);
+      p.read(begin, end);
       BOOST_CHECK_EQUAL(cb.t, 23);
     }
 
@@ -153,8 +153,8 @@ BOOST_AUTO_TEST_SUITE( imap_client_lexer )
         }
       };
       CB cb;
-      IMAP::Client::Lexer l(cb.buffer, cb.tag_buffer, cb);
-      l.read(begin, end);
+      IMAP::Client::Parser p(cb.buffer, cb.tag_buffer, cb);
+      p.read(begin, end);
       BOOST_CHECK_EQUAL(cb.t, 3*4+3*64);
       BOOST_CHECK_EQUAL(cb.i, 3);
     }
@@ -191,8 +191,8 @@ BOOST_AUTO_TEST_SUITE( imap_client_lexer )
         }
       };
       CB cb;
-      IMAP::Client::Lexer l(cb.buffer, cb.tag_buffer, cb);
-      l.read(begin, end);
+      IMAP::Client::Parser p(cb.buffer, cb.tag_buffer, cb);
+      p.read(begin, end);
       for (unsigned i = 0; i<3; ++i)
         BOOST_CHECK_EQUAL(cb.a[i], 1);
     }
@@ -227,8 +227,8 @@ BOOST_AUTO_TEST_SUITE( imap_client_lexer )
         }
       };
       CB cb;
-      IMAP::Client::Lexer l(cb.buffer, cb.tag_buffer, cb);
-      l.read(begin, end);
+      IMAP::Client::Parser p(cb.buffer, cb.tag_buffer, cb);
+      p.read(begin, end);
       BOOST_CHECK_EQUAL(cb.t, 130);
     }
 
@@ -266,8 +266,8 @@ BOOST_AUTO_TEST_SUITE( imap_client_lexer )
         }
       };
       CB cb;
-      IMAP::Client::Lexer l(cb.buffer, cb.tag_buffer, cb);
-      l.read(begin, end);
+      IMAP::Client::Parser p(cb.buffer, cb.tag_buffer, cb);
+      p.read(begin, end);
       BOOST_CHECK_EQUAL(cb.t, 2);
       BOOST_CHECK_EQUAL(cb.u, 1);
     }
@@ -291,10 +291,10 @@ BOOST_AUTO_TEST_SUITE( imap_client_lexer )
         }
       };
       CB cb;
-      IMAP::Client::Lexer l(cb.buffer, cb.tag_buffer, cb);
+      IMAP::Client::Parser p(cb.buffer, cb.tag_buffer, cb);
       bool caught = false;
       try {
-        l.read(begin, end);
+        p.read(begin, end);
       } catch (const exception &e) {
         caught = true;
       }
@@ -332,8 +332,8 @@ BOOST_AUTO_TEST_SUITE( imap_client_lexer )
         }
       };
       CB cb;
-      IMAP::Client::Lexer l(cb.buffer, cb.tag_buffer, cb);
-      l.read(begin, end);
+      IMAP::Client::Parser p(cb.buffer, cb.tag_buffer, cb);
+      p.read(begin, end);
       BOOST_CHECK_EQUAL(cb.t, 1);
       BOOST_CHECK_EQUAL(cb.u, 1);
       for (unsigned i = 1; i<static_cast<unsigned>(IMAP::Flag::RECENT); ++i)
@@ -382,8 +382,8 @@ BOOST_AUTO_TEST_SUITE( imap_client_lexer )
         }
       };
       CB cb;
-      IMAP::Client::Lexer l(cb.buffer, cb.tag_buffer, cb);
-      l.read(begin, end);
+      IMAP::Client::Parser p(cb.buffer, cb.tag_buffer, cb);
+      p.read(begin, end);
       BOOST_CHECK_EQUAL(cb.a[0], 3);
       for (unsigned i = 1; i < 4; ++i)
         BOOST_CHECK_EQUAL(cb.a[i], 1);
@@ -416,10 +416,10 @@ BOOST_AUTO_TEST_SUITE( imap_client_lexer )
         }
       };
       CB cb;
-      IMAP::Client::Lexer l(cb.buffer, cb.tag_buffer, cb);
+      IMAP::Client::Parser p(cb.buffer, cb.tag_buffer, cb);
       bool caught = false;
       try {
-        l.read(begin, end);
+        p.read(begin, end);
       } catch (const exception &e) {
         caught = true;
       }
@@ -446,10 +446,10 @@ BOOST_AUTO_TEST_SUITE( imap_client_lexer )
         }
       };
       CB cb;
-      IMAP::Client::Lexer l(cb.buffer, cb.tag_buffer, cb);
+      IMAP::Client::Parser p(cb.buffer, cb.tag_buffer, cb);
       bool caught = false;
       try {
-        l.read(begin, end);
+        p.read(begin, end);
       } catch (const exception &e) {
         caught = true;
       }
@@ -492,8 +492,8 @@ BOOST_AUTO_TEST_SUITE( imap_client_lexer )
         }
       };
       CB cb;
-      IMAP::Client::Lexer l(cb.buffer, cb.tag_buffer, cb);
-      l.read(begin, end);
+      IMAP::Client::Parser p(cb.buffer, cb.tag_buffer, cb);
+      p.read(begin, end);
       for (unsigned i = 0; i<3; ++i)
         BOOST_CHECK_EQUAL(cb.a[i], 1);
     }
@@ -518,8 +518,8 @@ BOOST_AUTO_TEST_SUITE( imap_client_lexer )
         }
       };
       CB cb;
-      IMAP::Client::Lexer l(cb.buffer, cb.tag_buffer, cb);
-      l.read(begin, end);
+      IMAP::Client::Parser p(cb.buffer, cb.tag_buffer, cb);
+      p.read(begin, end);
       BOOST_CHECK_EQUAL(cb.number_, 11810);
     }
 
@@ -550,8 +550,8 @@ BOOST_AUTO_TEST_SUITE( imap_client_lexer )
         }
       };
       CB cb;
-      IMAP::Client::Lexer l(cb.buffer, cb.tag_buffer, cb);
-      l.read(begin, end);
+      IMAP::Client::Parser p(cb.buffer, cb.tag_buffer, cb);
+      p.read(begin, end);
       for (unsigned i = 0; i<2; ++i)
         BOOST_CHECK_EQUAL(cb.a[i], 1);
     }
@@ -589,11 +589,11 @@ BOOST_AUTO_TEST_SUITE( imap_client_lexer )
       };
       CB cb;
       char small[128] = {0};
-      IMAP::Client::Lexer l(cb.proxy, cb.tag_buffer, cb);
+      IMAP::Client::Parser p(cb.proxy, cb.tag_buffer, cb);
       memcpy(small, begin, 27);
-      l.read(small, small+27);
+      p.read(small, small+27);
       memcpy(small, begin+27, end-(begin+27));
-      l.read(small, small + (end-(begin+27)));
+      p.read(small, small + (end-(begin+27)));
       string s(cb.buffer.begin(), cb.buffer.end());
       BOOST_CHECK_EQUAL(s, "abcdefg\n\n");
     }
@@ -676,8 +676,8 @@ BOOST_AUTO_TEST_SUITE( imap_client_lexer )
         }
       };
       CB cb;
-      IMAP::Client::Lexer l(cb.proxy, cb.tag_buffer, cb);
-      l.read(begin, end);
+      IMAP::Client::Parser p(cb.proxy, cb.tag_buffer, cb);
+      p.read(begin, end);
       BOOST_CHECK_EQUAL(fs::exists(filename), true);
       for (unsigned i = 0; i<6; ++i) {
         //cerr << "i => " << i << '\n';
@@ -767,9 +767,9 @@ BOOST_AUTO_TEST_SUITE( imap_client_lexer )
         }
       };
       CB cb;
-      IMAP::Client::Lexer l(cb.proxy, cb.tag_buffer, cb);
-      l.set_convert_crlf(false);
-      l.read(begin, end);
+      IMAP::Client::Parser p(cb.proxy, cb.tag_buffer, cb);
+      p.set_convert_crlf(false);
+      p.read(begin, end);
       BOOST_CHECK_EQUAL(fs::exists(filename), true);
       for (unsigned i = 0; i<6; ++i) {
         //cerr << "i => " << i << '\n';
@@ -844,21 +844,21 @@ BOOST_AUTO_TEST_SUITE( imap_client_lexer )
         }
       };
       CB cb;
-      IMAP::Client::Lexer l(cb.proxy, cb.tag_buffer, cb);
+      IMAP::Client::Parser p(cb.proxy, cb.tag_buffer, cb);
       using namespace IMAP::Test::Dovecot;
-      l.read(prologue, prologue + strlen(prologue));
-      l.read(fetch_head,
+      p.read(prologue, prologue + strlen(prologue));
+      p.read(fetch_head,
           fetch_head + strlen(fetch_head));
-      pair<const char*, const char*> p(IMAP::Test::Dovecot::fetch,
+      pair<const char*, const char*> pair(IMAP::Test::Dovecot::fetch,
           IMAP::Test::Dovecot::fetch + strlen(IMAP::Test::Dovecot::fetch));
-      const char *x = p.first;
-      for (; x+23<p.second; x+=23)
-        l.read(x, x+23);
-      l.read(x, p.second);
+      const char *x = pair.first;
+      for (; x+23<pair.second; x+=23)
+        p.read(x, x+23);
+      p.read(x, pair.second);
 
-      l.read(fetch_tail,
+      p.read(fetch_tail,
           fetch_tail + strlen(fetch_tail));
-      l.read(epilogue, epilogue + strlen(epilogue));
+      p.read(epilogue, epilogue + strlen(epilogue));
       for (unsigned i = 0; i<2; ++i)
         BOOST_CHECK_EQUAL(cb.a[i], 74);
       for (unsigned i = 2; i<6; ++i)
@@ -943,9 +943,9 @@ BOOST_AUTO_TEST_SUITE( imap_client_lexer )
         }
       };
       CB cb;
-      IMAP::Client::Lexer l(cb.proxy, cb.tag_buffer, cb);
+      IMAP::Client::Parser p(cb.proxy, cb.tag_buffer, cb);
       for (const char **resp = IMAP::Test::Cyrus::response; *resp; ++resp) {
-        l.read(*resp, *resp + strlen(*resp));
+        p.read(*resp, *resp + strlen(*resp));
       }
       BOOST_CHECK_EQUAL(cb.saw_tag_ok, true);
       for (unsigned i = 0; i<3; ++i) {
@@ -1053,9 +1053,9 @@ BOOST_AUTO_TEST_SUITE( imap_client_lexer )
         }
       };
       CB cb;
-      IMAP::Client::Lexer l(cb.proxy, cb.tag_buffer, cb);
+      IMAP::Client::Parser p(cb.proxy, cb.tag_buffer, cb);
       for (const char*const*resp = IMAP::Test::GMAIL::received; *resp; ++resp) {
-        l.read(*resp, *resp + strlen(*resp));
+        p.read(*resp, *resp + strlen(*resp));
       }
       {
         string p(filepath);
@@ -1126,8 +1126,8 @@ BOOST_AUTO_TEST_SUITE( imap_client_lexer )
         }
       };
       CB cb;
-      IMAP::Client::Lexer l(cb.buffer, cb.tag_buffer, cb);
-      l.read(begin, end);
+      IMAP::Client::Parser p(cb.buffer, cb.tag_buffer, cb);
+      p.read(begin, end);
       for (unsigned i = 0; i<2; ++i) {
         //cerr << i << '\n';
         BOOST_CHECK_EQUAL(cb.a[i], 1);
@@ -1281,8 +1281,8 @@ BOOST_AUTO_TEST_SUITE( imap_client_lexer )
         }
       };
       CB cb;
-      IMAP::Client::Lexer l(cb.buffer, cb.tag_buffer, cb);
-      l.read(begin, end);
+      IMAP::Client::Parser p(cb.buffer, cb.tag_buffer, cb);
+      p.read(begin, end);
       const array<unsigned, 5> a_ref = {{
         2, 2, 32, 30,32
       }};
@@ -1306,10 +1306,10 @@ BOOST_AUTO_TEST_SUITE( imap_client_lexer )
         Memory::Buffer::Vector tag_buffer;
       };
       CB cb;
-      IMAP::Client::Lexer l(cb.buffer, cb.tag_buffer, cb);
+      IMAP::Client::Parser p(cb.buffer, cb.tag_buffer, cb);
       bool caught = false;
       try {
-        l.read(begin, end);
+        p.read(begin, end);
       } catch (exception) {
         caught = true;
       }
@@ -1330,10 +1330,10 @@ BOOST_AUTO_TEST_SUITE( imap_client_lexer )
         Memory::Buffer::Vector tag_buffer;
       };
       CB cb;
-      IMAP::Client::Lexer l(cb.buffer, cb.tag_buffer, cb);
+      IMAP::Client::Parser p(cb.buffer, cb.tag_buffer, cb);
       bool caught = false;
       try {
-        l.read(begin, end);
+        p.read(begin, end);
       } catch (exception) {
         caught = true;
       }
