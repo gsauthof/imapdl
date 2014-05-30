@@ -18,7 +18,7 @@
     along with imapdl.  If not, see <http://www.gnu.org/licenses/>.
 
 }}} */
-#include "client_lexer.h"
+#include "client_parser.h"
 
 namespace IMAP {
   namespace Client {

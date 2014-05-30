@@ -35,8 +35,8 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/libbuffer
   )
 
-RAGEL_TARGET(imap_client_lexer imap/client_lexer.rl ${CMAKE_CURRENT_BINARY_DIR}/imap_client_lexer.cc COMPILE_FLAGS -I${CMAKE_CURRENT_SOURCE_DIR})
-RAGEL_TARGET(imap_server_lexer imap/server_lexer.rl ${CMAKE_CURRENT_BINARY_DIR}/imap_server_lexer.cc COMPILE_FLAGS -I${CMAKE_CURRENT_SOURCE_DIR})
+RAGEL_TARGET(imap_client_parser imap/client_parser.rl ${CMAKE_CURRENT_BINARY_DIR}/imap_client_parser.cc COMPILE_FLAGS -I${CMAKE_CURRENT_SOURCE_DIR})
+RAGEL_TARGET(imap_server_parser imap/server_parser.rl ${CMAKE_CURRENT_BINARY_DIR}/imap_server_parser.cc COMPILE_FLAGS -I${CMAKE_CURRENT_SOURCE_DIR})
 
 RAGEL_TARGET(mime_base64_decoder mime/base64_decoder.rl ${CMAKE_CURRENT_BINARY_DIR}/mime_base64_decoder.cc)
 RAGEL_TARGET(mime_base64_decoder_main mime/base64_decoder_main.rl ${CMAKE_CURRENT_BINARY_DIR}/mime_base64_decoder_main.cc)
@@ -55,21 +55,21 @@ find_library(LIB_BOTAN
 
 add_executable(ut
   imap/imap.cc
-  imap/client_lexer_callback.cc
+  imap/client_parser_callback.cc
   imap/client_writer.cc
   maildir/maildir.cc
   net/ssl_util.cc
   unittest/main.cc
-  unittest/imap_client_lexer.cc
-  unittest/imap_server_lexer.cc
+  unittest/imap_client_parser.cc
+  unittest/imap_server_parser.cc
   unittest/data.cc
   unittest/maildir.cc
   unittest/replay.cc
   unittest/imap_client_writer.cc
   example/server.cc
   example/client.cc
-  ${RAGEL_imap_client_lexer_OUTPUTS}
-  ${RAGEL_imap_server_lexer_OUTPUTS}
+  ${RAGEL_imap_client_parser_OUTPUTS}
+  ${RAGEL_imap_server_parser_OUTPUTS}
   lex_util.cc
   unittest/sequence_set.cc
   sequence_set.cc
@@ -167,11 +167,11 @@ add_executable(imapdl
   net/ssl_verification.cc
   log/log.cc
   imap/imap.cc
-  ${RAGEL_imap_client_lexer_OUTPUTS}
+  ${RAGEL_imap_client_parser_OUTPUTS}
   lex_util.cc
-  imap/client_lexer_callback.cc
+  imap/client_parser_callback.cc
   imap/client_writer.cc
-  ${RAGEL_imap_server_lexer_OUTPUTS}
+  ${RAGEL_imap_server_parser_OUTPUTS}
   maildir/maildir.cc
   sequence_set.cc
   trace/trace.cc

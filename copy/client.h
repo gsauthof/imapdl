@@ -24,7 +24,7 @@
 #include <boost/asio/signal_set.hpp>
 
 #include <net/tcp_client.h>
-#include <imap/client_lexer.h>
+#include <imap/client_parser.h>
 #include <imap/client_writer.h>
 #include <log/log.h>
 #include <maildir/maildir.h>

@@ -20,7 +20,7 @@
 }}} */
 #include <boost/test/unit_test.hpp>
 
-#include <imap/server_lexer.h>
+#include <imap/server_parser.h>
 #include <imap/imap.h>
 
 using namespace std;

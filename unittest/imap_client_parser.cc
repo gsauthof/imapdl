@@ -32,7 +32,7 @@ namespace fs = boost::filesystem;
 #include <unordered_set>
 #include <set>
 
-#include <imap/client_lexer.h>
+#include <imap/client_parser.h>
 #include <imap/imap.h>
 #include "data.h"
 #include <maildir/maildir.h>

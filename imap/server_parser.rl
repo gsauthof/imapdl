@@ -18,7 +18,7 @@
     along with imapdl.  If not, see <http://www.gnu.org/licenses/>.
 
 }}} */
-#include <imap/server_lexer.h>
+#include <imap/server_parser.h>
 
 #include <stdexcept>
 #include <string>
