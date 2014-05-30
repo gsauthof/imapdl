@@ -11,13 +11,13 @@ other IMAP clients/servers because it includes [Ragel][ragel] based parsers for
 the client and server side of the IMAP protocol. For such use cases it is
 recommended to include this repository as Git [submodule][gitm].
 
-(last change to this readme file: 2014-05-27)
+(last change to this readme file: 2014-05-30)
 
 ## Features
 
 - [Maildir][maildir] support - client makes sure to [fsync][fsync] at the right
   times to minimize data loss in the case of power failure
-- [SSL][ssl] enabled by default
+- [SSL][ssl] (i.e. [TLS][tls]) enabled by default
 - In case the connection is interrupted during a fetch operation, the UIDs of
   completely fetched messages are written to a journal and expunged on next
   program start before the remaining messages are fetched. Useful, when e.g.
@@ -35,8 +35,28 @@ recommended to include this repository as Git [submodule][gitm].
 - Robust IMAP protocol lexer implemented in [Ragel][ragel]
 - Before commands are send to the server they are locally parsed with a Ragel
   grammar that implements the server side of the IMAP spec - thus, the client
-  verifies that it does not violate [RFC3501][rfc3501] in an obvious way.
+  verifies that it doesn't violate [RFC3501][rfc3501] in any obvious way.
 - High test coverage with unittests
+
+## Design Choices
+
+- Use sane and secure defaults (e.g. TLS encryption and certificate validation
+  are enabled by default).
+- Don't send commands to the server that are expected to fail (e.g. the LOGIN
+  command when it is disabled or the UID expunge command when the server has no
+  UIDPLUS extension).
+- Verify commands before sending them to the server.
+- Use asynchronous IO without threads.
+- Use state machines where it makes the code more robust, compact, easier to reason about etc.
+- Support IPv4 and [IPv6][v6].
+- Use layering where it reduces complexity (e.g. in the download client
+  the differenes between the Boost ASIO TCP and SSL APIs are abstracted away by a
+  layer, on top of that are the IMAP parsers layered,  etc.)
+- Give [SASL][sasl] support a low priority, because IMAP over TLS
+  generally makes SASL redundant (cf. SASL notes section).
+- Make it portable (e.g. via using open standards like ISO C++, POSIX, portable
+  tools like CMake, Ragel and portable libraries like Boost).
+
 
 ## Compile
 
@@ -117,7 +137,7 @@ For verifying the authenticity of the certificate provided by the server you can
 
 ## Licence
 
-GPLv3+
+[GPLv3+][gpl3]
 
 ## Appendix
 
@@ -130,7 +150,17 @@ A collection of small example programs for testing some related features:
 - `server.cc` - exploring ASIO features, also used for replaying IMAP sessions
   in unittests
 - `replay.cc` - for dumping serialized network sessions
-- `hash.cc` - implement sha256sum using the [Botan][botan] C++ library
+- `hash.cc`   - implement sha256sum using the [Botan][botan] C++ library
+
+### SASL Notes
+
+When securing the connection with TLS, SASL doesn't increase your security. On
+the other hand, on unsecured connections SASL only protects your password
+somewhat (depending on the used method) but it doesn't help against
+[man-in-the-middle][mitm] attacks or eavesdropping on the content of your
+mails. SASL is perhaps of interest for certain methods, e.g. to support
+Kerberos authentication with IMAP servers, but I haven't come across such
+setups, yet.
 
 ### Links
 
@@ -167,11 +197,16 @@ A collection of small example programs for testing some related features:
 [gcc]:     http://gcc.gnu.org
 [gitm2]:   http://git-scm.com/docs/git-submodule
 [gitm]:    http://git-scm.com/book/en/Git-Tools-Submodules
+[gpl3]:    http://www.gnu.org/copyleft/gpl.html
 [json]:    http://en.wikipedia.org/wiki/JSON
 [maildir]: http://en.wikipedia.org/wiki/Maildir
+[mitm]:    http://en.wikipedia.org/wiki/Man-in-the-middle_attack
 [openssl]: http://www.openssl.org/
 [ragel]:   http://www.complang.org/ragel/
 [rc]:      http://www.faqs.org/docs/artu/ch10s03.html
 [rfc3501]: http://tools.ietf.org/html/rfc3501
+[sasl]:    http://en.wikipedia.org/wiki/Simple_Authentication_and_Security_Layer
 [ssl]:     http://en.wikipedia.org/wiki/SSL
 [tilde]:   http://www.gnu.org/software/libc/manual/html_node/Tilde-Expansion.html
+[tls]:     http://en.wikipedia.org/wiki/Transport_Layer_Security
+[v6]:      http://en.wikipedia.org/wiki/IPv6
