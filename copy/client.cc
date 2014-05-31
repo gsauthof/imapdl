@@ -218,7 +218,7 @@ namespace IMAP {
               THROW_ERROR(ec);
             } else {
               BOOST_LOG(lg_) << "Handshake completed.";
-              state_ = State::ESTABLISHED;
+              //state_ = State::ESTABLISHED;
               do_read();
               do_pre_login();
             }
@@ -267,113 +267,59 @@ namespace IMAP {
       fetch_timer_.cancel();
     }
 
-    void Client::command()
+    void Client::async_login_capabilities(std::function<void(void)> fn)
     {
       BOOST_LOG_FUNCTION();
-      switch (task_) {
-        case Task::FIRST_:
-        case Task::LAST_:
-          break;
-        case Task::CLEANUP:
-          cleanup_command();
-          break;
-        case Task::DOWNLOAD:
-          download_command();
-          break;
-      }
+      auto cap_fn = [this, fn](){
+        cond_async_capabilities(fn);
+      };
+      async_login(cap_fn);
     }
 
-    void Client::cleanup_command()
+    void Client::async_cleanup(std::function<void(void)> fn)
     {
       BOOST_LOG_FUNCTION();
-      switch (state_) {
-        case State::FIRST_:
-        case State::LAST_:
-        case State::DISCONNECTED:
-          break;
-        case State::ESTABLISHED:
-          break;
-        case State::GOT_INITIAL_CAPABILITIES:
-          do_login();
-          break;
-        case State::LOGGED_IN:
-          do_capabilities();
-          break;
-        case State::GOT_CAPABILITIES:
-          BOOST_LOG_SEV(lg_, Log::MSG) << "Deleting messages from last time ...";
-          do_select();
-          break;
-        case State::SELECTED_MAILBOX:
-          do_store();
-          break;
-        case State::FETCHING:
-        case State::FETCHED:
-          // should not visit here in that state/task
-          break;
-        case State::STORED:
-          do_uid_or_simple_expunge();
-          break;
-        case State::EXPUNGED:
-          uids_.clear();
-          task_ = Task::DOWNLOAD;
-          state_ = State::GOT_CAPABILITIES;
-          mailbox_ = opts_.mailbox;
-          BOOST_LOG_SEV(lg_, Log::MSG) << "Deleting messages from last time ... finished";
-          command();
-          break;
-        case State::LOGGING_OUT:
-        case State::LOGGED_OUT:
-        case State::END:
-          // should not visit here in that task/state
-          break;
-      }
+      auto finish_fn = [this, fn](){
+        uids_.clear();
+        mailbox_ = opts_.mailbox;
+        BOOST_LOG_SEV(lg_, Log::MSG) << "Deleting messages from last time ... finished";
+        fn();
+      };
+      auto expunge_fn = [this, finish_fn](){
+       async_uid_or_simple_expunge(finish_fn);
+      };
+      auto store_fn = [this, expunge_fn](){
+        async_store(expunge_fn);
+      };
+      async_select(store_fn);
     }
 
-    void Client::download_command()
+    void Client::do_cleanup()
+    {
+      async_cleanup(std::bind(&Client::do_download, this));
+    }
+
+    void Client::do_download()
     {
       BOOST_LOG_FUNCTION();
-      switch (state_) {
-        case State::FIRST_:
-        case State::LAST_:
-        case State::DISCONNECTED:
-          break;
-        case State::ESTABLISHED:
-          break;
-        case State::GOT_INITIAL_CAPABILITIES:
-          do_login();
-          break;
-        case State::LOGGED_IN:
-          do_capabilities();
-          break;
-        case State::GOT_CAPABILITIES:
-          do_select();
-          break;
-        case State::SELECTED_MAILBOX:
-          do_fetch_or_logout();
-          break;
-        case State::FETCHING:
-          // should not visit here in that state
-          break;
-        case State::FETCHED:
-          stop_fetch_timer();
-          do_store_or_logout();
-          break;
-        case State::STORED:
-          do_uid_or_simple_expunge();
-          break;
-        case State::EXPUNGED:
-          do_logout();
-          break;
-        case State::LOGGING_OUT:
-          // should not visit here in that state
-          break;
-        case State::LOGGED_OUT:
-          uids_.clear();
-          do_quit();
-          break;
-        case State::END:
-          break;
-      }
+      auto finish_fn = [this](){
+        do_quit();
+      };
+      auto logout_fn = [this, finish_fn](){
+        uids_.clear();
+        async_logout(finish_fn);
+      };
+      auto expunge_fn = [this, logout_fn](){
+        async_uid_or_simple_expunge(logout_fn);
+      };
+      auto store_fn = [this, expunge_fn, finish_fn](){
+        stop_fetch_timer();
+        async_store_or_logout(expunge_fn, finish_fn);
+      };
+      auto fetch_fn = [this, store_fn, finish_fn](){
+        async_fetch_or_logout(store_fn, finish_fn);
+      };
+      async_select(fetch_fn);
     }
 
     void Client::do_pre_login()
@@ -383,80 +329,124 @@ namespace IMAP {
           const boost::system::error_code &ec)
         {
           BOOST_LOG_FUNCTION();
-          if (ec) {
+          if (ec && ec.value() != boost::system::errc::operation_canceled) {
             THROW_ERROR(ec);
           } else {
             BOOST_LOG(lg_) << "Point after first possibly occured read";
-            do_capabilities();
+            //do_capabilities();
+            cond_async_capabilities([this](){
+                async_login_capabilities(std::bind(&Client::do_task, this));
+              });
           }
         });
     }
 
-    void Client::do_capabilities()
+    void Client::do_task()
+    {
+      switch (task_) {
+        case Task::CLEANUP:
+          do_cleanup();
+          break;
+        case Task::DOWNLOAD:
+          do_download();
+          break;
+        default:
+          ;
+      }
+    }
+
+    void Client::async_capabilities(std::function<void(void)> fn)
     {
       BOOST_LOG_FUNCTION();
-      if (!capabilities_.empty()) {
-        BOOST_LOG(lg_) << "Switch from state " << state_ << " to " << (state_+1);
-        ++state_;
-        command();
-        return;
-      }
       string tag;
       writer_.capability(tag);
-      tag_to_state_[tag] = state_ + 1;
+      tag_to_fn_[tag] = fn;
       BOOST_LOG(lg_) << "Getting CAPABILITIES ..." << " [" << tag << ']';
       do_write();
     }
+    void Client::cond_async_capabilities(std::function<void(void)> fn)
+    {
+      if (capabilities_.empty()) {
+        async_capabilities(fn);
+      } else {
+        BOOST_LOG(lg_) << "not fetching capabilities (already received)";
+        fn();
+      }
+    }
 
-    void Client::do_login()
+    void Client::async_login(const std::string &username, const std::string &password,
+        std::function<void(void)> fn)
     {
       BOOST_LOG_FUNCTION();
-      if (capabilities_.find(IMAP::Server::Response::Capability::LOGINDISABLED)
-          != capabilities_.end())
+      string tag;
+      writer_.login(username, password, tag);
+      tag_to_fn_[tag] = fn;
+      BOOST_LOG(lg_) << "Logging in as |" << username << "| [" << tag << "]";
+      BOOST_LOG_SEV(lg_, Log::INSANE) << "Password: |" << password << "|";
+      do_write();
+    }
+
+    void Client::async_login(std::function<void(void)> fn)
+    {
+      BOOST_LOG_FUNCTION();
+      using namespace IMAP::Server::Response;
+      if (capabilities_.find(Capability::IMAP4rev1) == capabilities_.end())
+        THROW_MSG("Server has not IMAP4rev1 capability");
+      if (capabilities_.find(Capability::LOGINDISABLED) != capabilities_.end())
         THROW_MSG("Cannot login because server has LOGINDISABLED");
       BOOST_LOG_SEV(lg_, Log::DEBUG) << "Clearing capabilities";
       capabilities_.clear();
-      string tag;
-      writer_.login(opts_.username, opts_.password, tag);
-      tag_to_state_[tag] = State::LOGGED_IN;
-
       exists_ = 0;
       recent_ = 0;
       // Don't reset them on login in case the values are loaded from a journal
       //uidvalidity_ = 0;
       //uids_.clear();
-
-      BOOST_LOG(lg_) << "Logging in as |" << opts_.username << "| [" << tag << "]";
-      BOOST_LOG_SEV(lg_, Log::INSANE) << "Password: |" << opts_.password << "|";
-      do_write();
+      async_login(opts_.username, opts_.password, fn);
     }
 
-    void Client::do_select()
+    void Client::async_select(const std::string &mailbox, std::function<void(void)> fn)
     {
       BOOST_LOG_FUNCTION();
       string tag;
-      writer_.select(mailbox_, tag);
-      tag_to_state_[tag] = State::SELECTED_MAILBOX;
-      BOOST_LOG(lg_) << "Selecting mailbox: |" << mailbox_ << "|" << " [" << tag << ']';
+      writer_.select(mailbox, tag);
+      tag_to_fn_[tag] = fn;
+      BOOST_LOG(lg_) << "Selecting mailbox: |" << mailbox << "|" << " [" << tag << ']';
       do_write();
     }
+    void Client::async_select(std::function<void(void)> fn)
+    {
+      async_select(mailbox_, fn);
+    }
 
-    void Client::do_fetch_or_logout()
+    void Client::async_fetch_or_logout(std::function<void(void)> after_fetch,
+        std::function<void(void)> after_logout)
     {
       BOOST_LOG_FUNCTION();
       if (exists_) {
-        do_fetch();
+        async_fetch(after_fetch);
       } else {
         BOOST_LOG_SEV(lg_, Log::MSG) << "Mailbox " << opts_.mailbox << " is empty.";
-        do_logout();
+        async_logout(after_logout);
       }
     }
 
-    void Client::do_fetch()
+    void Client::async_fetch(
+            const std::vector<std::pair<uint32_t, uint32_t> > &set,
+            const std::vector<IMAP::Client::Fetch_Attribute> &atts,
+            std::function<void(void)> fn)
     {
       BOOST_LOG_FUNCTION();
       string tag;
+      writer_.fetch(set, atts, tag);
+      tag_to_fn_[tag] = fn;
+      BOOST_LOG(lg_) << "Fetching into " << opts_.maildir
+        <<  " ..." << " [" << tag << ']';
+      start_fetch_timer();
+      do_write();
+    }
 
+    void Client::async_fetch(std::function<void(void)> fn)
+    {
       vector<pair<uint32_t, uint32_t> > set = {
         {1, numeric_limits<uint32_t>::max()}
       };
@@ -474,39 +464,41 @@ namespace IMAP {
           IMAP::Section_Attribute(IMAP::Section::HEADER_FIELDS, std::move(fields)));
       atts.emplace_back(Fetch::BODY_PEEK);
 
-      writer_.fetch(set, atts, tag);
-      tag_to_state_[tag] = State::FETCHED;
-      BOOST_LOG(lg_) << "Fetching into " << opts_.maildir
-        <<  " ..." << " [" << tag << ']';
       state_ = State::FETCHING;
-      start_fetch_timer();
-      do_write();
+      async_fetch(set, atts, fn);
     }
 
-    void Client::do_store_or_logout()
+    void Client::async_store_or_logout(std::function<void(void)> after_store,
+        std::function<void(void)> after_logout)
     {
       BOOST_LOG_FUNCTION();
       if (opts_.del) {
-        do_store();
+        async_store(after_store);
       } else {
-        do_logout();
+        async_logout(after_logout);
       }
     }
 
-    void Client::do_store()
+    void Client::async_store(
+            const std::vector<std::pair<uint32_t, uint32_t> > &set,
+            const std::vector<IMAP::Flag> &flags,
+            std::function<void(void)> fn)
     {
       BOOST_LOG_FUNCTION();
-      vector<IMAP::Flag> flags;
-      flags.emplace_back(IMAP::Flag::DELETED);
-
-      vector<pair<uint32_t, uint32_t> > set;
-      uids_.copy(set);
-
       string tag;
       writer_.uid_store(set, flags, tag, IMAP::Client::Store_Mode::REPLACE, true);
-      tag_to_state_[tag] = State::STORED;
+      tag_to_fn_[tag] = fn;
       BOOST_LOG(lg_) << "Storing DELETED flags ..." << " [" << tag << ']';
       do_write();
+    }
+    void Client::async_store(std::function<void(void)> fn)
+    {
+      BOOST_LOG_FUNCTION();
+      vector<pair<uint32_t, uint32_t> > set;
+      uids_.copy(set);
+      vector<IMAP::Flag> flags;
+      flags.emplace_back(IMAP::Flag::DELETED);
+      async_store(set, flags, fn);
     }
 
     bool Client::has_uidplus() const
@@ -516,46 +508,52 @@ namespace IMAP {
       BOOST_LOG(lg_) << "Has UIDPLUS capability: " << (i != capabilities_.end());
       return i != capabilities_.end();
     }
-    
-    void Client::do_uid_or_simple_expunge()
+
+    void Client::async_uid_or_simple_expunge(std::function<void(void)> fn)
     {
       BOOST_LOG_FUNCTION();
       if (has_uidplus())
-        do_uid_expunge();
+        async_uid_expunge(fn);
       else
-        do_expunge();
+        async_expunge(fn);
     }
 
-    void Client::do_uid_expunge()
+    void Client::async_uid_expunge(const std::vector<std::pair<uint32_t, uint32_t> > &set,
+        std::function<void(void)> fn)
     {
       BOOST_LOG_FUNCTION();
       string tag;
-      vector<pair<uint32_t, uint32_t> > set;
-      uids_.copy(set);
       writer_.uid_expunge(set, tag);
-      tag_to_state_[tag] = State::EXPUNGED;
+      tag_to_fn_[tag] = fn;
       BOOST_LOG(lg_) << "Expunging messages ..." << " [" << tag << ']';
       do_write();
     }
+    void Client::async_uid_expunge(std::function<void(void)> fn)
+    {
+      BOOST_LOG_FUNCTION();
+      vector<pair<uint32_t, uint32_t> > set;
+      uids_.copy(set);
+      async_uid_expunge(set, fn);
+    }
 
-    void Client::do_expunge()
+    void Client::async_expunge(std::function<void(void)> fn)
     {
       BOOST_LOG_FUNCTION();
       string tag;
       writer_.expunge(tag);
-      tag_to_state_[tag] = State::EXPUNGED;
+      tag_to_fn_[tag] = fn;
       BOOST_LOG(lg_) << "Expunging messages (without UIDPLUS) ..." << " [" << tag << ']';
       do_write();
     }
 
-    void Client::do_logout()
+    void Client::async_logout(std::function<void(void)> fn)
     {
       BOOST_LOG_FUNCTION();
       string tag;
       writer_.logout(tag);
-      tag_to_state_[tag] = State::LOGGED_OUT;
+      tag_to_fn_[tag] = fn;
       BOOST_LOG(lg_) << "Logging out ..." << " [" << tag << ']';
-      state_ = State::LOGGING_OUT;
+      //state_ = State::LOGGING_OUT;
       do_write();
     }
 
@@ -600,6 +598,7 @@ namespace IMAP {
     void Client::do_quit()
     {
       BOOST_LOG_FUNCTION();
+      state_ = State::LOGGED_OUT;
       BOOST_LOG_SEV(lg_, Log::DEBUG) << "do_quit()";
       client_->cancel();
       do_shutdown();
@@ -651,6 +650,12 @@ namespace IMAP {
       BOOST_LOG(lg_) << "Got capability: " << capability;
       capabilities_.insert(capability);
     }
+    void Client::imap_status_code_capability_end()
+    {
+      BOOST_LOG_FUNCTION();
+      BOOST_LOG_SEV(lg_, Log::DEBUG) << "finished retrieving capabilties";
+      login_timer_.cancel();
+    }
     void Client::imap_tagged_status_end(IMAP::Server::Response::Status c)
     {
       BOOST_LOG_FUNCTION();
@@ -661,18 +666,16 @@ namespace IMAP {
         o << "Command failed: " << c << " - " << string(buffer_.begin(), buffer_.end());
         THROW_MSG(o.str());
       }
-      auto i = tag_to_state_.find(tag);
-      if (i == tag_to_state_.end()) {
+      auto i = tag_to_fn_.find(tag);
+      if (i == tag_to_fn_.end()) {
         stringstream o;
         o << "Got unknown tag: " << tag;
         THROW_MSG(o.str());
       }
-      BOOST_LOG(lg_) << "Switch from state " << state_ << " to " << i->second
-        << " [" << tag << "]";
       tags_.pop(tag);
-      state_ = i->second;
-      tag_to_state_.erase(i);
-      command();
+      auto fn = i->second;
+      tag_to_fn_.erase(i);
+      fn();
     }
     void Client::imap_data_exists(uint32_t number)
     {

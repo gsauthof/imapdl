@@ -67,7 +67,7 @@ namespace Net {
     void Base::log_write()
     {
       trace_writer_.push(Trace::Type::SENT, write_queue_.front());
-      if (opts_.severity < Log::DEBUG)
+      if (opts_.severity < Log::DEBUG && opts_.file_severity < Log::DEBUG)
         return;
       BOOST_LOG_SEV(lg_, Log::DEBUG_V) << "Schedule " << write_queue_.front().size()
         << " bytes to write to host";
