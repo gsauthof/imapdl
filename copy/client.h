@@ -70,7 +70,47 @@ namespace IMAP {
     State operator+(State s, int b);
     std::ostream &operator<<(std::ostream &o, State s);
     class Options;
-    class Client : public IMAP::Client::Callback::Null {
+    class IMAP_Client : public IMAP::Client::Callback::Null {
+      public:
+        using Write_Fn = std::function<void(std::vector<char> &v)>;
+      private:
+        boost::log::sources::severity_logger< Log::Severity > &lg_;
+        Write_Fn write_fn_;
+
+        IMAP::Client::Tag    tags_;
+        std::vector<char>         cmd_;
+        IMAP::Client::Writer writer_;
+        std::map<std::string, std::function<void(void)> > tag_to_fn_;
+
+        void to_cmd(vector<char> &x);
+        void do_write();
+
+      protected:
+        Memory::Buffer::Vector tag_buffer_;
+        Memory::Buffer::Vector buffer_;
+        // generic imap client functions
+        void async_capabilities(std::function<void(void)> fn);
+        void async_login(const std::string &username, const std::string &password,
+            std::function<void(void)> fn);
+        void async_select(const std::string &mailbox, std::function<void(void)> fn);
+        void async_fetch(
+            const std::vector<std::pair<uint32_t, uint32_t> > &set,
+            const std::vector<IMAP::Client::Fetch_Attribute> &atts,
+            std::function<void(void)> fn);
+        void async_store(
+            const std::vector<std::pair<uint32_t, uint32_t> > &set,
+            const std::vector<IMAP::Flag> &flags,
+            std::function<void(void)> fn);
+        void async_uid_expunge(const std::vector<std::pair<uint32_t, uint32_t> > &set,
+            std::function<void(void)> fn);
+        void async_expunge(std::function<void(void)> fn);
+        void async_logout(std::function<void(void)> fn);
+      public:
+        IMAP_Client(Write_Fn write_fn,
+            boost::log::sources::severity_logger< Log::Severity > &lg);
+        void imap_tagged_status_end(IMAP::Server::Response::Status c) override;
+    };
+    class Client : public IMAP_Client {
       private:
         const Options                                         &opts_;
         std::unique_ptr<Net::Client::Base>                     client_;
@@ -79,21 +119,14 @@ namespace IMAP {
         unsigned                                               signaled_ {0};
 
         Memory::Buffer::Proxy  buffer_proxy_;
-        Memory::Buffer::Vector tag_buffer_;
-        Memory::Buffer::Vector buffer_;
         Memory::Buffer::File   file_buffer_;
         IMAP::Client::Parser   parser_;
 
         std::unordered_set<IMAP::Server::Response::Capability>       capabilities_;
         boost::asio::basic_waitable_timer<std::chrono::steady_clock> login_timer_;
 
-        IMAP::Client::Tag    tags_;
-        vector<char>         cmd_;
-        IMAP::Client::Writer writer_;
-
         Task                         task_         {Task::DOWNLOAD};
         State                        state_        {State::DISCONNECTED };
-        std::map<std::string, std::function<void(void)> > tag_to_fn_;
 
         unsigned exists_        {0};
         unsigned recent_        {0};
@@ -123,8 +156,6 @@ namespace IMAP {
         void read_journal();
         void write_journal();
 
-        void to_cmd(vector<char> &x);
-
         void do_signal_wait();
 
         void pp_header();
@@ -134,37 +165,21 @@ namespace IMAP {
         void resume_fetch_timer();
         void stop_fetch_timer();
 
+        void write_command(vector<char> &cmd);
+
         bool has_uidplus() const;
 
         void do_resolve();
         void do_connect(boost::asio::ip::tcp::resolver::iterator iterator);
         void do_handshake();
         void do_read();
-        void do_write();
         void do_quit();
         void do_shutdown();
 
         void do_pre_login();
 
-        // generic imap client functions
-        void async_capabilities(std::function<void(void)> fn);
-        void async_login(const std::string &username, const std::string &password,
-            std::function<void(void)> fn);
-        void async_login_capabilities(std::function<void(void)> fn);
-        void async_select(const std::string &mailbox, std::function<void(void)> fn);
-        void async_fetch(
-            const std::vector<std::pair<uint32_t, uint32_t> > &set,
-            const std::vector<IMAP::Client::Fetch_Attribute> &atts,
-            std::function<void(void)> fn);
-        void async_store(
-            const std::vector<std::pair<uint32_t, uint32_t> > &set,
-            const std::vector<IMAP::Flag> &flags,
-            std::function<void(void)> fn);
-        void async_uid_expunge(const std::vector<std::pair<uint32_t, uint32_t> > &set,
-            std::function<void(void)> fn);
-        void async_expunge(std::function<void(void)> fn);
-        void async_logout(std::function<void(void)> fn);
         // specialized dl client functions
+        void async_login_capabilities(std::function<void(void)> fn);
         void cond_async_capabilities(std::function<void(void)> fn);
         void async_login(std::function<void(void)> fn);
         void async_select(std::function<void(void)> fn);
@@ -190,7 +205,6 @@ namespace IMAP {
         void imap_capability_begin() override;
         void imap_capability(IMAP::Server::Response::Capability capability) override;
         void imap_status_code_capability_end() override;
-        void imap_tagged_status_end(IMAP::Server::Response::Status c) override;
         void imap_data_exists(uint32_t number) override;
         void imap_data_recent(uint32_t number) override;
         void imap_status_code_uidvalidity(uint32_t n) override;

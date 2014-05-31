@@ -84,13 +84,13 @@ namespace IMAP {
         std::unique_ptr<Net::Client::Base> &&net_client,
         boost::log::sources::severity_logger<Log::Severity> &lg)
       :
+        IMAP_Client(std::bind(&Client::write_command, this, std::placeholders::_1), lg),
         opts_(opts),
         client_(std::move(net_client)),
         lg_(lg),
         signals_(client_->io_service(), SIGINT, SIGTERM),
         parser_(buffer_proxy_, tag_buffer_, *this),
         login_timer_(client_->io_service()),
-        writer_(tags_, std::bind(&Client::to_cmd, this, std::placeholders::_1)),
         maildir_(opts_.maildir),
         tmp_dir_(maildir_.tmp_dir_fd()),
         fetch_timer_(client_->io_service()),
@@ -141,7 +141,7 @@ namespace IMAP {
       journal.write(opts_.journal_file);
     }
 
-    void Client::to_cmd(vector<char> &x)
+    void IMAP_Client::to_cmd(vector<char> &x)
     {
       std::swap(x, cmd_);
     }
@@ -355,7 +355,7 @@ namespace IMAP {
       }
     }
 
-    void Client::async_capabilities(std::function<void(void)> fn)
+    void IMAP_Client::async_capabilities(std::function<void(void)> fn)
     {
       BOOST_LOG_FUNCTION();
       string tag;
@@ -374,7 +374,7 @@ namespace IMAP {
       }
     }
 
-    void Client::async_login(const std::string &username, const std::string &password,
+    void IMAP_Client::async_login(const std::string &username, const std::string &password,
         std::function<void(void)> fn)
     {
       BOOST_LOG_FUNCTION();
@@ -401,10 +401,10 @@ namespace IMAP {
       // Don't reset them on login in case the values are loaded from a journal
       //uidvalidity_ = 0;
       //uids_.clear();
-      async_login(opts_.username, opts_.password, fn);
+      IMAP_Client::async_login(opts_.username, opts_.password, fn);
     }
 
-    void Client::async_select(const std::string &mailbox, std::function<void(void)> fn)
+    void IMAP_Client::async_select(const std::string &mailbox, std::function<void(void)> fn)
     {
       BOOST_LOG_FUNCTION();
       string tag;
@@ -415,7 +415,7 @@ namespace IMAP {
     }
     void Client::async_select(std::function<void(void)> fn)
     {
-      async_select(mailbox_, fn);
+      IMAP_Client::async_select(mailbox_, fn);
     }
 
     void Client::async_fetch_or_logout(std::function<void(void)> after_fetch,
@@ -423,6 +423,8 @@ namespace IMAP {
     {
       BOOST_LOG_FUNCTION();
       if (exists_) {
+        BOOST_LOG(lg_) << "Fetching into " << opts_.maildir << " ...";
+        start_fetch_timer();
         async_fetch(after_fetch);
       } else {
         BOOST_LOG_SEV(lg_, Log::MSG) << "Mailbox " << opts_.mailbox << " is empty.";
@@ -430,7 +432,7 @@ namespace IMAP {
       }
     }
 
-    void Client::async_fetch(
+    void IMAP_Client::async_fetch(
             const std::vector<std::pair<uint32_t, uint32_t> > &set,
             const std::vector<IMAP::Client::Fetch_Attribute> &atts,
             std::function<void(void)> fn)
@@ -439,9 +441,7 @@ namespace IMAP {
       string tag;
       writer_.fetch(set, atts, tag);
       tag_to_fn_[tag] = fn;
-      BOOST_LOG(lg_) << "Fetching into " << opts_.maildir
-        <<  " ..." << " [" << tag << ']';
-      start_fetch_timer();
+      BOOST_LOG(lg_) << "Fetching messages " <<  " ..." << " [" << tag << ']';
       do_write();
     }
 
@@ -465,7 +465,7 @@ namespace IMAP {
       atts.emplace_back(Fetch::BODY_PEEK);
 
       state_ = State::FETCHING;
-      async_fetch(set, atts, fn);
+      IMAP_Client::async_fetch(set, atts, fn);
     }
 
     void Client::async_store_or_logout(std::function<void(void)> after_store,
@@ -479,7 +479,7 @@ namespace IMAP {
       }
     }
 
-    void Client::async_store(
+    void IMAP_Client::async_store(
             const std::vector<std::pair<uint32_t, uint32_t> > &set,
             const std::vector<IMAP::Flag> &flags,
             std::function<void(void)> fn)
@@ -498,7 +498,7 @@ namespace IMAP {
       uids_.copy(set);
       vector<IMAP::Flag> flags;
       flags.emplace_back(IMAP::Flag::DELETED);
-      async_store(set, flags, fn);
+      IMAP_Client::async_store(set, flags, fn);
     }
 
     bool Client::has_uidplus() const
@@ -518,7 +518,7 @@ namespace IMAP {
         async_expunge(fn);
     }
 
-    void Client::async_uid_expunge(const std::vector<std::pair<uint32_t, uint32_t> > &set,
+    void IMAP_Client::async_uid_expunge(const std::vector<std::pair<uint32_t, uint32_t> > &set,
         std::function<void(void)> fn)
     {
       BOOST_LOG_FUNCTION();
@@ -533,10 +533,10 @@ namespace IMAP {
       BOOST_LOG_FUNCTION();
       vector<pair<uint32_t, uint32_t> > set;
       uids_.copy(set);
-      async_uid_expunge(set, fn);
+      IMAP_Client::async_uid_expunge(set, fn);
     }
 
-    void Client::async_expunge(std::function<void(void)> fn)
+    void IMAP_Client::async_expunge(std::function<void(void)> fn)
     {
       BOOST_LOG_FUNCTION();
       string tag;
@@ -546,7 +546,7 @@ namespace IMAP {
       do_write();
     }
 
-    void Client::async_logout(std::function<void(void)> fn)
+    void IMAP_Client::async_logout(std::function<void(void)> fn)
     {
       BOOST_LOG_FUNCTION();
       string tag;
@@ -590,9 +590,13 @@ namespace IMAP {
           });
     }
 
-    void Client::do_write()
+    void IMAP_Client::do_write()
     {
-      client_->push_write(cmd_);
+      write_fn_(cmd_);
+    }
+    void Client::write_command(vector<char> &cmd)
+    {
+      client_->push_write(cmd);
     }
 
     void Client::do_quit()
@@ -656,7 +660,7 @@ namespace IMAP {
       BOOST_LOG_SEV(lg_, Log::DEBUG) << "finished retrieving capabilties";
       login_timer_.cancel();
     }
-    void Client::imap_tagged_status_end(IMAP::Server::Response::Status c)
+    void IMAP_Client::imap_tagged_status_end(IMAP::Server::Response::Status c)
     {
       BOOST_LOG_FUNCTION();
       string tag(tag_buffer_.begin(), tag_buffer_.end());
@@ -814,6 +818,17 @@ namespace IMAP {
         BOOST_LOG_SEV(lg_, Log::DEBUG) << "UID: " << number;
         last_uid_ = number;
       }
+    }
+
+    IMAP_Client::IMAP_Client(
+            Write_Fn write_fn,
+            boost::log::sources::severity_logger< Log::Severity > &lg
+        )
+      :
+        lg_(lg),
+        write_fn_(write_fn),
+        writer_(tags_, std::bind(&Client::to_cmd, this, std::placeholders::_1))
+    {
     }
 
   }
