@@ -78,7 +78,7 @@ namespace IMAP {
         Write_Fn write_fn_;
 
         IMAP::Client::Tag    tags_;
-        std::vector<char>         cmd_;
+        std::vector<char>    cmd_;
         IMAP::Client::Writer writer_;
         std::map<std::string, std::function<void(void)> > tag_to_fn_;
 
@@ -127,15 +127,15 @@ namespace IMAP {
         Net_Client_App(
             const std::string &host,
             Net::Client::Base &client,
-            boost::log::sources::severity_logger< Log::Severity > &lg
+            boost::log::sources::severity_logger<Log::Severity> &lg
             );
-        void async_start(std::function<void(void)> fn);
+        void async_start (std::function<void(void)> fn);
         void async_finish(std::function<void(void)> fn);
     };
     class Fetch_Timer {
       private:
-        Net::Client::Base                                     &client_;
-        boost::log::sources::severity_logger< Log::Severity > &lg_;
+        Net::Client::Base                                           &client_;
+        boost::log::sources::severity_logger<Log::Severity>         &lg_;
         std::chrono::time_point<std::chrono::steady_clock>           start_;
         boost::asio::basic_waitable_timer<std::chrono::steady_clock> timer_;
         size_t bytes_start_ {0};
@@ -143,7 +143,7 @@ namespace IMAP {
       public:
         Fetch_Timer(
             Net::Client::Base &client,
-            boost::log::sources::severity_logger< Log::Severity > &lg
+            boost::log::sources::severity_logger<Log::Severity> &lg
             );
         void start();
         void resume();
@@ -154,12 +154,12 @@ namespace IMAP {
     };
     class Header_Printer {
       private:
-        boost::log::sources::severity_logger< Log::Severity > &lg_;
-        const Options                                         &opts_;
+        boost::log::sources::severity_logger<Log::Severity> &lg_;
+        const Options                                       &opts_;
 
         const Memory::Buffer::Vector &buffer_;
 
-        MIME::Header::Decoder header_decoder_;
+        MIME::Header::Decoder  header_decoder_;
         Memory::Buffer::Vector field_name_;
         Memory::Buffer::Vector field_body_;
         std::map<std::string, std::string> fields_;
@@ -167,45 +167,40 @@ namespace IMAP {
         Header_Printer(
             const IMAP::Copy::Options &opts,
             const Memory::Buffer::Vector &buffer,
-            boost::log::sources::severity_logger< Log::Severity > &lg
+            boost::log::sources::severity_logger<Log::Severity> &lg
             );
         void print();
     };
     class Client : public IMAP_Client {
       private:
-        boost::log::sources::severity_logger< Log::Severity > &lg_;
-        const Options                                         &opts_;
-        Net::Client::Base                                     &client_;
-        Net_Client_App app_;
-        boost::asio::signal_set                                signals_;
-        unsigned                                               signaled_ {0};
-
-        Memory::Buffer::Proxy  buffer_proxy_;
-        Memory::Buffer::File   file_buffer_;
-        IMAP::Client::Parser   parser_;
-
-        std::unordered_set<IMAP::Server::Response::Capability>       capabilities_;
+        boost::log::sources::severity_logger<Log::Severity> &lg_;
+        const Options          &opts_;
+        Net::Client::Base      &client_;
+        Net_Client_App          app_;
+        boost::asio::signal_set signals_;
+        unsigned                signaled_ {0};
         boost::asio::basic_waitable_timer<std::chrono::steady_clock> login_timer_;
 
-        Task                         task_         {Task::DOWNLOAD};
-        State                        state_        {State::DISCONNECTED };
+        Memory::Buffer::Proxy   buffer_proxy_;
+        Memory::Buffer::File    file_buffer_;
+        IMAP::Client::Parser    parser_;
 
-        unsigned exists_        {0};
-        unsigned recent_        {0};
-        unsigned uidvalidity_   {0};
+        Task          task_        {Task::DOWNLOAD};
+        State         state_       {State::DISCONNECTED };
 
-        uint32_t     last_uid_  {0};
-        Sequence_Set uids_;
+        unsigned      exists_      {0};
+        unsigned      recent_      {0};
+        unsigned      uidvalidity_ {0};
+        uint32_t      last_uid_    {0};
+        Sequence_Set  uids_;
+        std::unordered_set<IMAP::Server::Response::Capability> capabilities_;
+        Maildir       maildir_;
+        Memory::Dir   tmp_dir_;
+        bool          full_body_   {false};
+        std::string   flags_;
+        std::string   mailbox_;
 
-        Maildir      maildir_;
-        Memory::Dir  tmp_dir_;
-        bool         full_body_ {false};
-        std::string  flags_;
-
-        std::string mailbox_;
-
-        Fetch_Timer fetch_timer_;
-
+        Fetch_Timer    fetch_timer_;
         Header_Printer header_printer_;
 
         void read_journal();
@@ -213,15 +208,13 @@ namespace IMAP {
 
         void do_signal_wait();
 
-        bool has_uidplus() const;
-
         void do_read();
         void write_command(vector<char> &cmd);
 
-        void do_pre_login();
-        void do_quit();
+        bool has_uidplus() const;
 
-        // specialized dl client functions
+        // specialized download client functions
+        void do_pre_login();
         void async_login_capabilities(std::function<void(void)> fn);
         void cond_async_capabilities(std::function<void(void)> fn);
         void async_login(std::function<void(void)> fn);
@@ -238,6 +231,7 @@ namespace IMAP {
         void do_cleanup();
         void do_download();
         void do_task();
+        void do_quit();
       public:
         Client(IMAP::Copy::Options &opts,
             Net::Client::Base &net_client,
