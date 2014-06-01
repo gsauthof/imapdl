@@ -656,6 +656,21 @@ BOOST_AUTO_TEST_SUITE(mime)
           ;
         BOOST_CHECK_THROW(d.read(inp, inp + sizeof(inp) - 1), std::runtime_error);
       }
+      BOOST_AUTO_TEST_CASE(pseudo)
+      {
+        using namespace MIME::Header;
+        Buffer::Vector v;
+        Buffer::Proxy p;
+        Decoder d(p, v, [](){});
+        d.set_ending_policy(Decoder::Ending::LF);
+        const char inp[] =
+          "Subject: Cron <juser@example> VAR=\"-xfoo\" bash some_script.sh\n"
+          "\n"
+          ;
+        d.read(inp, inp + sizeof(inp) - 1);
+        string s(v.begin(), v.end());
+        BOOST_CHECK_EQUAL(s, "Cron <juser@example> VAR=\"-xfoo\" bash some_script.sh");
+      }
 
     BOOST_AUTO_TEST_SUITE_END()
 

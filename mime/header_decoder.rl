@@ -78,6 +78,13 @@ action buffer_stop
 {
   buffer_.stop(p);
 }
+action buffer_eq_cont
+{
+  char c = '=';
+  buffer_.cont(&c);
+  buffer_.stop(&c+1);
+  buffer_.cont(p);
+}
 action charset_start
 {
   charset_buffer_.start(p);
@@ -308,7 +315,9 @@ header =
           @buffer_stop     -> lf_state
   ),
   ew_state: (
-    encoded_word_tail      -> ew_tail_state
+    encoded_word_tail      -> ew_tail_state     |
+    (fa - '?')
+          @buffer_eq_cont  -> w_state
   ),
   ew_tail_state: (
     WSP   @space_start     -> after_ew_ws_state |
