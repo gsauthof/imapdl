@@ -22,14 +22,13 @@
 
 using namespace Memory;
 
+#include "state.h"
 #include "options.h"
-#include "enum.h"
-#include "exception.h"
+#include <exception.h>
 
 #include <boost/log/sources/record_ostream.hpp>
 #include <boost/log/attributes/named_scope.hpp>
 #include <boost/system/error_code.hpp>
-#include <boost/algorithm/string.hpp>
 
 #include <sstream>
 #include <stdexcept>
@@ -44,41 +43,6 @@ namespace fs = boost::filesystem;
 
 namespace IMAP {
   namespace Copy {
-
-    State operator++(State &s)
-    {
-      unsigned i = static_cast<unsigned>(s);
-      ++i;
-      s = static_cast<State>(i);
-      return s;
-    }
-    State operator+(State s, int b)
-    {
-      unsigned i = static_cast<unsigned>(s);
-      i += b;
-      s = static_cast<State>(i);
-      return s;
-    }
-    static const char *const state_map[] = {
-      "DISCONNECTED",
-      "ESTABLISHED",
-      "GOT_INITIAL_CAPABILITIES",
-      "LOGGED_IN",
-      "GOT_CAPABILITIES",
-      "SELECTED_MAILBOX",
-      "FETCHING",
-      "FETCHED",
-      "STORED",
-      "EXPUNGED",
-      "LOGGING_OUT",
-      "LOGGED_OUT",
-      "END"
-    };
-    std::ostream &operator<<(std::ostream &o, State s)
-    {
-      o << enum_str(state_map, s);
-      return o;
-    }
 
     Client::Client(IMAP::Copy::Options &opts,
         Net::Client::Base &net_client,
@@ -165,56 +129,6 @@ namespace IMAP {
               }
             }
           });
-    }
-
-    void Fetch_Timer::print()
-    {
-      auto fetch_stop = chrono::steady_clock::now();
-      auto d = chrono::duration_cast<chrono::milliseconds>
-        (fetch_stop - start_);
-      size_t b = client_.bytes_read() - bytes_start_;
-      double r = (double(b)*1024.0)/(double(d.count())*1000.0);
-      BOOST_LOG_SEV(lg_, Log::MSG) << "Fetched " << messages_
-        << " messages (" << b << " bytes) in " << double(d.count())/1000.0
-        << " s (@ " << r << " KiB/s)";
-    }
-
-    void Fetch_Timer::start()
-    {
-      start_ = chrono::steady_clock::now();
-      bytes_start_ = client_.bytes_read();
-
-      resume();
-    }
-
-    void Fetch_Timer::resume()
-    {
-      timer_.expires_from_now(std::chrono::seconds(1));
-      timer_.async_wait([this](const boost::system::error_code &ec)
-          {
-            BOOST_LOG_FUNCTION();
-            if (ec) {
-              if (ec.value() == boost::asio::error::operation_aborted)
-                return;
-              THROW_ERROR(ec);
-            } else {
-              print();
-              resume();
-            }
-          });
-    }
-    void Fetch_Timer::stop()
-    {
-      print();
-      timer_.cancel();
-    }
-    void Fetch_Timer::increase_messages()
-    {
-      ++messages_;
-    }
-    size_t Fetch_Timer::messages() const
-    {
-      return messages_;
     }
 
     void Client::async_login_capabilities(std::function<void(void)> fn)
@@ -544,31 +458,6 @@ namespace IMAP {
     {
       full_body_ = true;
     }
-    void Header_Printer::print()
-    {
-      if (    static_cast<Log::Severity>(opts_.severity)      < Log::Severity::INFO
-           && static_cast<Log::Severity>(opts_.file_severity) < Log::Severity::INFO)
-        return;
-
-      if (    static_cast<Log::Severity>(opts_.severity)      >= Log::Severity::DEBUG
-           || static_cast<Log::Severity>(opts_.file_severity) >= Log::Severity::DEBUG) 
-      {
-        string s(buffer_.begin(), buffer_.end());
-        BOOST_LOG_SEV(lg_, Log::DEBUG) << "Header: |" << s << "|";
-      }
-
-      try {
-        header_decoder_.read(buffer_.begin(), buffer_.end());
-        header_decoder_.verify_finished();
-      } catch (const std::runtime_error &e) {
-        BOOST_LOG_SEV(lg_, Log::ERROR) << e.what();
-      }
-      for (auto &i : fields_) {
-        BOOST_LOG(lg_) << setw(10) << left << i.first << ' ' << i.second;
-      }
-      header_decoder_.clear();
-      fields_.clear();
-    }
     void Client::imap_body_section_inner()
     {
       if (state_ == State::FETCHING) {
@@ -630,35 +519,6 @@ namespace IMAP {
         BOOST_LOG_SEV(lg_, Log::DEBUG) << "UID: " << number;
         last_uid_ = number;
       }
-    }
-
-    Fetch_Timer::Fetch_Timer(
-            Net::Client::Base &client,
-            boost::log::sources::severity_logger< Log::Severity > &lg
-        )
-      :
-        client_(client),
-        lg_(lg),
-        timer_(client_.io_service())
-    {
-    }
-
-    Header_Printer::Header_Printer(
-            const IMAP::Copy::Options &opts,
-            const Memory::Buffer::Vector &buffer,
-            boost::log::sources::severity_logger< Log::Severity > &lg
-        )
-      :
-        lg_(lg),
-        opts_(opts),
-        buffer_(buffer),
-        header_decoder_(field_name_, field_body_, [this](){
-            string name(field_name_.begin(), field_name_.end());
-            string body(field_body_.begin(), field_body_.end());
-            fields_.emplace(boost::to_upper_copy(name), body);
-        })
-    {
-      header_decoder_.set_ending_policy(MIME::Header::Decoder::Ending::LF);
     }
 
   }

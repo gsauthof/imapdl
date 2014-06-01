@@ -23,6 +23,10 @@
 
 #include <boost/asio/signal_set.hpp>
 
+#include <copy/state.h>
+#include <copy/fetch_timer.h>
+#include <copy/header_printer.h>
+
 #include <net/tcp_client.h>
 #include <net/client_application.h>
 #include <imap/client_parser.h>
@@ -33,85 +37,18 @@
 #include <buffer/buffer.h>
 #include <buffer/file.h>
 #include <sequence_set.h>
-#include <mime/header_decoder.h>
 
 #include <string>
 #include <unordered_set>
 #include <chrono>
 #include <map>
-#include <ostream>
 #include <functional>
 
 #include <boost/asio/steady_timer.hpp>
 
 namespace IMAP {
   namespace Copy {
-    enum class Task {
-      FIRST_,
-      CLEANUP,
-      DOWNLOAD,
-      LAST_
-    };
-    enum class State {
-      FIRST_,
-      DISCONNECTED,
-      ESTABLISHED,
-      GOT_INITIAL_CAPABILITIES,
-      LOGGED_IN,
-      GOT_CAPABILITIES,
-      SELECTED_MAILBOX,
-      FETCHING,
-      FETCHED,
-      STORED,
-      EXPUNGED,
-      LOGGING_OUT,
-      LOGGED_OUT,
-      END,
-      LAST_
-    };
-    State operator++(State &s);
-    State operator+(State s, int b);
-    std::ostream &operator<<(std::ostream &o, State s);
     class Options;
-    class Fetch_Timer {
-      private:
-        Net::Client::Base                                           &client_;
-        boost::log::sources::severity_logger<Log::Severity>         &lg_;
-        std::chrono::time_point<std::chrono::steady_clock>           start_;
-        boost::asio::basic_waitable_timer<std::chrono::steady_clock> timer_;
-        size_t bytes_start_ {0};
-        size_t messages_  {0};
-      public:
-        Fetch_Timer(
-            Net::Client::Base &client,
-            boost::log::sources::severity_logger<Log::Severity> &lg
-            );
-        void start();
-        void resume();
-        void stop();
-        void print();
-        void increase_messages();
-        size_t messages() const;
-    };
-    class Header_Printer {
-      private:
-        boost::log::sources::severity_logger<Log::Severity> &lg_;
-        const Options                                       &opts_;
-
-        const Memory::Buffer::Vector &buffer_;
-
-        MIME::Header::Decoder  header_decoder_;
-        Memory::Buffer::Vector field_name_;
-        Memory::Buffer::Vector field_body_;
-        std::map<std::string, std::string> fields_;
-      public:
-        Header_Printer(
-            const IMAP::Copy::Options &opts,
-            const Memory::Buffer::Vector &buffer,
-            boost::log::sources::severity_logger<Log::Severity> &lg
-            );
-        void print();
-    };
     class Client : public IMAP::Client::Base {
       private:
         boost::log::sources::severity_logger<Log::Severity> &lg_;

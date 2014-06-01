@@ -19,7 +19,7 @@
 
 }}} */
 #include "journal.h"
-#include "client.h"
+//#include "client.h"
 
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>

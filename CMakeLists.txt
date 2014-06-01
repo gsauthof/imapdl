@@ -81,6 +81,9 @@ add_executable(ut
   copy/client.cc
   copy/id.cc
   copy/journal.cc
+  copy/state.cc
+  copy/fetch_timer.cc
+  copy/header_printer.cc
   net/client.cc
   net/client_application.cc
   net/tcp_client.cc
@@ -165,6 +168,9 @@ add_executable(imapdl
   copy/client.cc
   copy/id.cc
   copy/journal.cc
+  copy/state.cc
+  copy/fetch_timer.cc
+  copy/header_printer.cc
   net/client.cc
   net/client_application.cc
   net/tcp_client.cc
