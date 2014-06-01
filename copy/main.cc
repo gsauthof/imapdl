@@ -62,7 +62,7 @@ int main(int argc, char **argv)
             new Net::TCP::Client::Base(io_service, opts, lg));
         net_client = std::move(c);
       }
-      IMAP::Copy::Client client(opts, std::move(net_client), lg);
+      IMAP::Copy::Client client(opts, *net_client, lg);
 
       io_service.run();
     } catch (const exception &e) {

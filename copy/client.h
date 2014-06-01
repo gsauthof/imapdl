@@ -156,7 +156,7 @@ namespace IMAP {
       private:
         boost::log::sources::severity_logger< Log::Severity > &lg_;
         const Options                                         &opts_;
-        std::unique_ptr<Net::Client::Base>                     client_;
+        Net::Client::Base                                     &client_;
         Net_Client_App app_;
         boost::asio::signal_set                                signals_;
         unsigned                                               signaled_ {0};
@@ -226,7 +226,7 @@ namespace IMAP {
         void do_task();
       public:
         Client(IMAP::Copy::Options &opts,
-            std::unique_ptr<Net::Client::Base> &&net_client,
+            Net::Client::Base &net_client,
             boost::log::sources::severity_logger< Log::Severity > &lg);
         ~Client();
 

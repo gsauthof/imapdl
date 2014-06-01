@@ -146,7 +146,7 @@ class Client_Frontend {
             (static_cast<Net::Client::Base*>(new Net::TCP::Client::Base(io_service, opts, lg)))
             ),
 
-        client(opts, std::move(net_client), lg)
+        client(opts, *net_client, lg)
 
         {
         }

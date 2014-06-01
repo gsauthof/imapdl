@@ -81,21 +81,21 @@ namespace IMAP {
     }
 
     Client::Client(IMAP::Copy::Options &opts,
-        std::unique_ptr<Net::Client::Base> &&net_client,
+        Net::Client::Base &net_client,
         boost::log::sources::severity_logger<Log::Severity> &lg)
       :
         IMAP_Client(std::bind(&Client::write_command, this, std::placeholders::_1), lg),
         lg_(lg),
         opts_(opts),
-        client_(std::move(net_client)),
-        app_(opts_.host, *client_, lg_),
-        signals_(client_->io_service(), SIGINT, SIGTERM),
+        client_(net_client),
+        app_(opts_.host, client_, lg_),
+        signals_(client_.io_service(), SIGINT, SIGTERM),
         parser_(buffer_proxy_, tag_buffer_, *this),
-        login_timer_(client_->io_service()),
+        login_timer_(client_.io_service()),
         maildir_(opts_.maildir),
         tmp_dir_(maildir_.tmp_dir_fd()),
         mailbox_(opts_.mailbox),
-        fetch_timer_(*client_, lg_),
+        fetch_timer_(client_, lg_),
         header_decoder_(field_name_, field_body_, [this](){
             string name(field_name_.begin(), field_name_.end());
             string body(field_body_.begin(), field_body_.end());
@@ -570,7 +570,7 @@ namespace IMAP {
     void Client::do_read()
     {
       BOOST_LOG_FUNCTION();
-      client_->async_read_some([this](
+      client_.async_read_some([this](
             const boost::system::error_code &ec,
             size_t size)
           {
@@ -593,8 +593,8 @@ namespace IMAP {
                 THROW_ERROR(ec);
               }
             } else {
-              parser_.read(client_->input().data(), client_-> input().data() + size);
-              if (state_ != State::LOGGED_OUT) // && client_->is_open())
+              parser_.read(client_.input().data(), client_. input().data() + size);
+              if (state_ != State::LOGGED_OUT) // && client_.is_open())
                 do_read();
             }
           });
@@ -606,7 +606,7 @@ namespace IMAP {
     }
     void Client::write_command(vector<char> &cmd)
     {
-      client_->push_write(cmd);
+      client_.push_write(cmd);
     }
 
     void Client::do_quit()
