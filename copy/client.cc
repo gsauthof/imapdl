@@ -96,15 +96,10 @@ namespace IMAP {
         tmp_dir_(maildir_.tmp_dir_fd()),
         mailbox_(opts_.mailbox),
         fetch_timer_(client_, lg_),
-        header_decoder_(field_name_, field_body_, [this](){
-            string name(field_name_.begin(), field_name_.end());
-            string body(field_body_.begin(), field_body_.end());
-            fields_.emplace(boost::to_upper_copy(name), body);
-        })
+        header_printer_(opts_, buffer_, lg_)
     {
       BOOST_LOG_FUNCTION();
       buffer_proxy_.set(&buffer_);
-      header_decoder_.set_ending_policy(MIME::Header::Decoder::Ending::LF);
       read_journal();
       do_signal_wait();
       app_.async_start([this](){
@@ -752,7 +747,7 @@ namespace IMAP {
     {
       full_body_ = true;
     }
-    void Client::pp_header()
+    void Header_Printer::print()
     {
       if (    static_cast<Log::Severity>(opts_.severity)      < Log::Severity::INFO
            && static_cast<Log::Severity>(opts_.file_severity) < Log::Severity::INFO)
@@ -805,7 +800,7 @@ namespace IMAP {
           full_body_ = false;
           fetch_timer_.increase_messages();
         } else {
-          pp_header();
+          header_printer_.print();
         }
       }
     }
@@ -880,6 +875,24 @@ namespace IMAP {
         lg_(lg),
         timer_(client_.io_service())
     {
+    }
+
+    Header_Printer::Header_Printer(
+            const IMAP::Copy::Options &opts,
+            const Memory::Buffer::Vector &buffer,
+            boost::log::sources::severity_logger< Log::Severity > &lg
+        )
+      :
+        lg_(lg),
+        opts_(opts),
+        buffer_(buffer),
+        header_decoder_(field_name_, field_body_, [this](){
+            string name(field_name_.begin(), field_name_.end());
+            string body(field_body_.begin(), field_body_.end());
+            fields_.emplace(boost::to_upper_copy(name), body);
+        })
+    {
+      header_decoder_.set_ending_policy(MIME::Header::Decoder::Ending::LF);
     }
 
   }

@@ -152,6 +152,25 @@ namespace IMAP {
         void increase_messages();
         size_t messages() const;
     };
+    class Header_Printer {
+      private:
+        boost::log::sources::severity_logger< Log::Severity > &lg_;
+        const Options                                         &opts_;
+
+        const Memory::Buffer::Vector &buffer_;
+
+        MIME::Header::Decoder header_decoder_;
+        Memory::Buffer::Vector field_name_;
+        Memory::Buffer::Vector field_body_;
+        std::map<std::string, std::string> fields_;
+      public:
+        Header_Printer(
+            const IMAP::Copy::Options &opts,
+            const Memory::Buffer::Vector &buffer,
+            boost::log::sources::severity_logger< Log::Severity > &lg
+            );
+        void print();
+    };
     class Client : public IMAP_Client {
       private:
         boost::log::sources::severity_logger< Log::Severity > &lg_;
@@ -187,17 +206,12 @@ namespace IMAP {
 
         Fetch_Timer fetch_timer_;
 
-        MIME::Header::Decoder header_decoder_;
-        Memory::Buffer::Vector field_name_;
-        Memory::Buffer::Vector field_body_;
-        std::map<std::string, std::string> fields_;
+        Header_Printer header_printer_;
 
         void read_journal();
         void write_journal();
 
         void do_signal_wait();
-
-        void pp_header();
 
         bool has_uidplus() const;
 
