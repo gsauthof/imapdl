@@ -94,8 +94,8 @@ namespace IMAP {
         login_timer_(client_->io_service()),
         maildir_(opts_.maildir),
         tmp_dir_(maildir_.tmp_dir_fd()),
-        fetch_timer_(client_->io_service()),
         mailbox_(opts_.mailbox),
+        fetch_timer_(*client_, lg_),
         header_decoder_(field_name_, field_body_, [this](){
             string name(field_name_.begin(), field_name_.end());
             string body(field_body_.begin(), field_body_.end());
@@ -227,30 +227,30 @@ namespace IMAP {
           });
     }
 
-    void Client::print_fetch_stats()
+    void Fetch_Timer::print()
     {
       auto fetch_stop = chrono::steady_clock::now();
       auto d = chrono::duration_cast<chrono::milliseconds>
-        (fetch_stop - fetch_start_);
-      size_t b = client_->bytes_read() - fetch_bytes_start_;
+        (fetch_stop - start_);
+      size_t b = client_.bytes_read() - bytes_start_;
       double r = (double(b)*1024.0)/(double(d.count())*1000.0);
-      BOOST_LOG_SEV(lg_, Log::MSG) << "Fetched " << fetched_messages_
+      BOOST_LOG_SEV(lg_, Log::MSG) << "Fetched " << messages_
         << " messages (" << b << " bytes) in " << double(d.count())/1000.0
         << " s (@ " << r << " KiB/s)";
     }
 
-    void Client::start_fetch_timer()
+    void Fetch_Timer::start()
     {
-      fetch_start_ = chrono::steady_clock::now();
-      fetch_bytes_start_ = client_->bytes_read();
+      start_ = chrono::steady_clock::now();
+      bytes_start_ = client_.bytes_read();
 
-      resume_fetch_timer();
+      resume();
     }
 
-    void Client::resume_fetch_timer()
+    void Fetch_Timer::resume()
     {
-      fetch_timer_.expires_from_now(std::chrono::seconds(1));
-      fetch_timer_.async_wait([this](const boost::system::error_code &ec)
+      timer_.expires_from_now(std::chrono::seconds(1));
+      timer_.async_wait([this](const boost::system::error_code &ec)
           {
             BOOST_LOG_FUNCTION();
             if (ec) {
@@ -258,15 +258,23 @@ namespace IMAP {
                 return;
               THROW_ERROR(ec);
             } else {
-              print_fetch_stats();
-              resume_fetch_timer();
+              print();
+              resume();
             }
           });
     }
-    void Client::stop_fetch_timer()
+    void Fetch_Timer::stop()
     {
-      print_fetch_stats();
-      fetch_timer_.cancel();
+      print();
+      timer_.cancel();
+    }
+    void Fetch_Timer::increase_messages()
+    {
+      ++messages_;
+    }
+    size_t Fetch_Timer::messages() const
+    {
+      return messages_;
     }
 
     void Client::async_login_capabilities(std::function<void(void)> fn)
@@ -315,7 +323,7 @@ namespace IMAP {
         async_uid_or_simple_expunge(logout_fn);
       };
       auto store_fn = [this, expunge_fn, finish_fn](){
-        stop_fetch_timer();
+        fetch_timer_.stop();
         async_store_or_logout(expunge_fn, finish_fn);
       };
       auto fetch_fn = [this, store_fn, finish_fn](){
@@ -426,7 +434,7 @@ namespace IMAP {
       BOOST_LOG_FUNCTION();
       if (exists_) {
         BOOST_LOG(lg_) << "Fetching into " << opts_.maildir << " ...";
-        start_fetch_timer();
+        fetch_timer_.start();
         async_fetch(after_fetch);
       } else {
         BOOST_LOG_SEV(lg_, Log::MSG) << "Mailbox " << opts_.mailbox << " is empty.";
@@ -726,9 +734,9 @@ namespace IMAP {
       if (state_ == State::FETCHING) {
         BOOST_LOG(lg_) << "Fetching message: " << number;
         last_uid_ = 0;
-        if (opts_.simulate_error == fetched_messages_ + 1) {
+        if (opts_.simulate_error == fetch_timer_.messages() + 1) {
           ostringstream o;
-          o << "Simulated error after fetched message: " << fetched_messages_;
+          o << "Simulated error after fetched message: " << fetch_timer_.messages();
           THROW_MSG(o.str());
         }
       }
@@ -795,7 +803,7 @@ namespace IMAP {
             maildir_.move_to_cur(flags_);
           }
           full_body_ = false;
-          ++fetched_messages_;
+          fetch_timer_.increase_messages();
         } else {
           pp_header();
         }
@@ -861,6 +869,17 @@ namespace IMAP {
     void Net_Client_App::async_finish(std::function<void(void)> fn)
     {
       async_quit(fn);
+    }
+
+    Fetch_Timer::Fetch_Timer(
+            Net::Client::Base &client,
+            boost::log::sources::severity_logger< Log::Severity > &lg
+        )
+      :
+        client_(client),
+        lg_(lg),
+        timer_(client_.io_service())
+    {
     }
 
   }

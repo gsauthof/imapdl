@@ -132,6 +132,26 @@ namespace IMAP {
         void async_start(std::function<void(void)> fn);
         void async_finish(std::function<void(void)> fn);
     };
+    class Fetch_Timer {
+      private:
+        Net::Client::Base                                     &client_;
+        boost::log::sources::severity_logger< Log::Severity > &lg_;
+        std::chrono::time_point<std::chrono::steady_clock>           start_;
+        boost::asio::basic_waitable_timer<std::chrono::steady_clock> timer_;
+        size_t bytes_start_ {0};
+        size_t messages_  {0};
+      public:
+        Fetch_Timer(
+            Net::Client::Base &client,
+            boost::log::sources::severity_logger< Log::Severity > &lg
+            );
+        void start();
+        void resume();
+        void stop();
+        void print();
+        void increase_messages();
+        size_t messages() const;
+    };
     class Client : public IMAP_Client {
       private:
         boost::log::sources::severity_logger< Log::Severity > &lg_;
@@ -163,13 +183,9 @@ namespace IMAP {
         bool         full_body_ {false};
         std::string  flags_;
 
-        std::chrono::time_point<std::chrono::steady_clock>           fetch_start_;
-        size_t fetch_bytes_start_ {0};
-        size_t fetched_messages_  {0};
-
-        boost::asio::basic_waitable_timer<std::chrono::steady_clock> fetch_timer_;
-
         std::string mailbox_;
+
+        Fetch_Timer fetch_timer_;
 
         MIME::Header::Decoder header_decoder_;
         Memory::Buffer::Vector field_name_;
@@ -182,11 +198,6 @@ namespace IMAP {
         void do_signal_wait();
 
         void pp_header();
-
-        void print_fetch_stats();
-        void start_fetch_timer();
-        void resume_fetch_timer();
-        void stop_fetch_timer();
 
         bool has_uidplus() const;
 
