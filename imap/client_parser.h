@@ -19,7 +19,7 @@
 
 }}} */
 #ifndef IMAP_CLIENT_PARSER_H
-#define IMAP_CLIENT_PARSEr_H
+#define IMAP_CLIENT_PARSER_H
 
 #include <vector>
 #include <cstdint>

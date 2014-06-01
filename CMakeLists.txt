@@ -57,6 +57,7 @@ add_executable(ut
   imap/imap.cc
   imap/client_parser_callback.cc
   imap/client_writer.cc
+  imap/client_base.cc
   maildir/maildir.cc
   net/ssl_util.cc
   unittest/main.cc
@@ -171,6 +172,7 @@ add_executable(imapdl
   lex_util.cc
   imap/client_parser_callback.cc
   imap/client_writer.cc
+  imap/client_base.cc
   ${RAGEL_imap_server_parser_OUTPUTS}
   maildir/maildir.cc
   sequence_set.cc
