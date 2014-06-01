@@ -70,10 +70,11 @@ namespace IMAP {
             std::function<void(void)> fn);
         void async_expunge(std::function<void(void)> fn);
         void async_logout(std::function<void(void)> fn);
+
+        void imap_tagged_status_end(IMAP::Server::Response::Status c) override;
       public:
         Base(Write_Fn write_fn,
             boost::log::sources::severity_logger< Log::Severity > &lg);
-        void imap_tagged_status_end(IMAP::Server::Response::Status c) override;
     };
 
   }

@@ -116,6 +116,7 @@ namespace IMAP {
             boost::log::sources::severity_logger< Log::Severity > &lg);
         ~Client();
 
+      protected:
         void imap_status_code_capability_begin() override;
         void imap_capability_begin() override;
         void imap_capability(IMAP::Server::Response::Capability capability) override;

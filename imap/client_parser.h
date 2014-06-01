@@ -32,6 +32,7 @@ using namespace std;
 namespace IMAP {
 
   namespace Client {
+    class Parser;
 
     namespace Callback {
 
@@ -39,7 +40,8 @@ namespace IMAP {
 
       class Base {
         private:
-        public:
+          friend class IMAP::Client::Parser;
+        protected:
           //virtual void imap_continuation_request_begin() = 0;
           //virtual void imap_continuation_request_end() = 0;
           //virtual void imap_response_begin(Group g, Kind k) = 0;
@@ -86,7 +88,7 @@ namespace IMAP {
 
       class Null : public Base {
         private:
-        public:
+        protected:
           void imap_tagged_status_begin() override;
           void imap_tagged_status_end(Status c) override;
           void imap_untagged_status_begin(Status c) override;
