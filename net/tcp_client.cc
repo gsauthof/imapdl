@@ -279,6 +279,7 @@ namespace Net {
         }
         void Base::async_handshake(Handshake_Fn fn)
         {
+          BOOST_LOG_SEV(lg_, Log::DEBUG) << "Handshaking - Cipher list: " << opts_.cipher;
           stream_.async_handshake(asio::ssl::stream_base::client, fn);
         }
         void Base::async_read_some(Read_Fn fn)

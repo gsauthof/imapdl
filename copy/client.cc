@@ -85,9 +85,10 @@ namespace IMAP {
         boost::log::sources::severity_logger<Log::Severity> &lg)
       :
         IMAP_Client(std::bind(&Client::write_command, this, std::placeholders::_1), lg),
+        lg_(lg),
         opts_(opts),
         client_(std::move(net_client)),
-        lg_(lg),
+        app_(opts_.host, *client_, lg_),
         signals_(client_->io_service(), SIGINT, SIGTERM),
         parser_(buffer_proxy_, tag_buffer_, *this),
         login_timer_(client_->io_service()),
@@ -106,7 +107,11 @@ namespace IMAP {
       header_decoder_.set_ending_policy(MIME::Header::Decoder::Ending::LF);
       read_journal();
       do_signal_wait();
-      do_resolve();
+      app_.async_start([this](){
+            //state_ = State::ESTABLISHED;
+            do_read();
+            do_pre_login();
+          });
     }
     Client::~Client()
     {
@@ -172,55 +177,52 @@ namespace IMAP {
           });
     }
 
-    void Client::do_resolve()
+    void Net_Client_App::async_resolve(std::function<void(void)> fn)
     {
       BOOST_LOG_FUNCTION();
-      BOOST_LOG(lg_) << "Resolving " << opts_.host << "...";
-      client_->async_resolve([this](const boost::system::error_code &ec,
+      BOOST_LOG(lg_) << "Resolving " << host_ << "...";
+      client_.async_resolve([this, fn](const boost::system::error_code &ec,
             boost::asio::ip::tcp::resolver::iterator iterator)
           {
             BOOST_LOG_FUNCTION();
             if (ec) {
               THROW_ERROR(ec);
             } else {
-              BOOST_LOG(lg_) << opts_.host << " resolved.";
-              do_connect(iterator);
+              BOOST_LOG(lg_) << host_ << " resolved.";
+              async_connect(iterator, fn);
             }
           });
     }
 
-    void Client::do_connect(boost::asio::ip::tcp::resolver::iterator iterator)
+    void Net_Client_App::async_connect(boost::asio::ip::tcp::resolver::iterator iterator,
+        std::function<void(void)> fn)
     {
       BOOST_LOG_FUNCTION();
-      BOOST_LOG(lg_) << "Connecting to " << opts_.host << "...";
-      client_->async_connect(iterator, [this](const boost::system::error_code &ec)
+      BOOST_LOG(lg_) << "Connecting to " << host_ << "...";
+      client_.async_connect(iterator, [this, fn](const boost::system::error_code &ec)
           {
             BOOST_LOG_FUNCTION();
             if (ec) {
               THROW_ERROR(ec);
             } else {
-              BOOST_LOG(lg_) << opts_.host << " connected.";
-              do_handshake();
+              BOOST_LOG(lg_) << host_ << " connected.";
+              async_handshake(fn);
             }
           });
     }
 
-    void Client::do_handshake()
+    void Net_Client_App::async_handshake(std::function<void(void)> fn)
     {
       BOOST_LOG_FUNCTION();
-      if (opts_.use_ssl)
-        BOOST_LOG(lg_) << "Cipher list: " << opts_.cipher;
-      BOOST_LOG(lg_) << "Shaking hands with " << opts_.host << "...";
-      client_->async_handshake([this](const boost::system::error_code &ec)
+      BOOST_LOG(lg_) << "Shaking hands with " << host_ << "...";
+      client_.async_handshake([this, fn](const boost::system::error_code &ec)
           {
             BOOST_LOG_FUNCTION();
             if (ec) {
               THROW_ERROR(ec);
             } else {
               BOOST_LOG(lg_) << "Handshake completed.";
-              //state_ = State::ESTABLISHED;
-              do_read();
-              do_pre_login();
+              fn();
             }
           });
     }
@@ -602,19 +604,29 @@ namespace IMAP {
     void Client::do_quit()
     {
       BOOST_LOG_FUNCTION();
-      state_ = State::LOGGED_OUT;
       BOOST_LOG_SEV(lg_, Log::DEBUG) << "do_quit()";
-      client_->cancel();
-      do_shutdown();
+      state_ = State::LOGGED_OUT;
+      app_.async_finish([this](){
+            signals_.cancel();
+          });
     }
 
-    void Client::do_shutdown()
+    void Net_Client_App::async_quit(std::function<void(void)> fn)
     {
       BOOST_LOG_FUNCTION();
-      client_->async_shutdown([this](
+      BOOST_LOG_SEV(lg_, Log::DEBUG) << "async_quit()";
+      client_.cancel();
+      async_shutdown(fn);
+    }
+
+    void Net_Client_App::async_shutdown(std::function<void(void)> fn)
+    {
+      BOOST_LOG_FUNCTION();
+      client_.async_shutdown([this, fn](
             const boost::system::error_code &ec)
           {
             BOOST_LOG_FUNCTION();
+            BOOST_LOG_SEV(lg_, Log::DEBUG) << "shutting down connect to: " << host_;
             if (ec) {
               if (   ec.category() == boost::asio::error::get_ssl_category()
                   && ec.value()    == ERR_PACK(ERR_LIB_SSL, 0, SSL_R_SHORT_READ)) {
@@ -633,8 +645,8 @@ namespace IMAP {
               }
             } else {
             }
-            client_->close();
-            signals_.cancel();
+            client_.close();
+            fn();
           });
     }
 
@@ -829,6 +841,26 @@ namespace IMAP {
         write_fn_(write_fn),
         writer_(tags_, std::bind(&Client::to_cmd, this, std::placeholders::_1))
     {
+    }
+
+    Net_Client_App::Net_Client_App(
+            const std::string &host,
+            Net::Client::Base &client,
+            boost::log::sources::severity_logger< Log::Severity > &lg
+            )
+      :
+        host_(host),
+        client_(client),
+        lg_(lg)
+    {
+    }
+    void Net_Client_App::async_start(std::function<void(void)> fn)
+    {
+      async_resolve(fn);
+    }
+    void Net_Client_App::async_finish(std::function<void(void)> fn)
+    {
+      async_quit(fn);
     }
 
   }

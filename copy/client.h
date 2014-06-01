@@ -110,11 +110,34 @@ namespace IMAP {
             boost::log::sources::severity_logger< Log::Severity > &lg);
         void imap_tagged_status_end(IMAP::Server::Response::Status c) override;
     };
+    class Net_Client_App {
+      private:
+       const std::string                                      &host_;
+        Net::Client::Base                                     &client_;
+        boost::log::sources::severity_logger< Log::Severity > &lg_;
+
+        void async_resolve(std::function<void(void)> fn);
+        void async_connect(boost::asio::ip::tcp::resolver::iterator iterator,
+            std::function<void(void)> fn);
+        void async_handshake(std::function<void(void)> fn);
+
+        void async_quit(std::function<void(void)> fn);
+        void async_shutdown(std::function<void(void)> fn);
+      public:
+        Net_Client_App(
+            const std::string &host,
+            Net::Client::Base &client,
+            boost::log::sources::severity_logger< Log::Severity > &lg
+            );
+        void async_start(std::function<void(void)> fn);
+        void async_finish(std::function<void(void)> fn);
+    };
     class Client : public IMAP_Client {
       private:
+        boost::log::sources::severity_logger< Log::Severity > &lg_;
         const Options                                         &opts_;
         std::unique_ptr<Net::Client::Base>                     client_;
-        boost::log::sources::severity_logger< Log::Severity > &lg_;
+        Net_Client_App app_;
         boost::asio::signal_set                                signals_;
         unsigned                                               signaled_ {0};
 
@@ -165,18 +188,13 @@ namespace IMAP {
         void resume_fetch_timer();
         void stop_fetch_timer();
 
-        void write_command(vector<char> &cmd);
-
         bool has_uidplus() const;
 
-        void do_resolve();
-        void do_connect(boost::asio::ip::tcp::resolver::iterator iterator);
-        void do_handshake();
         void do_read();
-        void do_quit();
-        void do_shutdown();
+        void write_command(vector<char> &cmd);
 
         void do_pre_login();
+        void do_quit();
 
         // specialized dl client functions
         void async_login_capabilities(std::function<void(void)> fn);
