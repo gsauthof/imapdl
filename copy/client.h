@@ -24,6 +24,7 @@
 #include <boost/asio/signal_set.hpp>
 
 #include <net/tcp_client.h>
+#include <net/client_application.h>
 #include <imap/client_parser.h>
 #include <imap/client_writer.h>
 #include <imap/client_base.h>
@@ -72,28 +73,6 @@ namespace IMAP {
     State operator+(State s, int b);
     std::ostream &operator<<(std::ostream &o, State s);
     class Options;
-    class Net_Client_App {
-      private:
-       const std::string                                      &host_;
-        Net::Client::Base                                     &client_;
-        boost::log::sources::severity_logger< Log::Severity > &lg_;
-
-        void async_resolve(std::function<void(void)> fn);
-        void async_connect(boost::asio::ip::tcp::resolver::iterator iterator,
-            std::function<void(void)> fn);
-        void async_handshake(std::function<void(void)> fn);
-
-        void async_quit(std::function<void(void)> fn);
-        void async_shutdown(std::function<void(void)> fn);
-      public:
-        Net_Client_App(
-            const std::string &host,
-            Net::Client::Base &client,
-            boost::log::sources::severity_logger<Log::Severity> &lg
-            );
-        void async_start (std::function<void(void)> fn);
-        void async_finish(std::function<void(void)> fn);
-    };
     class Fetch_Timer {
       private:
         Net::Client::Base                                           &client_;
@@ -138,7 +117,7 @@ namespace IMAP {
         boost::log::sources::severity_logger<Log::Severity> &lg_;
         const Options          &opts_;
         Net::Client::Base      &client_;
-        Net_Client_App          app_;
+        Net::Client::Application app_;
         boost::asio::signal_set signals_;
         unsigned                signaled_ {0};
         boost::asio::basic_waitable_timer<std::chrono::steady_clock> login_timer_;
