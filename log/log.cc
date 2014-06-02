@@ -102,9 +102,18 @@ namespace Log {
         );
     flog->set_filter(severity <= severity_threshold);
   }
+  void setup_vanilla_file(Severity severity_threshold, const std::string &filename)
+  {
+    if (filename.empty())
+      return;
+    auto flog = boost::log::add_file_log(boost::log::keywords::file_name = filename);
+    flog->set_formatter(boost::log::expressions::stream
+        << "[" << severity << "] " << boost::log::expressions::smessage);
+    flog->set_filter(severity <= severity_threshold);
+  }
 
   boost::log::sources::severity_logger< Severity > 
-    create(Severity severity, Severity file_severity,
+    create(Severity sev, Severity file_severity,
         const std::string &logfile)
     {
       BOOST_LOG_SCOPED_THREAD_ATTR("Timeline", boost::log::attributes::timer());
@@ -113,7 +122,7 @@ namespace Log {
       boost::log::add_common_attributes();
       boost::log::sources::severity_logger< Severity > lg(boost::log::keywords::severity = INFO);
       lg.add_attribute("Timeline", boost::log::attributes::timer());
-      setup_console(severity);
+      setup_console(sev);
       setup_file(file_severity, logfile);
       return std::move(lg);
     }

@@ -348,6 +348,64 @@ static void test_partial_2(bool use_ssl)
   BOOST_CHECK_EQUAL(fs::exists(journal), false);
 }
 
+static void test_fetch_header()
+{
+  bool use_ssl = false;
+  int rc = 0;
+  thread replay_server{Replay_Server{rc, "fetch_header.trace", "ut_header_server.log", use_ssl, 10}};
+
+  this_thread::sleep_for(chrono::seconds{1});
+
+  string prefix(ut_prefix());
+  prefix += '/';
+  string configfile{prefix+"cp.conf"};
+  char cconfigfile[128] = {0};
+  strncpy(cconfigfile, configfile.c_str(), sizeof(cconfigfile)-1);
+  char *argv[] = {
+    (char*)"imapcp",
+    (char*)"--account", (char*)"fake",
+    (char*)"--log", (char*)"ut_fetch_header.log", (char*)"--log_v",
+    (char*)"--maildir", (char*)"tmp/cp/basicmd",
+    (char*)"-v6",
+    (char*)"--gwait", (char*)"400",
+    (char*)"--config", cconfigfile,
+    (char*)"--ssl", (char*)(use_ssl?"yes":"no"),
+    (char*)"--header",
+    0
+  };
+  int argc = sizeof(argv)/sizeof(char*)-1;
+
+  const char filename[] = "tmp/fetch_header.log";
+  fs::remove(filename);
+  {
+    Client_Frontend client(argc, argv, use_ssl);
+    Log::setup_vanilla_file(Log::MSG, filename);
+    client.run();
+  }
+  boost::log::core::get()->remove_all_sinks();
+
+  replay_server.join();
+  BOOST_CHECK_EQUAL(rc, 0);
+
+  const char ref[] =
+R"([MSG] DATE       Mon, 2 Jun 2014 23:09:55 +0200
+[MSG] FROM       Georg Sauthoff <mail@georg.so>
+[MSG] SUBJECT    test1
+[MSG] DATE       Mon, 2 Jun 2014 23:10:13 +0200
+[MSG] FROM       Georg Sauthoff <mail@georg.so>
+[MSG] SUBJECT    test2
+[MSG] DATE       Mon, 2 Jun 2014 23:10:25 +0200
+[MSG] FROM       Georg Sauthoff <mail@georg.so>
+[MSG] SUBJECT    test3
+)";
+  std::array<char, 512> buffer = {{0}};
+  {
+    ifstream f(filename, ifstream::in | ifstream::binary);
+    f.read(buffer.data(), buffer.size()-1);
+  }
+  BOOST_CHECK_EQUAL(buffer.data(), ref);
+}
+
 struct Log_Fixture {
   boost::log::sources::severity_logger<Log::Severity> lg;
   Log_Fixture()
@@ -369,7 +427,7 @@ struct Log_Fixture {
 //BOOST_GLOBAL_FIXTURE(Log_Fixture);
 
 
-BOOST_AUTO_TEST_SUITE( imapcp )
+BOOST_AUTO_TEST_SUITE( copy )
 //BOOST_FIXTURE_TEST_SUITE( imapcp, Log_Fixture )
 
   BOOST_AUTO_TEST_CASE( basic )
@@ -392,12 +450,17 @@ BOOST_AUTO_TEST_SUITE( imapcp )
     test_logindisabled();
   }
 
-  BOOST_AUTO_TEST_CASE( partial )
+  BOOST_AUTO_TEST_CASE(partial)
   {
     boost::log::core::get()->remove_all_sinks();
     test_partial_1(true);
     boost::log::core::get()->remove_all_sinks();
     test_partial_2(true);
+  }
+  BOOST_AUTO_TEST_CASE(fetch_header)
+  {
+    boost::log::core::get()->remove_all_sinks();
+    test_fetch_header();
   }
 
 BOOST_AUTO_TEST_SUITE_END()

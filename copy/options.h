@@ -28,6 +28,12 @@
 
 namespace IMAP {
   namespace Copy {
+    enum class Task : unsigned {
+      FIRST_,
+      DOWNLOAD,
+      FETCH_HEADER,
+      LAST_
+    };
     class Options : public Net::TCP::SSL::Client::Options {
       public:
         Options();
@@ -50,6 +56,9 @@ namespace IMAP {
         unsigned    greeting_wait  {100};
         unsigned    simulate_error {0};
         std::string journal_file;
+        bool        fetch_header_only {true};
+
+        Task        task           {Task::DOWNLOAD};
 
     };
     std::ostream &operator<<(std::ostream &o, const Options &opts);

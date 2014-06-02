@@ -52,7 +52,8 @@ namespace IMAP {
 
     void Header_Printer::print()
     {
-      if (    static_cast<Log::Severity>(opts_.severity)      < Log::Severity::INFO
+      if (    opts_.task != Task::FETCH_HEADER
+           && static_cast<Log::Severity>(opts_.severity)      < Log::Severity::INFO
            && static_cast<Log::Severity>(opts_.file_severity) < Log::Severity::INFO)
         return;
 
@@ -70,7 +71,8 @@ namespace IMAP {
         BOOST_LOG_SEV(lg_, Log::ERROR) << e.what();
       }
       for (auto &i : fields_) {
-        BOOST_LOG(lg_) << setw(10) << left << i.first << ' ' << i.second;
+        BOOST_LOG_SEV(lg_, opts_.task == Task::FETCH_HEADER ? Log::MSG : Log::INFO)
+          << setw(10) << left << i.first << ' ' << i.second;
       }
       header_decoder_.clear();
       fields_.clear();

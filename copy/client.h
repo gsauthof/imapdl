@@ -63,7 +63,7 @@ namespace IMAP {
         Memory::Buffer::File    file_buffer_;
         IMAP::Client::Parser    parser_;
 
-        Task          task_        {Task::DOWNLOAD};
+        bool          need_cleanup_ {false};
         State         state_       {State::DISCONNECTED };
 
         unsigned      exists_      {0};
@@ -93,12 +93,14 @@ namespace IMAP {
 
         // specialized download client functions
         void do_pre_login();
+        void do_post_login();
         void async_login_capabilities(std::function<void(void)> fn);
         void cond_async_capabilities(std::function<void(void)> fn);
         void async_login(std::function<void(void)> fn);
         void async_select(std::function<void(void)> fn);
         void async_fetch_or_logout(std::function<void(void)> after_fetch,
             std::function<void(void)> after_logout);
+        void async_fetch_header(std::function<void(void)> fn);
         void async_fetch(std::function<void(void)> fn);
         void async_store_or_logout(std::function<void(void)> after_store,
             std::function<void(void)> after_logout);
@@ -106,7 +108,7 @@ namespace IMAP {
         void async_uid_or_simple_expunge(std::function<void(void)> fn);
         void async_uid_expunge(std::function<void(void)> fn);
         void async_cleanup(std::function<void(void)> fn);
-        void do_cleanup();
+        void do_fetch_header();
         void do_download();
         void do_task();
         void do_quit();

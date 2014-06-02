@@ -45,6 +45,7 @@ namespace Log {
     create(Severity severity, Severity file_severity,
         const std::string &logfile = std::string());
   void setup_file(Severity severity_threshold, const std::string &filename);
+  void setup_vanilla_file(Severity severity_threshold, const std::string &filename);
 }
 
 #endif

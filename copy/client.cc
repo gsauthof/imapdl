@@ -90,7 +90,7 @@ namespace IMAP {
         uidvalidity_ = journal.uidvalidity_;
         uids_ = journal.uids_;
         mailbox_ = journal.mailbox_;
-        task_ = Task::CLEANUP;
+        need_cleanup_ = true;
         fs::remove(opts_.journal_file);
       }
     }
@@ -158,11 +158,6 @@ namespace IMAP {
       async_select(store_fn);
     }
 
-    void Client::do_cleanup()
-    {
-      async_cleanup(std::bind(&Client::do_download, this));
-    }
-
     void Client::do_download()
     {
       BOOST_LOG_FUNCTION();
@@ -185,6 +180,21 @@ namespace IMAP {
       };
       async_select(fetch_fn);
     }
+    void Client::do_fetch_header()
+    {
+      BOOST_LOG_FUNCTION();
+      auto finish_fn = [this](){
+        do_quit();
+      };
+      auto logout_fn = [this, finish_fn](){
+        uids_.clear();
+        async_logout(finish_fn);
+      };
+      auto fetch_fn = [this, logout_fn](){
+        async_fetch_header(logout_fn);
+      };
+      async_select(fetch_fn);
+    }
 
     void Client::do_pre_login()
     {
@@ -199,20 +209,27 @@ namespace IMAP {
             BOOST_LOG(lg_) << "Point after first possibly occured read";
             //do_capabilities();
             cond_async_capabilities([this](){
-                async_login_capabilities(std::bind(&Client::do_task, this));
+                async_login_capabilities(std::bind(&Client::do_post_login, this));
               });
           }
         });
     }
+    void Client::do_post_login()
+    {
+      if (need_cleanup_)
+        async_cleanup(std::bind(&Client::do_task, this));
+      else
+        do_task();
+    }
 
     void Client::do_task()
     {
-      switch (task_) {
-        case Task::CLEANUP:
-          do_cleanup();
-          break;
+      switch (opts_.task) {
         case Task::DOWNLOAD:
           do_download();
+          break;
+        case Task::FETCH_HEADER:
+          do_fetch_header();
           break;
         default:
           ;
@@ -285,6 +302,28 @@ namespace IMAP {
       atts.emplace_back(Fetch::BODY_PEEK,
           IMAP::Section_Attribute(IMAP::Section::HEADER_FIELDS, std::move(fields)));
       atts.emplace_back(Fetch::BODY_PEEK);
+
+      state_ = State::FETCHING;
+      IMAP::Client::Base::async_fetch(set, atts, fn);
+    }
+
+    void Client::async_fetch_header(std::function<void(void)> fn)
+    {
+      vector<pair<uint32_t, uint32_t> > set = {
+        {1, numeric_limits<uint32_t>::max()}
+      };
+
+      using namespace IMAP::Client;
+      vector<Fetch_Attribute> atts;
+      atts.emplace_back(Fetch::UID);
+      atts.emplace_back(Fetch::FLAGS);
+      vector<string> fields;
+      fields.emplace_back("date");
+      fields.emplace_back("from");
+      fields.emplace_back("subject");
+      // BODY_PEEK - same as BODY but don't set \seen flag ...
+      atts.emplace_back(Fetch::BODY_PEEK,
+          IMAP::Section_Attribute(IMAP::Section::HEADER_FIELDS, std::move(fields)));
 
       state_ = State::FETCHING;
       IMAP::Client::Base::async_fetch(set, atts, fn);
@@ -398,7 +437,7 @@ namespace IMAP {
     void Client::imap_capability(IMAP::Server::Response::Capability capability)
     {
       BOOST_LOG_FUNCTION();
-      BOOST_LOG(lg_) << "Got capability: " << capability;
+      BOOST_LOG_SEV(lg_, Log::DEBUG) << "Got capability: " << capability;
       capabilities_.insert(capability);
     }
     void Client::imap_status_code_capability_end()
@@ -456,7 +495,11 @@ namespace IMAP {
     }
     void Client::imap_section_empty()
     {
-      full_body_ = true;
+      if (state_ == State::FETCHING) {
+        if (opts_.task == Task::FETCH_HEADER)
+          THROW_MSG("server sends body during header only fetch");
+        full_body_ = true;
+      }
     }
     void Client::imap_body_section_inner()
     {

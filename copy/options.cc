@@ -76,6 +76,7 @@ namespace OPT {
   static const char GREETING_WAIT[]  = "gwait"         ;
   static const char SIMULATE_ERROR[] = "sim_error"     ;
   static const char JOURNAL_FILE[]   = "journal"       ;
+  static const char FETCH_HEADER[]   = "header"        ;
 }
 
 namespace KEY {
@@ -258,6 +259,10 @@ namespace IMAP {
          ->default_value("", "$HOME/.config/"  + string(ID::argv0) + "/$ACCOUNT.journal"),
            "write already fetched and not yet expunged messages to a journal "
            "for expunging on the next connect")
+        (OPT::FETCH_HEADER, po::value<bool>(&fetch_header_only)
+         ->default_value(false, "false")
+         ->implicit_value(true, "true")
+         , "fetch (and display) only header fields")
         ;
 
       po::options_description hidden_group;
@@ -323,6 +328,8 @@ namespace IMAP {
           << account << ".journal";
         journal_file = o.str();
       }
+      if (fetch_header_only)
+        task = Task::FETCH_HEADER;
     }
     void Options::verify()
     {

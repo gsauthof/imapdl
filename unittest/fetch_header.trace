@@ -1,0 +1,38 @@
+22 serialization::archive 10 0 1 1 376 159 * OK [CAPABILITY IMAP4 IMAP4rev1 LITERAL+ ID AUTH=LOGIN AUTH=PLAIN AUTH=GSSAPI SASL-IR] imap.CeBiTec.Uni-Bielefeld.DE Cyrus IMAP v2.3.13-CeBiTec server ready
+ 0 0 30 A000 LOGIN juser123 muchvery
+ 1 79 356 A000 OK [CAPABILITY IMAP4 IMAP4rev1 LITERAL+ ID LOGINDISABLED AUTH=LOGIN AUTH=PLAIN AUTH=GSSAPI ACL RIGHTS=kxte QUOTA MAILBOX-REFERRALS NAMESPACE UIDPLUS NO_ATOMIC_RENAME UNSELECT CHILDREN MULTIAPPEND BINARY SORT SORT=MODSEQ THREAD=ORDEREDSUBJECT THREAD=REFERENCES ANNOTATEMORE CATENATE CONDSTORE SCAN IDLE LISTEXT LIST-SUBSCRIBED URLAUTH] User logged in
+ 0 0 19 A001 SELECT INBOX
+ 1 63 355 * FLAGS (\Answered \Flagged \Draft \Deleted \Seen)
+* OK [PERMANENTFLAGS (\Answered \Flagged \Draft \Deleted \Seen \*)]  
+* 3 EXISTS
+* 3 RECENT
+* OK [UNSEEN 1]  
+* OK [UIDVALIDITY 1204039922]  
+* OK [UIDNEXT 23420]  
+* OK [NOMODSEQ] Sorry, modsequences have not been enabled on this mailbox
+* OK [URLMECH INTERNAL]
+A001 OK [READ-WRITE] Completed
+ 0 0 73 A002 FETCH 1:* (UID FLAGS BODY.PEEK[HEADER.FIELDS (date from subject)])
+ 1 47 571 * 1 FETCH (FLAGS (\Recent) UID 23417 BODY[HEADER.FIELDS (date from subject)] {94}
+Date: Mon, 2 Jun 2014 23:09:55 +0200
+From: Georg Sauthoff <mail@georg.so>
+Subject: test1
+
+)
+* 2 FETCH (FLAGS (\Recent) UID 23418 BODY[HEADER.FIELDS (date from subject)] {94}
+Date: Mon, 2 Jun 2014 23:10:13 +0200
+From: Georg Sauthoff <mail@georg.so>
+Subject: test2
+
+)
+* 3 FETCH (FLAGS (\Recent) UID 23419 BODY[HEADER.FIELDS (date from subject)] {94}
+Date: Mon, 2 Jun 2014 23:10:25 +0200
+From: Georg Sauthoff <mail@georg.so>
+Subject: test3
+
+)
+A002 OK Completed (0.000 sec)
+ 0 0 13 A003 LOGOUT
+ 1 44 42 * BYE LOGOUT received
+A003 OK Completed
+ 2 0 0  3 0 0 

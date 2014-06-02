@@ -26,12 +26,6 @@
 namespace IMAP {
   namespace Copy {
 
-    enum class Task : unsigned {
-      FIRST_,
-      CLEANUP,
-      DOWNLOAD,
-      LAST_
-    };
     enum class State : unsigned {
       FIRST_,
       DISCONNECTED,
