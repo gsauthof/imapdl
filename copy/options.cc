@@ -49,11 +49,13 @@ namespace fs = boost::filesystem;
 namespace OPT {
   static const char HELP_S[]         = "help,h"        ;
   static const char HELP[]           = "help"          ;
+
   static const char HOST[]           = "host"          ;
   static const char SERVICE[]        = "port"          ;
   static const char LOCAL_ADDRESS[]  = "bind"          ;
   static const char LOCAL_PORT[]     = "lport"         ;
   static const char IP[]             = "ip"            ;
+
   static const char FINGERPRINT[]    = "fp"            ;
   static const char CIPHER[]         = "cipher"        ;
   static const char CIPHER_PRESET[]  = "cipher_preset" ;
@@ -61,18 +63,21 @@ namespace OPT {
   static const char CA_FILE[]        = "ca"            ;
   static const char CA_PATH[]        = "ca_path"       ;
   static const char CERT_HOST[]      = "cert_host"     ;
+  static const char TLS1[]           = "tls1"          ;
+
   static const char TRACEFILE[]      = "trace"         ;
   static const char LOGFILE[]        = "log"           ;
   static const char SEVERITY[]       = "verbose"       ;
   static const char SEVERITY_S[]     = "verbose,v"     ;
   static const char FILE_SEVERITY[]  = "log_v"         ;
-  static const char ACCOUNT[]        = "account"       ;
+
   static const char CONFIGFILE[]     = "config"        ;
+
+  static const char ACCOUNT[]        = "account"       ;
   static const char DELETE[]         = "delete"        ;
   static const char DELETE_S[]       = "delete,d"      ;
   static const char MAILBOX[]        = "mailbox"       ;
   static const char MAILDIR[]        = "maildir"       ;
-  static const char TLS1[]           = "tls1"          ;
   static const char GREETING_WAIT[]  = "gwait"         ;
   static const char SIMULATE_ERROR[] = "sim_error"     ;
   static const char JOURNAL_FILE[]   = "journal"       ;
