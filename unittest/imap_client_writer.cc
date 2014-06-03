@@ -140,18 +140,36 @@ BOOST_AUTO_TEST_SUITE( imap_client_writer )
       BOOST_CHECK_EQUAL(v.data(), "A001 LOGOUT\r\n");
     }
 
-    BOOST_AUTO_TEST_CASE( login )
-    {
-      vector<char> v;
-      using namespace IMAP::Client;
-      Tag tag;
-      Writer writer(tag, [&v](vector<char> &x){ swap(v, x);});
-      string t;
-      writer.login("juser", "secretvery", t);
-      BOOST_CHECK_EQUAL(t, "A000");
-      v.push_back('\0');
-      BOOST_CHECK_EQUAL(v.data(), "A000 LOGIN juser secretvery\r\n");
-    }
+    BOOST_AUTO_TEST_SUITE(login)
+
+      BOOST_AUTO_TEST_CASE(basic)
+      {
+        vector<char> v;
+        using namespace IMAP::Client;
+        Tag tag;
+        Writer writer(tag, [&v](vector<char> &x){ swap(v, x);});
+        string t;
+        writer.login("juser", "secretvery", t);
+        BOOST_CHECK_EQUAL(t, "A000");
+        v.push_back('\0');
+        BOOST_CHECK_EQUAL(v.data(), "A000 LOGIN juser secretvery\r\n");
+      }
+
+      BOOST_AUTO_TEST_CASE(literal)
+      {
+        vector<char> v;
+        using namespace IMAP::Client;
+        Tag tag;
+        Writer writer(tag, [&v](vector<char> &x){ swap(v, x);});
+        string t;
+        writer.login("ju%ser", "secret very", t);
+        BOOST_CHECK_EQUAL(t, "A000");
+        v.push_back('\0');
+        BOOST_CHECK_EQUAL(v.data(), "A000 LOGIN {6}\r\nju%ser {11}\r\nsecret very\r\n");
+      }
+
+    BOOST_AUTO_TEST_SUITE_END()
+
     BOOST_AUTO_TEST_CASE( examine )
     {
       vector<char> v;

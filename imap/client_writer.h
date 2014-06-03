@@ -80,7 +80,8 @@ namespace IMAP {
         void command_start(Command c, std::string &tag);
         void command_finish();
         void nullary(Command c, std::string &tag);
-        void write_literal(const string &s);
+        void write_literal(const std::string &s);
+        void write_cond_literal(const std::string &s);
         void write_sequence_nr(uint32_t nz);
         void write_sequence(const std::pair<uint32_t, uint32_t> &seq);
         void write_sequence_set(

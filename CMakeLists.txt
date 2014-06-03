@@ -27,6 +27,7 @@ find_package(Boost 1.54
     thread
     #
     locale
+    regex
   REQUIRED)
 
 include_directories(
@@ -108,6 +109,7 @@ target_link_libraries(ut
   ${Boost_LOG_SETUP_LIBRARY}
   ${Boost_THREAD_LIBRARY}
   ${Boost_LOCALE_LIBRARY}
+  ${Boost_REGEX_LIBRARY}
   # for ut comparison
   ${LIB_BOTAN}
 
@@ -202,6 +204,7 @@ target_link_libraries(imapdl
   ${Boost_LOG_SETUP_LIBRARY}
   ${Boost_THREAD_LIBRARY}
   ${Boost_LOCALE_LIBRARY}
+  ${Boost_REGEX_LIBRARY}
 
   ${OPENSSL_SSL_LIBRARY}
   ${OPENSSL_CRYPTO_LIBRARY}

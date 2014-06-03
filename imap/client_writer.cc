@@ -26,6 +26,7 @@ using namespace std;
 
 #include <boost/interprocess/streams/vectorstream.hpp>
 namespace bi = boost::interprocess;
+#include <boost/regex.hpp>
 
 namespace IMAP {
 
@@ -125,7 +126,9 @@ namespace IMAP {
         const std::string &password, string &tag)
     {
       command_start(Command::LOGIN, tag);
-      stream_ << user << ' ' << password;
+      write_cond_literal(user);
+      stream_ << ' ';
+      write_cond_literal(password);
       command_finish();
     }
     void Writer::list(const std::string &reference,
@@ -160,6 +163,14 @@ namespace IMAP {
     void Writer::write_literal(const string &s)
     {
       stream_ << '{' << s.size() << "}\r\n" << s;
+    }
+    void Writer::write_cond_literal(const string &s)
+    {
+      static boost::regex re("^[A-Za-z0-9]+$", boost::regex::extended);
+      if (boost::regex_search(s, re))
+        stream_ << s;
+      else
+        write_literal(s);
     }
     void Writer::write_sequence_nr(uint32_t nz)
     {
