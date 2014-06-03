@@ -77,6 +77,7 @@ namespace IMAP {
         bool          full_body_   {false};
         std::string   flags_;
         std::string   mailbox_;
+        std::set<IMAP::Server::Response::OFlag> oflags_;
 
         Fetch_Timer    fetch_timer_;
         Header_Printer header_printer_;
@@ -102,12 +103,14 @@ namespace IMAP {
             std::function<void(void)> after_logout);
         void async_fetch_header(std::function<void(void)> fn);
         void async_fetch(std::function<void(void)> fn);
+        void async_list(std::function<void(void)> fn);
         void async_store_or_logout(std::function<void(void)> after_store,
             std::function<void(void)> after_logout);
         void async_store(std::function<void(void)> fn);
         void async_uid_or_simple_expunge(std::function<void(void)> fn);
         void async_uid_expunge(std::function<void(void)> fn);
         void async_cleanup(std::function<void(void)> fn);
+        void do_list();
         void do_fetch_header();
         void do_download();
         void do_task();
@@ -134,6 +137,10 @@ namespace IMAP {
         void imap_body_section_end() override;
         void imap_flag(Flag flag) override;
         void imap_uid(uint32_t number) override;
+
+        void imap_list_begin() override;
+        void imap_list_oflag(IMAP::Server::Response::OFlag o) override;
+        void imap_list_mailbox() override;
 
 
     };

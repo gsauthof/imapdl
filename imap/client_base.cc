@@ -71,6 +71,16 @@ namespace IMAP {
       BOOST_LOG_SEV(lg_, Log::INSANE) << "Password: |" << password << "|";
       do_write();
     }
+    void Base::async_list(const std::string &reference, const std::string &mailbox,
+        std::function<void(void)> fn)
+    {
+      BOOST_LOG_FUNCTION();
+      string tag;
+      writer_.list(reference, mailbox, tag);
+      tag_to_fn_[tag] = fn;
+      BOOST_LOG_SEV(lg_, Log::DEBUG) << "Listing: |" << reference << "| |" << mailbox << "|";
+      do_write();
+    }
     void Base::async_select(const std::string &mailbox, std::function<void(void)> fn)
     {
       BOOST_LOG_FUNCTION();

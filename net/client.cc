@@ -55,7 +55,7 @@ namespace Net {
     {
       bytes_read_ += size;
       trace_writer_.push(Trace::Type::RECEIVED, input_, size);
-      if (opts_.severity < Log::DEBUG)
+      if (opts_.severity < Log::DEBUG && opts_.file_severity < Log::DEBUG)
         return;
       BOOST_LOG_SEV(lg_, Log::DEBUG_V) << "Read " << size << " bytes from host";
       string s(input_.data(), size);

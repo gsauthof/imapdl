@@ -128,6 +128,15 @@ namespace IMAP {
       stream_ << user << ' ' << password;
       command_finish();
     }
+    void Writer::list(const std::string &reference,
+        const std::string &mailbox, string &tag)
+    {
+      command_start(Command::LIST, tag);
+      write_literal(reference);
+      stream_ << ' ';
+      write_literal(mailbox);
+      command_finish();
+    }
     void Writer::select(const std::string &mailbox, string &tag)
     {
       command_start(Command::SELECT, tag);
@@ -147,6 +156,10 @@ namespace IMAP {
     void Writer::expunge(string &tag)
     {
       nullary(Command::EXPUNGE, tag);
+    }
+    void Writer::write_literal(const string &s)
+    {
+      stream_ << '{' << s.size() << "}\r\n" << s;
     }
     void Writer::write_sequence_nr(uint32_t nz)
     {

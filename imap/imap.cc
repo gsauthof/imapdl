@@ -317,6 +317,26 @@ namespace IMAP {
         o << enum_str(capability_map, capability);
         return o;
       }
+      static const char * const sflag_map[] = {
+        "NOSELECT",
+        "MARKED",
+        "UNMARKED"
+      };
+      std::ostream &operator<<(std::ostream &o, SFlag sflag)
+      {
+        o << enum_str(sflag_map, sflag);
+        return o;
+      }
+      static const char * const oflag_map[] = {
+        "NOINFERIORS",
+        "HASCHILDREN",
+        "HASNOCHILDREN"
+      };
+      std::ostream &operator<<(std::ostream &o, OFlag oflag)
+      {
+        o << enum_str(oflag_map, oflag);
+        return o;
+      }
 
     }
   }

@@ -196,6 +196,22 @@ namespace IMAP {
       async_select(fetch_fn);
     }
 
+    void Client::do_list()
+    {
+      BOOST_LOG_FUNCTION();
+      auto finish_fn = [this](){
+        do_quit();
+      };
+      auto logout_fn = [this, finish_fn](){
+        uids_.clear();
+        async_logout(finish_fn);
+      };
+      auto list_fn = [this, logout_fn](){
+        async_list(logout_fn);
+      };
+      async_select(list_fn);
+    }
+
     void Client::do_pre_login()
     {
       login_timer_.expires_from_now(std::chrono::milliseconds(opts_.greeting_wait));
@@ -230,6 +246,9 @@ namespace IMAP {
           break;
         case Task::FETCH_HEADER:
           do_fetch_header();
+          break;
+        case Task::LIST:
+          do_list();
           break;
         default:
           ;
@@ -327,6 +346,10 @@ namespace IMAP {
 
       state_ = State::FETCHING;
       IMAP::Client::Base::async_fetch(set, atts, fn);
+    }
+    void Client::async_list(std::function<void(void)> fn)
+    {
+      IMAP::Client::Base::async_list(opts_.list_reference, opts_.list_mailbox, fn);
     }
 
     void Client::async_store_or_logout(std::function<void(void)> after_store,
@@ -562,6 +585,30 @@ namespace IMAP {
         BOOST_LOG_SEV(lg_, Log::DEBUG) << "UID: " << number;
         last_uid_ = number;
       }
+    }
+
+    void Client::imap_list_begin()
+    {
+      oflags_.clear();
+    }
+    void Client::imap_list_mailbox()
+    {
+      using namespace IMAP::Server::Response;
+      if (buffer_.empty()) {
+        BOOST_LOG_SEV(lg_, Log::MSG) << "NIL-Mailbox";
+        return;
+      }
+      string m(buffer_.begin(), buffer_.end());
+      char x = ' ';
+      if (oflags_.find(OFlag::HASCHILDREN) != oflags_.end())
+        x = '+';
+      else if (oflags_.find(OFlag::HASNOCHILDREN) != oflags_.end())
+          x = '|';
+      BOOST_LOG_SEV(lg_, Log::MSG) << "Mailbox: -" << x << ' ' << m;
+    }
+    void Client::imap_list_oflag(IMAP::Server::Response::OFlag o)
+    {
+      oflags_.insert(o);
     }
 
   }

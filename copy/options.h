@@ -32,6 +32,7 @@ namespace IMAP {
       FIRST_,
       DOWNLOAD,
       FETCH_HEADER,
+      LIST,
       LAST_
     };
     class Options : public Net::TCP::SSL::Client::Options {
@@ -57,6 +58,9 @@ namespace IMAP {
         unsigned    simulate_error {0};
         std::string journal_file;
         bool        fetch_header_only {true};
+        bool        list           {true};
+        std::string list_reference;
+        std::string list_mailbox;
 
         Task        task           {Task::DOWNLOAD};
 

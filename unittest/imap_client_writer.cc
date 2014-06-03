@@ -499,6 +499,43 @@ BOOST_AUTO_TEST_SUITE( imap_client_writer )
 
     BOOST_AUTO_TEST_SUITE_END()
 
+    BOOST_AUTO_TEST_SUITE(list)
+
+      BOOST_AUTO_TEST_CASE(basic)
+      {
+        vector<char> v;
+        using namespace IMAP::Client;
+        Tag tag;
+        Writer writer(tag, [&v](vector<char> &x){ swap(v, x);});
+        string t;
+        writer.login("juser", "secretvery", t);
+        writer.list("", "", t);
+        BOOST_CHECK_EQUAL(t, "A001");
+        v.push_back('\0');
+        BOOST_CHECK_EQUAL(v.data(), "A001 LIST {0}\r\n {0}\r\n\r\n");
+      }
+      BOOST_AUTO_TEST_CASE(two)
+      {
+        vector<char> v;
+        using namespace IMAP::Client;
+        Tag tag;
+        Writer writer(tag, [&v](vector<char> &x){ swap(v, x);});
+        string t;
+        writer.login("juser", "secretvery", t);
+        tag.pop(t);
+        writer.list("", "", t);
+        BOOST_CHECK_EQUAL(t, "A001");
+        v.push_back('\0');
+        BOOST_CHECK_EQUAL(v.data(), "A001 LIST {0}\r\n {0}\r\n\r\n");
+        tag.pop(t);
+        writer.list("~/Mail/", "%", t);
+        BOOST_CHECK_EQUAL(t, "A002");
+        v.push_back('\0');
+        BOOST_CHECK_EQUAL(v.data(), "A002 LIST {7}\r\n~/Mail/ {1}\r\n%\r\n");
+      }
+
+    BOOST_AUTO_TEST_SUITE_END()
+
 
   BOOST_AUTO_TEST_SUITE_END()
 

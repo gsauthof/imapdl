@@ -1342,4 +1342,66 @@ BOOST_AUTO_TEST_SUITE( imap_client_parser )
 
   BOOST_AUTO_TEST_SUITE_END();
 
+  BOOST_AUTO_TEST_SUITE( list )
+
+    BOOST_AUTO_TEST_CASE(basic)
+    {
+      using namespace IMAP::Server::Response;
+      const char response[] =
+        "* LIST (\\Noselect) \"/\" ~/Mail/foo\r\n"
+        ;
+      const char *begin = response;
+      const char *end = begin + sizeof(response)-1;
+
+      struct CB : public IMAP::Client::Callback::Null {
+        Memory::Buffer::Vector buffer;
+        Memory::Buffer::Vector tag_buffer;
+        unsigned list_begin {0};
+        unsigned list_end {0};
+        unsigned list_sflag {0};
+        unsigned list_oflag {0};
+        unsigned quoted_char {0};
+        unsigned list_mailbox {0};
+        void imap_list_begin() override
+        {
+          ++list_begin;
+        }
+        void imap_list_end() override
+        {
+          ++list_end;
+        }
+        void imap_list_sflag(SFlag flag) override
+        {
+          ++list_sflag;
+          BOOST_CHECK_EQUAL(flag, SFlag::NOSELECT);
+        }
+        void imap_list_oflag(OFlag oflag) override
+        {
+          ++list_oflag;
+        }
+        void imap_quoted_char(char c) override
+        {
+          ++quoted_char;
+          BOOST_CHECK_EQUAL(c, '/');
+        }
+        void imap_list_mailbox() override
+        {
+          ++list_mailbox;
+          string s(buffer.begin(), buffer.end());
+          BOOST_CHECK_EQUAL(s, "~/Mail/foo");
+        }
+      };
+      CB cb;
+      IMAP::Client::Parser p(cb.buffer, cb.tag_buffer, cb);
+      p.read(begin, end);
+      BOOST_CHECK_EQUAL(cb.list_begin, 1);
+      BOOST_CHECK_EQUAL(cb.list_end, 1);
+      BOOST_CHECK_EQUAL(cb.list_sflag, 1);
+      BOOST_CHECK_EQUAL(cb.list_oflag, 0);
+      BOOST_CHECK_EQUAL(cb.quoted_char, 1);
+      BOOST_CHECK_EQUAL(cb.list_mailbox, 1);
+    }
+
+  BOOST_AUTO_TEST_SUITE_END();
+
 BOOST_AUTO_TEST_SUITE_END();

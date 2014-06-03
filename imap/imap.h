@@ -270,6 +270,26 @@ namespace IMAP {
           LAST_
       };
       std::ostream &operator<<(std::ostream &o, Capability capability);
+
+      enum class SFlag {
+        FIRST_,
+        NOSELECT,
+        MARKED,
+        UNMARKED,
+        LAST_
+      };
+      std::ostream &operator<<(std::ostream &o, SFlag capability);
+      enum class OFlag {
+        FIRST_,
+        NOINFERIORS,
+        // RFC3348
+        HASCHILDREN,
+        HASNOCHILDREN,
+        LAST_
+      };
+      std::ostream &operator<<(std::ostream &o, OFlag capability);
+
+
     }
   }
 
@@ -281,6 +301,16 @@ namespace std {
   template <> struct hash<IMAP::Server::Response::Capability>
   {
     size_t operator()(IMAP::Server::Response::Capability c) const
+    {
+      return hash<unsigned>()(static_cast<unsigned>(c));
+    }
+  };
+}
+
+namespace std {
+  template <> struct hash<IMAP::Server::Response::OFlag>
+  {
+    size_t operator()(IMAP::Server::Response::OFlag c) const
     {
       return hash<unsigned>()(static_cast<unsigned>(c));
     }

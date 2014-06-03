@@ -57,6 +57,8 @@ namespace IMAP {
         void async_capabilities(std::function<void(void)> fn);
         void async_login(const std::string &username, const std::string &password,
             std::function<void(void)> fn);
+        void async_list(const std::string &reference, const std::string &mailbox,
+            std::function<void(void)> fn);
         void async_select(const std::string &mailbox, std::function<void(void)> fn);
         void async_fetch(
             const std::vector<std::pair<uint32_t, uint32_t> > &set,

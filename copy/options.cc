@@ -77,6 +77,9 @@ namespace OPT {
   static const char SIMULATE_ERROR[] = "sim_error"     ;
   static const char JOURNAL_FILE[]   = "journal"       ;
   static const char FETCH_HEADER[]   = "header"        ;
+  static const char LIST[]           = "list"          ;
+  static const char LIST_REFERENCE[] = "list_reference";
+  static const char LIST_MAILBOX[]   = "list_mailbox"  ;
 }
 
 namespace KEY {
@@ -263,6 +266,15 @@ namespace IMAP {
          ->default_value(false, "false")
          ->implicit_value(true, "true")
          , "fetch (and display) only header fields")
+        (OPT::LIST, po::value<bool>(&list)
+         ->default_value(false, "false")
+         ->implicit_value(true, "true")
+         , "execute IMAP LIST on the server (without fetching anything)")
+        (OPT::LIST_REFERENCE, po::value<string>(&list_reference)
+         , "LIST reference argument")
+        (OPT::LIST_MAILBOX, po::value<string>(&list_mailbox)
+         ->default_value("%")
+         , "LIST mailbox argument")
         ;
 
       po::options_description hidden_group;
@@ -330,6 +342,8 @@ namespace IMAP {
       }
       if (fetch_header_only)
         task = Task::FETCH_HEADER;
+      if (list)
+        task = Task::LIST;
     }
     void Options::verify()
     {

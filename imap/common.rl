@@ -128,6 +128,10 @@ action literal_tail_cond_return_exl_finish
     fret;
   }
 }
+action cb_quoted_char
+{
+  cb_.imap_quoted_char(fc);
+}
 
 # }}}
 
@@ -194,8 +198,8 @@ literal = '{' number >number_start %number_finish '}' CRLF @buffer_clear  @call_
 # QUOTED-CHAR     = <any TEXT-CHAR except quoted-specials> /
 #                   "\" quoted-specials
 
-QUOTED_CHAR = ( TEXT_CHAR - quoted_specials )
-            | '\\' quoted_specials ;
+QUOTED_CHAR = ( TEXT_CHAR - quoted_specials ) @cb_quoted_char
+            | '\\' quoted_specials @cb_quoted_char ;
 
 # quoted          = DQUOTE *QUOTED-CHAR DQUOTE
 
@@ -230,7 +234,7 @@ ASTRING_CHAR = ATOM_CHAR | resp_specials ;
 
 # astring         = 1*ASTRING-CHAR / string
 
-astring         = ASTRING_CHAR+ | string ;
+astring         = ASTRING_CHAR+ >buffer_start %buffer_finish | string ;
 
 # nil             = "NIL"
 
@@ -348,7 +352,7 @@ status_att = /MESSAGES/i
 #                     ;  Refer to section 5.1 for further
 #                     ; semantic details of mailbox names.
 
-mailbox = /INBOX/i | ( astring - /INBOX/i ) ;
+mailbox = /INBOX/i | ( astring ) ;
 
 # header-fld-name = astring
 

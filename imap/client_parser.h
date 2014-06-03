@@ -84,6 +84,13 @@ namespace IMAP {
           virtual void imap_body_section_end() = 0;
           virtual void imap_section_empty() = 0;
           virtual void imap_section_header() = 0;
+
+          virtual void imap_list_begin() = 0;
+          virtual void imap_list_end() = 0;
+          virtual void imap_list_sflag(SFlag flag) = 0;
+          virtual void imap_list_oflag(OFlag oflag) = 0;
+          virtual void imap_quoted_char(char c) = 0;
+          virtual void imap_list_mailbox() = 0;
       };
 
       class Null : public Base {
@@ -119,6 +126,13 @@ namespace IMAP {
           void imap_body_section_end() override;
           void imap_section_empty() override;
           void imap_section_header() override;
+
+          virtual void imap_list_begin() override;
+          virtual void imap_list_end() override;
+          virtual void imap_list_sflag(SFlag flag) override;
+          virtual void imap_list_oflag(OFlag oflag) override;
+          virtual void imap_quoted_char(char c) override;
+          virtual void imap_list_mailbox() override;
       };
     }
 

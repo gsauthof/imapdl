@@ -111,6 +111,25 @@ namespace IMAP {
       {
       }
 
+      void Null::imap_list_begin()
+      {
+      }
+      void Null::imap_list_end()
+      {
+      }
+      void Null::imap_list_sflag(SFlag flag)
+      {
+      }
+      void Null::imap_list_oflag(OFlag oflag)
+      {
+      }
+      void Null::imap_quoted_char(char c)
+      {
+      }
+      void Null::imap_list_mailbox()
+      {
+      }
+
 
     }
 

@@ -182,6 +182,7 @@ setups, yet.
 - [RFC 2231 - MIME Parameter Value and Encoded Word Extensions](http://tools.ietf.org/html/rfc2231): Character Sets, Languages, and Continuations, Proposed STD, 1997
 - [RFC 1766 - Tags for Identifying Language](http://tools.ietf.org/html/rfc1766), Proposed STD, 1995
 - [RFC 5646 - Tags for Identifying Language](http://tools.ietf.org/html/rfc5646), BCP 47, 2009
+- [RFC 3348 - The Internet Message Action Protocol (IMAP4) Child Mailbox Extension](http://tools.ietf.org/html/rfc3348), Informational, 2002
 
 
 [asio]:    http://www.boost.org/doc/libs/1_55_0/libs/asio/

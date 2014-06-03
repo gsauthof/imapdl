@@ -478,6 +478,50 @@ action cb_section_empty
   cb_.imap_section_empty();
 }
 
+action cb_list_begin
+{
+  cb_.imap_list_begin();
+}
+action cb_list_end
+{
+  cb_.imap_list_end();
+}
+action cb_list_sflag_noselect
+{
+  using namespace IMAP::Server::Response;
+  cb_.imap_list_sflag(SFlag::NOSELECT);
+}
+action cb_list_sflag_marked
+{
+  using namespace IMAP::Server::Response;
+  cb_.imap_list_sflag(SFlag::MARKED);
+}
+action cb_list_sflag_unmarked
+{
+  using namespace IMAP::Server::Response;
+  cb_.imap_list_sflag(SFlag::UNMARKED);
+}
+action cb_list_oflag_noinferiors
+{
+  using namespace IMAP::Server::Response;
+  cb_.imap_list_oflag(OFlag::NOINFERIORS);
+}
+action cb_list_oflag_haschildren
+{
+  using namespace IMAP::Server::Response;
+  cb_.imap_list_oflag(OFlag::HASCHILDREN);
+}
+action cb_list_oflag_hasnochildren
+{
+  using namespace IMAP::Server::Response;
+  cb_.imap_list_oflag(OFlag::HASNOCHILDREN);
+}
+action cb_list_mailbox
+{
+  using namespace IMAP::Server::Response;
+  cb_.imap_list_mailbox();
+}
+
 # }}}
 
 include imap_common "imap/common.rl";
@@ -947,12 +991,21 @@ message_data =
 # mbx-list-sflag  = "\Noselect" / "\Marked" / "\Unmarked"
 #                     ; Selectability flags; only one per LIST response
 
-mbx_list_sflag  = '\\' ( /Noselect/i | /Marked/i | /Unmarked/i ) ;
+mbx_list_sflag  = '\\' ( /Noselect/i %cb_list_sflag_noselect
+                       | /Marked/i   %cb_list_sflag_marked
+                       | /Unmarked/i %cb_list_sflag_unmarked ) ;
 
 # mbx-list-oflag  = "\Noinferiors" / flag-extension
 #                     ; Other flags; multiple possible per LIST response
 
-mbx_list_oflag  = /\\Noinferiors/i | ( flag_extension - /\\Noinferiors/i ) ;
+# extensions:
+# \HasNoChildren
+
+mbx_list_oflag  = '\\' /Noinferiors/i   %cb_list_oflag_noinferiors
+                # RFC3348
+                | '\\' /HasChildren/i   %cb_list_oflag_haschildren
+                | '\\' /HasNoChildren/i %cb_list_oflag_hasnochildren
+                | ( flag_extension ) ;
 
 # mbx-list-flags  = *(mbx-list-oflag SP) mbx-list-sflag
 #                   *(SP mbx-list-oflag) /
@@ -966,7 +1019,7 @@ mbx_list_flags  = (mbx_list_oflag SP)* mbx_list_sflag (SP mbx_list_oflag)*
 
 # QUOTED_CHAR is the hierarchy delimiter, nil means no hierarchy/flat
 mailbox_list    = '(' (mbx_list_flags)? ')' SP
-                   (DQUOTE QUOTED_CHAR DQUOTE | nil) SP mailbox ;
+                   (DQUOTE QUOTED_CHAR DQUOTE | nil) SP mailbox %cb_list_mailbox ;
 
 # status-att-list =  status-att SP number *(SP status-att SP number)
 
@@ -979,7 +1032,7 @@ status_att_list = status_att SP number (SP status_att SP number)* ;
 
 mailbox_data    = /FLAGS/i  SP
                     @cb_data_flags_begin flag_list %cb_data_flags_end
-                | /LIST/i   SP mailbox_list
+                | /LIST/i   SP @cb_list_begin mailbox_list %cb_list_end
                 | /LSUB/i   SP mailbox_list
                 | /SEARCH/i (SP nz_number)*
                 | /STATUS/i SP mailbox SP '(' (status_att_list)? ')'
