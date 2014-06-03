@@ -154,14 +154,84 @@ namespace IMAP {
         ;
     }
 
+    class Options_Priv : public Options {
+      private:
+        void add_general_opts(po::options_description &general_group);
+        void add_net_opts    (po::options_description &net_group);
+        void add_ssl_opts    (po::options_description &ssl_group);
+        void add_test_opts   (po::options_description &test_group);
+        void add_imap_opts   (po::options_description &imap_group);
+
+      public:
+        void add_groups      (po::options_description &visible_group);
+    };
+
+
+    Options::Options(int argc, char **argv)
+    {
+      po::options_description hidden_group;
+      //hidden_group.add_options()
+      //  (OPT::HOST, po::value<string>(&host)->required(), "remote host")
+      //  (OPT::MAILDIR, po::value<string>(&maildir)->required(), "maildir destination")
+      //  ;
+
+      po::options_description visible_group;
+      Options_Priv *d = new (this) Options_Priv;
+      d->add_groups(visible_group);
+      po::options_description all;
+      all.add(visible_group);
+      all.add(hidden_group);
+
+      //po::positional_options_description pdesc;
+      //pdesc.add(OPT::HOST, 1);
+      //pdesc.add(OPT::MAILDIR, 1);
+      po::variables_map vm;
+      po::store(po::command_line_parser(argc, argv)
+          .options(all)
+          //.positional(pdesc)
+          .run(), vm);
+
+      if (vm.count(OPT::HELP)) {
+        help(*argv, visible_group, cout);
+        exit(0);
+      }
+      if (vm.count(OPT::CONFIGFILE))
+        configfile = vm[OPT::CONFIGFILE].as<string>();
+      if (vm.count(OPT::ACCOUNT))
+        account = vm[OPT::ACCOUNT].as<string>();
+      load();
+      po::notify(vm);
+
+      fix();
+      verify();
+    }
+
+    void Options_Priv::add_groups(po::options_description &visible_group)
+    {
+      po::options_description general_group("General Options");
+      add_general_opts(general_group);
+      po::options_description net_group("Net Options");
+      add_net_opts(net_group);
+      po::options_description ssl_group("SSL Options");
+      add_ssl_opts(ssl_group);
+      po::options_description test_group("Test Options");
+      add_test_opts(test_group);
+      po::options_description imap_group("IMAP Options");
+      add_imap_opts(imap_group);
+
+      visible_group.add(general_group);
+      visible_group.add(net_group);
+      visible_group.add(ssl_group);
+      visible_group.add(test_group);
+      visible_group.add(imap_group);
+    }
 
     // some default_value()/required_value() are commented out
     // because the defaults are set when reading the RC file
     // and required values may also come from the RC file.
     // Required values are checked in verify().
-    Options::Options(int argc, char **argv)
+    void Options_Priv::add_general_opts(po::options_description &general_group)
     {
-      po::options_description general_group("General Options");
       general_group.add_options()
         (OPT::HELP_S, "this help screen")
         (OPT::TRACEFILE, po::value<string>(&tracefile)->default_value(""),
@@ -179,7 +249,9 @@ namespace IMAP {
            ->implicit_value(7), //->value_name("bool"),
            "default verbosity for log file, level, 0 means nothing - higher means more")
         ;
-      po::options_description net_group("Net Options");
+    }
+    void Options_Priv::add_net_opts(po::options_description &net_group)
+    {
       net_group.add_options()
         (OPT::IP, po::value<unsigned>(&ip)
            //->default_value(4),
@@ -195,7 +267,9 @@ namespace IMAP {
            , "remote service name or port - usually imaps=993 (SSL) and imap=143"
            " (default: imaps or imap)")
         ;
-      po::options_description ssl_group("SSL Options");
+    }
+    void Options_Priv::add_ssl_opts(po::options_description &ssl_group)
+    {
       ssl_group.add_options()
         (OPT::USE_SSL,
          po::value<bool>(&use_ssl)
@@ -228,14 +302,18 @@ namespace IMAP {
            "enable/disable use of TLSv1 - disabling means that only TLSv1.1/TLSv1.2 "
            "are allowed. (default: true)")
         ;
-      po::options_description test_group("Test Options");
+    }
+    void Options_Priv::add_test_opts(po::options_description &test_group)
+    {
       test_group.add_options()
         (OPT::SIMULATE_ERROR,
            po::value<unsigned>(&simulate_error)
            ->default_value(0)
            , "simulate an error before fetching the n-th message")
         ;
-      po::options_description imap_group("IMAP Options");
+    }
+    void Options_Priv::add_imap_opts(po::options_description &imap_group)
+    {
       imap_group.add_options()
         (OPT::ACCOUNT, po::value<string>(&account)->default_value("default"),
            "account name - is used to find section in configuration file")
@@ -281,46 +359,8 @@ namespace IMAP {
          ->default_value("%")
          , "LIST mailbox argument")
         ;
-
-      po::options_description hidden_group;
-      //hidden_group.add_options()
-      //  (OPT::HOST, po::value<string>(&host)->required(), "remote host")
-      //  (OPT::MAILDIR, po::value<string>(&maildir)->required(), "maildir destination")
-      //  ;
-
-      po::options_description visible_group;
-      visible_group.add(general_group);
-      visible_group.add(net_group);
-      visible_group.add(ssl_group);
-      visible_group.add(test_group);
-      visible_group.add(imap_group);
-      po::options_description all;
-      all.add(visible_group);
-      all.add(hidden_group);
-
-      po::positional_options_description pdesc;
-      //pdesc.add(OPT::HOST, 1);
-      //pdesc.add(OPT::MAILDIR, 1);
-      po::variables_map vm;
-      po::store(po::command_line_parser(argc, argv)
-          .options(all)
-          .positional(pdesc)
-          .run(), vm);
-
-      if (vm.count(OPT::HELP)) {
-        help(*argv, visible_group, cout);
-        exit(0);
-      }
-      if (vm.count(OPT::CONFIGFILE))
-        configfile = vm[OPT::CONFIGFILE].as<string>();
-      if (vm.count(OPT::ACCOUNT))
-        account = vm[OPT::ACCOUNT].as<string>();
-      load();
-      po::notify(vm);
-
-      fix();
-      verify();
     }
+
     void Options::fix()
     {
       if (maildir.substr(0, 2) == "~/")
