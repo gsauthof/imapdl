@@ -176,6 +176,7 @@ setups, yet.
 - [RFC 2595 - Using TLS with IMAP, POP3 and ACAP](http://tools.ietf.org/html/rfc2595), Proposed STD, 1999
 - [RFC 2234 - Augmented BNF for Syntax Specifications: ABNF](http://tools.ietf.org/html/rfc2234), Proposed STD, 1997
 - [RFC 822 - Standard for the Format of ARPA Internet Text Messages, Section 2 Notational Conventions](http://tools.ietf.org/html/rfc822#section-2) - as a reference for pre-RFC2234 ABNF constructs, STD, 1982
+- [RFC 5234 - Augmented BNF for Syntax Specifications: ABNF](http://tools.ietf.org/html/rfc5234), STD, 2008
 - [RFC 2822 - Internet Message Format](http://tools.ietf.org/html/rfc2822), Proposed STD, 2001
 - [RFC 2047 - MIME (Multipurpose Internet Mail Extensions) Part Three](http://tools.ietf.org/html/rfc2047): Message Header Extensions for Non-ASCII Text, [Section 4 Encodings](http://tools.ietf.org/html/rfc2047#section-4), Draft STD, 1996
 - [RFC 2045 - Multipurpose Internet Mail Extensions (MIME) Part One](http://tools.ietf.org/html/rfc2045): Format of Internet Message Bodies, [Section 6.8 Base64 Content-Transfer-Encoding](http://tools.ietf.org/html/rfc2045#section-6.8), Draft STD, 1996

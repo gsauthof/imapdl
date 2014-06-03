@@ -119,6 +119,11 @@ digit_nz = [1-9] ;
 
 TEXT_CHAR = CHAR - [\r\n] ;
 
+# RFC 5646
+#alphanum      = (ALPHA / DIGIT)     ; letters and numbers
+
+alphanum = (ALPHA | DIGIT)
+  ;
 
 }%%
 

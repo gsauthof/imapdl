@@ -93,11 +93,11 @@ action charset_finish
 {
   charset_buffer_.finish(p);
 }
-action language_start
+action language_tag_start
 {
   language_buffer_.start(p);
 }
-action language_finish
+action language_tag_finish
 {
   language_buffer_.finish(p);
 }
@@ -151,6 +151,7 @@ action check_lf
 # }}}
 
 include abnf           "rfc/abnf.rl";
+include language       "rfc/language.rl";
 include base64_decoder "mime/base64_decoder.rl";
 include q_decoder      "mime/q_decoder.rl";
 
@@ -181,29 +182,10 @@ token = token_char+
 charset = token >charset_start %charset_finish
   ;
 
-# RFC1766
-# Subtag = 1*8ALPHA
-
-subtag = ALPHA{1,8}
-  ;
-
-# RFC1766
-# Primary-tag = 1*8ALPHA
-
-primary_tag = ALPHA{1,8}
-  ;
-
-# RFC1766
-# Language-Tag = Primary-tag *( "-" Subtag )
-
-language_tag = primary_tag ('-' subtag)*
-  ;
-
 # RFC2231
 # language := <registered language tag [RFC-1766]>
 
-language = language_tag >language_start %language_finish
-  ;
+# RFC 1766 was obsoleted by RFC 5646 - there the axiom is language_tag
 
 # RFC2047
 # encoding = token   ; see section 4
@@ -242,7 +224,8 @@ encoded_word_mid =
    encoded_word_end @convert_buffer
   ;
 
-encoded_word_tail = '?' @clear_trail_space charset ('*' language )? '?' encoded_word_mid
+encoded_word_tail = '?' @clear_trail_space charset ('*'
+  language_tag >language_tag_start % language_tag_finish )? '?' encoded_word_mid
   ;
 
 #encoded_word = '=' encoded_word_tail
