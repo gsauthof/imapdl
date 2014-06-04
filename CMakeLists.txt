@@ -13,7 +13,7 @@ find_package(RAGEL 6.6 REQUIRED)
 # are not in the same dir as the source (include "foo.h"->foo.h can't be found)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-find_package(Boost 1.54
+find_package(Boost 1.55
   COMPONENTS
     system # needed by filesystem, log
     filesystem
@@ -52,6 +52,16 @@ add_subdirectory(libbuffer)
 find_package(OpenSSL REQUIRED)
 find_library(LIB_BOTAN
   NAMES botan
+        botan-1.10 # for Fedora 20
+  )
+find_path(HEADER_BOTAN
+  NAMES botan/pipe.h
+  # e.g. Fedora 20 stores the botan header files
+  # under /usr/include/botan-1.10/botan/*.h ...
+  PATH_SUFFIXES botan-1.10
+  )
+include_directories(
+  ${HEADER_BOTAN}
   )
 
 add_executable(ut

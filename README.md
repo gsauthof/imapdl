@@ -97,7 +97,7 @@ Or supply a custom cache initialization file via `cmake -C`.
 - C++11 Compiler (e.g. [GCC][gcc] >= 4.8)
 - POSIX like system
 - [CMake][cmake] (>= 2.8)
-- [Boost][boost] (>= 1.54)
+- [Boost][boost] (>= 1.55)
 - [Ragel][ragel] (>= 6.6)
 - [OpenSSL][openssl] (tested with 1.0.1e)
 - [Botan][botan] (tested with 1.8.14, only for unittests)
@@ -127,7 +127,7 @@ For verifying the authenticity of the certificate provided by the server you can
 
 ## Tested platforms
 
-- Linux (Fedora 19 x86_64)
+- Linux (Fedora 19/20 x86_64)
 
 ### IMAP Servers
 
