@@ -67,14 +67,14 @@ namespace OPT {
 
   static const char TRACEFILE[]      = "trace"         ;
   static const char LOGFILE[]        = "log"           ;
-  static const char SEVERITY[]       = "verbose"       ;
+//  static const char SEVERITY[]       = "verbose"       ;
   static const char SEVERITY_S[]     = "verbose,v"     ;
   static const char FILE_SEVERITY[]  = "log_v"         ;
 
   static const char CONFIGFILE[]     = "config"        ;
 
   static const char ACCOUNT[]        = "account"       ;
-  static const char DELETE[]         = "delete"        ;
+//  static const char DELETE[]         = "delete"        ;
   static const char DELETE_S[]       = "delete,d"      ;
   static const char MAILBOX[]        = "mailbox"       ;
   static const char MAILDIR[]        = "maildir"       ;

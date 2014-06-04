@@ -72,13 +72,16 @@ namespace Trace {
     return r.print(o);
   }
 
-  struct Writer_Priv {
-    ofstream file_;
-    std::chrono::time_point<std::chrono::steady_clock> start_;
-    unique_ptr<boost::archive::text_oarchive>          oarchive_;
+  class Writer_Priv {
+    private:
+      ofstream file_;
+      std::chrono::time_point<std::chrono::steady_clock> start_;
+    public:
+      unique_ptr<boost::archive::text_oarchive>          oarchive_;
 
-    Writer_Priv(const string &filename);
-    size_t elapsed();
+    public:
+      Writer_Priv(const string &filename);
+      size_t elapsed();
   };
   Writer_Priv::Writer_Priv(const string &filename)
   {

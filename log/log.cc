@@ -41,7 +41,7 @@
 
 
 BOOST_LOG_ATTRIBUTE_KEYWORD(severity, "Severity", Log::Severity)
-BOOST_LOG_ATTRIBUTE_KEYWORD(scope, "Scope", boost::log::attributes::named_scope::value_type)
+//BOOST_LOG_ATTRIBUTE_KEYWORD(scope, "Scope", boost::log::attributes::named_scope::value_type)
 BOOST_LOG_ATTRIBUTE_KEYWORD(timeline, "Timeline", boost::log::attributes::timer::value_type)
 
 static const char * const severity_map[] = {

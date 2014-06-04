@@ -63,8 +63,6 @@ namespace MIME {
         uint32_t                base64_value_ {0};
         // q
         char                    q_value_      {0};
-        // both
-        const char             *next_         {nullptr};
 
       public:
         Decoder(

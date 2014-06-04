@@ -61,7 +61,6 @@ namespace IMAP {
         Memory::Buffer::Vector   number_buffer_;
         uint32_t                 number_        {0};
         size_t                   literal_pos_   {0};
-        bool                     has_imap4rev1_ {false};
         bool                     convert_crlf_  {false};
         Memory::Buffer::Vector   userid_buffer_;
         IMAP::Connection::State  state_
@@ -71,7 +70,6 @@ namespace IMAP {
         Memory::Buffer::Base    &buffer_;
         Memory::Buffer::Base    &tag_buffer_;
         Callback::Base          &cb_;
-        Server::Response::Status status_ { Server::Response::Status::OK };
       public:
         Parser(Memory::Buffer::Base &buffer,
             Memory::Buffer::Base &tag_buffer,
