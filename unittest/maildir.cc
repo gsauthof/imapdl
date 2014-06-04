@@ -26,6 +26,7 @@ namespace fs = boost::filesystem;
 #include <ixxx/ixxx.h>
 using namespace ixxx;
 
+#include <iostream>
 using namespace std;
 
 #ifdef STL_REGEX_IS_FIXED

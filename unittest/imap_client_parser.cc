@@ -31,6 +31,7 @@ namespace fs = boost::filesystem;
 #include <unordered_map>
 #include <unordered_set>
 #include <set>
+#include <iostream>
 
 #include <imap/client_parser.h>
 #include <imap/imap.h>
@@ -1250,12 +1251,12 @@ BOOST_AUTO_TEST_SUITE( imap_client_parser )
           BOOST_CHECK_EQUAL(c_set.size(), m);
           for (auto x : s_ref) {
             if (s_set.find(x) == s_set.end())
-              cerr << "missing: " << x << '\n';
+              cout << "missing: " << x << '\n';
             BOOST_CHECK(s_set.find(x) != s_set.end());
           }
           for (auto x : c_ref) {
             if (c_set.find(x) == c_set.end())
-              cerr << "missing: " << x << '\n';
+              cout << "missing: " << x << '\n';
             BOOST_CHECK(c_set.find(x) != c_set.end());
           }
           s_set.clear();
