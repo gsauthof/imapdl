@@ -41,6 +41,8 @@ namespace fs = boost::filesystem;
 
 #include "journal.h"
 
+#include <boost/asio/yield.hpp>
+
 namespace IMAP {
   namespace Copy {
 
@@ -158,44 +160,60 @@ namespace IMAP {
       async_select(store_fn);
     }
 
+    // Boost ASIO stackless coroutine in combination
+    // with classical std::bind()s to supply the completion handler
     void Client::do_download()
     {
       BOOST_LOG_FUNCTION();
-      auto finish_fn = [this](){
-        do_quit();
-      };
-      auto logout_fn = [this, finish_fn](){
+      reenter (download_coroutine_) {
+        yield async_select(bind(&Client::do_download, this));
+        if (exists_) {
+          BOOST_LOG(lg_) << "Fetching into " << opts_.maildir << " ...";
+          fetch_timer_.start();
+          yield async_fetch(bind(&Client::do_download, this));
+          fetch_timer_.stop();
+          if (opts_.del) {
+            yield async_store(bind(&Client::do_download, this));
+            yield async_uid_or_simple_expunge(bind(&Client::do_download, this));
+          }
+        } else {
+          BOOST_LOG_SEV(lg_, Log::MSG) << "Mailbox " << opts_.mailbox
+            << " is empty.";
+        }
         uids_.clear();
-        async_logout(finish_fn);
-      };
-      auto expunge_fn = [this, logout_fn](){
-        async_uid_or_simple_expunge(logout_fn);
-      };
-      auto store_fn = [this, expunge_fn, finish_fn](){
-        fetch_timer_.stop();
-        async_store_or_logout(expunge_fn, finish_fn);
-      };
-      auto fetch_fn = [this, store_fn, finish_fn](){
-        async_fetch_or_logout(store_fn, finish_fn);
-      };
-      async_select(fetch_fn);
+        yield async_logout(bind(&Client::do_download, this));
+        do_quit();
+      }
     }
+
+    // Boost ASIO stackless coroutine and as variation:
+    // completion-handler is specified as C++11 lambda
+    // (less characters to type than using std::bind() ...)
     void Client::do_fetch_header()
     {
       BOOST_LOG_FUNCTION();
-      auto finish_fn = [this](){
-        do_quit();
-      };
-      auto logout_fn = [this, finish_fn](){
+      reenter (fetch_header_coroutine_) {
+        yield async_select      ([this](){do_fetch_header();});
+        yield async_fetch_header([this](){do_fetch_header();});
         uids_.clear();
-        async_logout(finish_fn);
-      };
-      auto fetch_fn = [this, logout_fn](){
-        async_fetch_header(logout_fn);
-      };
-      async_select(fetch_fn);
+        yield async_logout      ([this](){do_fetch_header();});
+        do_quit();
+      }
     }
 
+    // Another variant: instead of a coroutine use only C++ lambdas
+    //
+    // Overhead (with gcc 4.8 on Fedora 20 x86-64) of different variants:
+    //
+    // lambda with captured this pointer                   :  8 byte
+    // lambda with captured this pointer and another lambda: 16 byte
+    // lambda with captured this pointer and two lambdas   : 24 byte
+    // std::bind() of this                                 : 24 byte
+    // std::function() of 8 byte lambda                    : 32 byte
+    // std::function() of 24 byte lambda                   : 32 byte
+    // std::function() of 24 byte std::bind()              : 32 byte
+    //
+    // coroutine object -> sizeof(int)                     :  4 byte
     void Client::do_list()
     {
       BOOST_LOG_FUNCTION();
@@ -289,20 +307,6 @@ namespace IMAP {
       IMAP::Client::Base::async_select(mailbox_, fn);
     }
 
-    void Client::async_fetch_or_logout(std::function<void(void)> after_fetch,
-        std::function<void(void)> after_logout)
-    {
-      BOOST_LOG_FUNCTION();
-      if (exists_) {
-        BOOST_LOG(lg_) << "Fetching into " << opts_.maildir << " ...";
-        fetch_timer_.start();
-        async_fetch(after_fetch);
-      } else {
-        BOOST_LOG_SEV(lg_, Log::MSG) << "Mailbox " << opts_.mailbox << " is empty.";
-        async_logout(after_logout);
-      }
-    }
-
     void Client::async_fetch(std::function<void(void)> fn)
     {
       vector<pair<uint32_t, uint32_t> > set = {
@@ -350,17 +354,6 @@ namespace IMAP {
     void Client::async_list(std::function<void(void)> fn)
     {
       IMAP::Client::Base::async_list(opts_.list_reference, opts_.list_mailbox, fn);
-    }
-
-    void Client::async_store_or_logout(std::function<void(void)> after_store,
-        std::function<void(void)> after_logout)
-    {
-      BOOST_LOG_FUNCTION();
-      if (opts_.del) {
-        async_store(after_store);
-      } else {
-        async_logout(after_logout);
-      }
     }
 
     void Client::async_store(std::function<void(void)> fn)

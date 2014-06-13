@@ -51,6 +51,8 @@ namespace IMAP {
     class Options;
     class Client : public IMAP::Client::Base {
       private:
+        boost::asio::coroutine  download_coroutine_;
+        boost::asio::coroutine  fetch_header_coroutine_;
         boost::log::sources::severity_logger<Log::Severity> &lg_;
         const Options          &opts_;
         Net::Client::Base      &client_;
@@ -99,13 +101,9 @@ namespace IMAP {
         void cond_async_capabilities(std::function<void(void)> fn);
         void async_login(std::function<void(void)> fn);
         void async_select(std::function<void(void)> fn);
-        void async_fetch_or_logout(std::function<void(void)> after_fetch,
-            std::function<void(void)> after_logout);
         void async_fetch_header(std::function<void(void)> fn);
         void async_fetch(std::function<void(void)> fn);
         void async_list(std::function<void(void)> fn);
-        void async_store_or_logout(std::function<void(void)> after_store,
-            std::function<void(void)> after_logout);
         void async_store(std::function<void(void)> fn);
         void async_uid_or_simple_expunge(std::function<void(void)> fn);
         void async_uid_expunge(std::function<void(void)> fn);
