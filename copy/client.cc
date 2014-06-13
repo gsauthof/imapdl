@@ -241,7 +241,6 @@ namespace IMAP {
             THROW_ERROR(ec);
           } else {
             BOOST_LOG(lg_) << "Point after first possibly occured read";
-            //do_capabilities();
             cond_async_capabilities([this](){
                 async_login_capabilities(std::bind(&Client::do_post_login, this));
               });
