@@ -44,43 +44,52 @@ namespace Net {
     {
       ++pos_;
 
+      X509* cert = X509_STORE_CTX_get_current_cert(ctx.native_handle());
+
+      ostringstream fp;
+      {
+        auto digest_type = EVP_sha1();
+        array<unsigned char, 128> buffer = {{0}};
+        unsigned size = buffer.size();
+        int r = X509_digest(cert, digest_type, buffer.data(), &size);
+        (void)r;
+        boost::algorithm::hex(buffer.data(), buffer.data() + size,
+            ostream_iterator<char>(fp));
+        BOOST_LOG(lg_) << "SHA1 fingerprint of certificate " " (position " << pos_ << "): "
+          << fp.str();
+      }
+
+      {
+        array<char, 128> char_buffer = {{0}};
+        X509_NAME_oneline(X509_get_subject_name(cert),
+            char_buffer.data(), char_buffer.size());
+        BOOST_LOG(lg_) << "Certificate subject: " << char_buffer.data();
+      }
+
+      BOOST_LOG(lg_) << "Pre-Verification result: " << preverified;
+
+      if (result_)
+        return result_;
+      else if (!fingerprint_.empty() && pos_ == 1) {
+        if (pos_ == 1) {
+          BOOST_LOG(lg_) << "Verifying fingerprint ...";
+          result_ = fingerprint_ == fp.str();
+          if (result_) {
+            BOOST_LOG(lg_) << "Fingerprint matches. Authentication finished.";
+          } else
+            BOOST_LOG_SEV(lg_, Log::FATAL)
+              << "Given fingerprint " << fingerprint_ << " does not"
+              " match the one of the certificate: " << fp.str();
+        }
+        return result_;
+      }
+
       bool r = default_(preverified, ctx);
 
       if (!r) {
-        X509* cert = X509_STORE_CTX_get_current_cert(ctx.native_handle());
-        {
-          array<char, 128> char_buffer = {{0}};
-          X509_NAME_oneline(X509_get_subject_name(cert),
-              char_buffer.data(), char_buffer.size());
-          BOOST_LOG(lg_) << "Certificate subject: " << char_buffer.data();
-        }
-
-        auto digest_type = EVP_sha1();
-        {
-          array<unsigned char, 128> buffer = {{0}};
-          unsigned size = buffer.size();
-          int r = X509_digest(cert, digest_type, buffer.data(), &size);
-          (void)r;
-          ostringstream fp;
-          boost::algorithm::hex(buffer.data(), buffer.data() + size,
-              ostream_iterator<char>(fp));
-          BOOST_LOG(lg_) << "SHA1 fingerprint of server certificate: " << fp.str();
-          if (result_)
-            return result_;
-          if (!fingerprint_.empty()) {
-            BOOST_LOG(lg_) << "Verifying fingerprint ...";
-            if (pos_ == 1) {
-              result_ = fingerprint_ == fp.str();
-              if (result_) {
-                BOOST_LOG(lg_) << "Fingerprint matches. Authentication finished.";
-              } else
-                BOOST_LOG(lg_) << "Given fingerprint " << fingerprint_ << " does not"
-                  " match the one of the certificate: " << fp.str();
-            }
-            return result_;
-          }
-        }
-
+        int rc = X509_STORE_CTX_get_error(ctx.native_handle());
+        BOOST_LOG_SEV(lg_, Log::FATAL) << "Certificate verification failed: "
+          << X509_verify_cert_error_string(rc) << " (return code: " << rc << ")";
       }
 
       return r;
