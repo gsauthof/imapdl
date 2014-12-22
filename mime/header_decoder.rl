@@ -45,7 +45,7 @@ using namespace std;
 # Character Sets, Languages, and Continuations
 # http://tools.ietf.org/html/rfc2231
 
-machine q;
+machine header_decoder;
 
 # {{{ Actions
 
