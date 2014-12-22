@@ -303,6 +303,9 @@ header =
           @buffer_eq_cont  -> w_state
   ),
   ew_tail_state: (
+    # application of the robustness principle:
+    # allow directly adjacent encoded words (which are not allowed by RFC 2047)
+    '='                    -> ew_state          |
     WSP   @space_start     -> after_ew_ws_state |
     CR    @check_cr        -> cr_state          |
     LF    @check_lf        -> lf_state          |

@@ -672,6 +672,38 @@ BOOST_AUTO_TEST_SUITE(mime)
         BOOST_CHECK_EQUAL(s, "Cron <juser@example> VAR=\"-xfoo\" bash some_script.sh");
       }
 
+      BOOST_AUTO_TEST_CASE(booklooker)
+      {
+        using namespace MIME::Header;
+        Buffer::Vector v;
+        Buffer::Proxy p;
+        Decoder d(p, v, [](){});
+        d.set_ending_policy(Decoder::Ending::LF);
+        const char inp[] =
+          "Subject: =?ISO-8859-1?Q?Bestellung=20=FCber=20booklooker.de=20('Der=20Gl?=  =?ISO-8859-1?Q?=FCckliche=20L=F6we=20in=20Afrika')?=\n"
+          "\n"
+          ;
+        d.read(inp, inp + sizeof(inp) - 1);
+        string s(v.begin(), v.end());
+        BOOST_CHECK_EQUAL(s, "Bestellung über booklooker.de ('Der Glückliche Löwe in Afrika')");
+      }
+
+      BOOST_AUTO_TEST_CASE(booklooker_anfrage)
+      {
+        using namespace MIME::Header;
+        Buffer::Vector v;
+        Buffer::Proxy p;
+        Decoder d(p, v, [](){});
+        d.set_ending_policy(Decoder::Ending::LF);
+        const char inp[] =
+          "Subject: =?ISO-8859-1?Q?Anfrage=20=FCber=20boo?==?ISO-8859-1?Q?klo?=  =?ISO-8859-1?Q?oker.de=20('Ene=20Bene=20?==?ISO-8859-1?Q?Bimme?=  =?ISO-8859-1?Q?lbahn')?=\n"
+          "\n"
+          ;
+        d.read(inp, inp + sizeof(inp) - 1);
+        string s(v.begin(), v.end());
+        BOOST_CHECK_EQUAL(s, "Anfrage über booklooker.de ('Ene Bene Bimmelbahn')");
+      }
+
     BOOST_AUTO_TEST_SUITE_END()
 
   BOOST_AUTO_TEST_SUITE_END()
