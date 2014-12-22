@@ -119,6 +119,10 @@ namespace Net {
               } else if (   ec.category() == boost::asio::error::get_ssl_category()
                          && ERR_GET_REASON(ec.value())
                               == SSL_R_DECRYPTION_FAILED_OR_BAD_RECORD_MAC) {
+              } else if (ec.category() == boost::asio::error::get_misc_category()
+                         && ec.value() == boost::asio::error::eof
+                         ) {
+                BOOST_LOG_SEV(lg_, Log::DEBUG) << "server " << host_ << " disconnected first";
               } else {
                 if (ec.category() == boost::asio::error::get_ssl_category()) {
                   BOOST_LOG_SEV(lg_, Log::ERROR)
