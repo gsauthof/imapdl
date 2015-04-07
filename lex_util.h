@@ -23,6 +23,8 @@
 
 #include <ostream>
 
+void safely_write(std::ostream &o, const char *begin, size_t n);
+
 void throw_lex_error(const char *msg, const char *begin, const char *p, const char *pe);
 
 void pp_buffer(std::ostream &o, const char *msg, const char *c, size_t size);

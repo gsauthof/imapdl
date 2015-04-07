@@ -107,6 +107,7 @@ add_executable(ut
   ${RAGEL_mime_header_decoder_OUTPUTS}
   ${RAGEL_ascii_control_sanitizer_OUTPUTS}
   unittest/mime.cc
+  unittest/lex_util.cc
   )
 target_link_libraries(ut
   ${Boost_LIBRARIES}

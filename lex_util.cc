@@ -38,24 +38,50 @@ static void hex(const char *begin, const char *end, ostream &o)
     o << setw(3) << hex << unsigned((unsigned char)*i);
 }
 
+static bool is_nice_char(char c)
+{
+  return c != '\\' && c >= ' ' && c <= '~';
+}
+
+void safely_write(ostream &o, const char *begin, size_t n)
+{
+  const char *end = begin + n;
+
+  const char *last = begin;
+  const char *i = begin;
+  for (; i<end; ++i) {
+    if (is_nice_char(*i))
+      continue;
+    o.write(last, i-last);
+    last = i+1;
+    o << "\\x";
+    boost::io::ios_flags_saver ifs(o);
+    boost::io::ios_fill_saver ifis(o);
+    o << setw(2) << setfill('0') << hex << unsigned((unsigned char)*i);
+  }
+  o.write(last, i-last);
+}
+
 void throw_lex_error(const char *msg, const char *begin, const char *p, const char *pe)
 {
   ostringstream o;
   o << msg;
+  o << " (";
   size_t n = pe-p;
   size_t e = min(n,size_t(20));
   hex(p, p + e, o);
   o << " <=> |";
-  o.write(p, e);
-  o << "|)";
+  safely_write(o, p, e);
+  o << "|";
   if (p>begin) {
     size_t d = min(size_t(p-begin), size_t(20));
     o << " - " << d << " bytes before: ";
     hex(p - d, p, o);
     o << " <=>  |";
-    o.write(p-d, d);
+    safely_write(o, p-d, d);
     o << '|';
   }
+  o << ')';
   throw runtime_error(o.str());
 }
 
