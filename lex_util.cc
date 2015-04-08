@@ -66,7 +66,7 @@ void throw_lex_error(const char *msg, const char *begin, const char *p, const ch
 {
   ostringstream o;
   o << msg;
-  o << " (";
+  o << " [";
   size_t n = pe-p;
   size_t e = min(n,size_t(20));
   hex(p, p + e, o);
@@ -81,7 +81,7 @@ void throw_lex_error(const char *msg, const char *begin, const char *p, const ch
     safely_write(o, p-d, d);
     o << '|';
   }
-  o << ')';
+  o << " ]";
   throw runtime_error(o.str());
 }
 

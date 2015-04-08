@@ -23,6 +23,7 @@
 
 machine imap_common;
 
+
 # Parts of the IMAP protocol used both by the client and server side.
 #
 # The state machine description is derived from the IMAP4v1 formal syntax
@@ -120,14 +121,6 @@ action literal_tail_cond_return
     fret;
   }
 }
-action literal_tail_cond_return_exl_finish
-{
-  ++literal_pos_;
-  if (literal_pos_ == number_) {
-    buffer_.finish(p);
-    fret;
-  }
-}
 action cb_quoted_char
 {
   cb_.imap_quoted_char(fc);
@@ -137,6 +130,7 @@ action cb_quoted_char
 
 include abnf "rfc/abnf.rl";
 
+include literal_converter "imap/literal_converter.rl";
 
 # resp-specials   = "]"
 
@@ -183,15 +177,8 @@ nz_number = (digit_nz DIGIT {0,10} ) >number_start %number_finish ;
 
 literal_tail := (CHAR8*) >literal_tail_begin $literal_tail_cond_return;
 
-# convert CRLF to LF for maildir/mailbox storage ...
-# assume that it is not called for empty literals
-literal_tail_convert :=
-  (   ( (CHAR8 - (CR|LF))+ )  $literal_tail_cond_return
-                              >buffer_cont
-                              %buffer_stop
-    | ( CR @literal_tail_cond_return_exl_finish LF @buffer_add_char
-                                                   @literal_tail_cond_return )
-  ) **     >literal_tail_begin  ;
+# convert_literal_tail is defined in imap/literal_converter.rl
+literal_tail_convert := convert_literal_tail;
 
 literal = '{' number >number_start %number_finish '}' CRLF @buffer_clear  @call_literal_tail ;
 

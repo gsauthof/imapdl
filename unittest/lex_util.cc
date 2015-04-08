@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_SUITE( lex_util )
       } catch (const runtime_error &e) {
         msg = e.what();
       }
-      const char ref[] = "Message (6e 20 66 6f 78 20 6a 75 6d 70 73  d  9  a 6f 76 65 72 20 74 <=> |n fox jumps\\x0d\\x09\\x0aover t| - 15 bytes before:  22 54 68 65 20 71 75 69 63 6b 20 62 72 6f 77 <=>  |\"The quick brow|)";
+      const char ref[] = "Message [ 6e 20 66 6f 78 20 6a 75 6d 70 73  d  9  a 6f 76 65 72 20 74 <=> |n fox jumps\\x0d\\x09\\x0aover t| - 15 bytes before:  22 54 68 65 20 71 75 69 63 6b 20 62 72 6f 77 <=>  |\"The quick brow| ]";
       BOOST_CHECK_EQUAL(msg, ref);
     }
 

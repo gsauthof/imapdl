@@ -599,6 +599,45 @@ BOOST_AUTO_TEST_SUITE( imap_client_parser )
       BOOST_CHECK_EQUAL(s, "abcdefg\n\n");
     }
 
+    BOOST_AUTO_TEST_CASE( inline_cr )
+    {
+      using namespace IMAP::Server::Response;
+      const char response[] =
+"* 12 FETCH (BODY[HEADER] {15}\r\n"
+"hello\rworld\r\n"
+"\r\n"
+")\r\n"
+"a004 OK FETCH completed\r\n"
+        ;
+        ;
+      const char *begin = response;
+      const char *end = begin + sizeof(response)-1;
+
+      struct CB : public IMAP::Client::Callback::Null {
+        Memory::Buffer::Vector buffer;
+        Memory::Buffer::Proxy  proxy;
+        Memory::Buffer::Vector tag_buffer;
+        CB() {}
+        void imap_body_section_begin() override
+        {
+        }
+        void imap_body_section_inner() override
+        {
+          proxy.set(&buffer);
+        }
+        void imap_body_section_end() override
+        {
+          proxy.set(nullptr);
+        }
+      };
+      CB cb;
+      IMAP::Client::Parser p(cb.proxy, cb.tag_buffer, cb);
+      p.read(begin, end);
+      string s(cb.buffer.begin(), cb.buffer.end());
+      const char ref[] = "hello\rworld\n\n";
+      BOOST_CHECK_EQUAL(s, ref);
+    }
+
     BOOST_AUTO_TEST_CASE( header )
     {
       static const char filename[] = "tmp/fetch_header";
