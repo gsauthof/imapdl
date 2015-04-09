@@ -62,11 +62,13 @@ namespace IMAP {
         boost::asio::basic_waitable_timer<std::chrono::steady_clock> login_timer_;
 
         Memory::Buffer::Proxy   buffer_proxy_;
+        Maildir                 maildir_;
+        Memory::Dir             tmp_dir_;
         Memory::Buffer::File    file_buffer_;
         IMAP::Client::Parser    parser_;
 
         bool          need_cleanup_ {false};
-        State         state_       {State::DISCONNECTED };
+        State         state_        {State::DISCONNECTED };
 
         unsigned      exists_      {0};
         unsigned      recent_      {0};
@@ -74,8 +76,6 @@ namespace IMAP {
         uint32_t      last_uid_    {0};
         Sequence_Set  uids_;
         std::unordered_set<IMAP::Server::Response::Capability> capabilities_;
-        Maildir       maildir_;
-        Memory::Dir   tmp_dir_;
         bool          full_body_   {false};
         std::string   flags_;
         std::string   mailbox_;

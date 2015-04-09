@@ -57,9 +57,9 @@ namespace IMAP {
         app_(opts_.host, client_, lg_),
         signals_(client_.io_service(), SIGINT, SIGTERM),
         login_timer_(client_.io_service()),
-        parser_(buffer_proxy_, tag_buffer_, *this),
         maildir_(opts_.maildir),
         tmp_dir_(maildir_.tmp_dir_fd()),
+        parser_(buffer_proxy_, tag_buffer_, *this),
         mailbox_(opts_.mailbox),
         fetch_timer_(client_, lg_),
         header_printer_(opts_, buffer_, lg_)
