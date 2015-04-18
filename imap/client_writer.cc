@@ -47,7 +47,8 @@ namespace IMAP {
       buffer_.clear();
       buffer_.seekp(0);
       buffer_ << prefix_ << setw(width_) << setfill('0') << value_;
-      tag = std::move(buffer_.str());
+      // no std::move() because it is an r-value
+      tag = buffer_.str();
       auto p = map_.insert(make_pair(tag, command));
       if (!p.second) {
         ostringstream t;

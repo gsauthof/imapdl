@@ -119,7 +119,7 @@ namespace Trace {
   {
     if (d)
       throw logic_error("Trace Writer already started");
-    d = std::move(unique_ptr<Writer_Priv>(new Writer_Priv(filename)));
+    d = unique_ptr<Writer_Priv>(new Writer_Priv(filename));
   }
   void Writer::push(Type type)
   {

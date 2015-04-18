@@ -38,10 +38,11 @@ int main(int argc, char **argv)
 {
   try {
     Options opts(argc, argv);
-    boost::log::sources::severity_logger<Log::Severity> lg(std::move(Log::create(
+    // no std::move() because return value is an r-value
+    boost::log::sources::severity_logger<Log::Severity> lg(Log::create(
             static_cast<Log::Severity>(opts.severity),
             static_cast<Log::Severity>(opts.file_severity),
-            opts.logfile)));
+            opts.logfile));
 
     try {
       BOOST_LOG(lg) << "Startup.";

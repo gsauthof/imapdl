@@ -135,10 +135,10 @@ class Client_Frontend {
     Client_Frontend(int argc, char **argv, bool use_ssl)
       :
         opts(argc, argv),
-        lg(std::move(Log::create(
+        lg(Log::create(
                 static_cast<Log::Severity>(opts.severity),
                 static_cast<Log::Severity>(opts.file_severity),
-                opts.logfile))),
+                opts.logfile)),
         context(boost::asio::ssl::context::sslv23),
         net_client(use_ssl?
             (static_cast<Net::Client::Base*>(new Net::TCP::SSL::Client::Base(io_service, context, opts, lg)))
@@ -466,10 +466,10 @@ struct Log_Fixture {
   boost::log::sources::severity_logger<Log::Severity> lg;
   Log_Fixture()
     :
-      lg(std::move(Log::create(
+      lg(Log::create(
               static_cast<Log::Severity>(5),
               static_cast<Log::Severity>(7),
-              "ut_cp.log")))
+              "ut_cp.log"))
   {
     BOOST_LOG(lg) <<  "setup fixture" ;
   }

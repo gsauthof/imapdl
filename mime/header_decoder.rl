@@ -372,7 +372,8 @@ namespace MIME {
       ASCII::Control::Sanitizer sani(v);
       sani.read(result.data(), result.data() + result.size());
       if (sani.seen_ctl()) {
-        out = std::move(string(v.begin(), v.end()));
+        // no std::move(), string() already is an r-value
+        out = string(v.begin(), v.end());
       } else {
         out = std::move(result);
       }
