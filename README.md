@@ -38,6 +38,8 @@ recommended to include this repository as Git [submodule][gitm].
   verifies that it doesn't violate [RFC3501][rfc3501] in any obvious way.
 - High test coverage with unittests
 
+[![Build Status](https://travis-ci.org/gsauthof/imapdl.svg)](https://travis-ci.org/gsauthof/imapdl)
+
 ## Design Choices
 
 - Use sane and secure defaults (e.g. TLS encryption and certificate validation
