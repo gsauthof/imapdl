@@ -1,9 +1,11 @@
+# relative paths are relative to origin
+# e.g. to git@github.com:gsauthof/imapdl.git
 [submodule "cmake/ragel"]
 	path = cmake/ragel
-	url = git@github.com:gsauthof/cmake-ragel.git
+	url = ../cmake-ragel.git
 [submodule "libixxx"]
 	path = libixxx
-	url = git@github.com:gsauthof/libixxx.git
+	url = ../libixxx.git
 [submodule "libbuffer"]
 	path = libbuffer
-	url = git@github.com:gsauthof/libbuffer.git
+	url = ../libbuffer.git
