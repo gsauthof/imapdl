@@ -18,7 +18,8 @@ os:
 before_install:
   - sudo add-apt-repository ppa:boost-latest/ppa -y
   - sudo apt-get update -qq
-  - sudo apt-get install -qq cmake ragel libssl-dev libbotan1.10-dev libboost1.55-dev ninja-build
+  - sudo apt-get install -qq cmake ragel libssl-dev libbotan1.10-dev ninja-build
+  - sudo apt-get install -qq libboost1.55-dev libboost-system1.55-dev libboost_filesystem1.55-dev libboost_regex1.55-dev libboost_unit_test_framework1.55-dev libboost_program_options1.55-dev libboost_serialization1.55-dev libboost_log1.55-dev libboost_log_setup1.55-dev libboost_thread1.55-dev libboost_locale1.55-dev libboost_regex1.55-dev
 
 #install: make install-deps
 
