@@ -19,9 +19,9 @@ before_install:
 
 before_script:
   - mkdir build
-  - cd build && cmake -D CMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE -G Ninja ..
+  - cd build && cmake -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE ..
 
-script: pwd && ninja-build imapdl ut && ./ut
+script: pwd && make imapdl ut && ./ut
 
 notifications:
     email: true
