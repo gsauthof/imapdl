@@ -11,9 +11,14 @@ compiler:
 os:
     - linux
 
+# Currently, Travis-CI's environment has Ubuntu 12.04 LTS x86-64
+# where libboost-dev is too old
+# libboost1.55-dev comes from a ppa
+
 before_install:
+  - sudo add-apt-repository ppa:boost-latest/ppa -y
   - sudo apt-get update -qq
-  - sudo apt-get install -qq cmake ragel libssl-dev libbotan1.10-dev libboost-dev ninja-build
+  - sudo apt-get install -qq cmake ragel libssl-dev libbotan1.10-dev libboost1.55-dev ninja-build
 
 #install: make install-deps
 
