@@ -7,8 +7,10 @@ env:
   - MYCXX=g++-4.8     CMAKE_BUILD_TYPE=Release
   - MYCXX=g++-4.9     CMAKE_BUILD_TYPE=Release
   - MYCXX=g++-5       CMAKE_BUILD_TYPE=Release
-  - MYCXX=clang++-3.5 CMAKE_BUILD_TYPE=Debug
-  - MYCXX=clang++-3.5 CMAKE_BUILD_TYPE=Release
+# disable clang for now, since the version from the upstream repo doesn't play well
+# with the ppa-boost ...
+#  - MYCXX=clang++-3.5 CMAKE_BUILD_TYPE=Debug
+#  - MYCXX=clang++-3.5 CMAKE_BUILD_TYPE=Release
 
 compiler:
   - gcc
