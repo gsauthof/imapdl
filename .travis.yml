@@ -38,7 +38,7 @@ before_script:
   - mkdir build
   - cd build && CXX=$MYCXX cmake -G Ninja -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE ..
 
-script: pwd && make imapdl ut && ./ut
+script: pwd && ninja imapdl ut && ./ut
 
 # use the defaults
 #notifications:
