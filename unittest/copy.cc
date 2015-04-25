@@ -437,10 +437,12 @@ static void test_list()
 
   const char filename[] = "tmp/list.log";
   fs::remove(filename);
-  {
+  try {
     Client_Frontend client(argc, argv, use_ssl);
     Log::setup_vanilla_file(Log::MSG, filename);
     client.run();
+  } catch (const exception &e) {
+    cerr << "Client frontend failed with: " << e.what() << '\n';
   }
   boost::log::core::get()->remove_all_sinks();
 
