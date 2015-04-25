@@ -3,7 +3,7 @@ language: cpp
 env:
   - MYCXX=g++-4.8     CMAKE_BUILD_TYPE=Debug
   - MYCXX=g++-4.9     CMAKE_BUILD_TYPE=Debug
-  - MYCXX=g++-5       CMAKE_BUILD_TYPE=Debug
+  - MYCXX=g++-5       CMAKE_BUILD_TYPE=Debug   LSAN_OPTIONS=suppressions=../example/leak_suppression_ubuntu_12.04_gcc_5.dat
   - MYCXX=g++-4.8     CMAKE_BUILD_TYPE=Release
   - MYCXX=g++-4.9     CMAKE_BUILD_TYPE=Release
   - MYCXX=g++-5       CMAKE_BUILD_TYPE=Release
