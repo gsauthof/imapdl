@@ -22,6 +22,7 @@
 #define LEX_UTIL_H
 
 #include <ostream>
+#include <stddef.h>
 
 void safely_write(std::ostream &o, const char *begin, size_t n);
 

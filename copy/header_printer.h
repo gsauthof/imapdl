@@ -26,6 +26,7 @@
 #include <mime/header_decoder.h>
 
 #include <map>
+#include <string>
 
 namespace IMAP {
   namespace Copy {

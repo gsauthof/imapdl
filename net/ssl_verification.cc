@@ -20,8 +20,11 @@
 }}} */
 #include "ssl_verification.h"
 
+#include <array>
+
 #include <boost/log/sources/record_ostream.hpp>
-#include <boost/algorithm/string.hpp>
+#include <boost/asio/ssl.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/hex.hpp>
 namespace asio = boost::asio;
 

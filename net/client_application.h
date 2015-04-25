@@ -21,12 +21,14 @@
 #ifndef NET_CLIENT_APPLICATION_H
 #define NET_CLIENT_APPLICATION_H
 
-#include <net/client.h>
-
 #include <string>
 #include <functional>
 
+#include <boost/asio/ip/tcp.hpp>
+
 #include <log/log.h>
+
+namespace Net { namespace Client { class Base; } }
 
 namespace Net {
 

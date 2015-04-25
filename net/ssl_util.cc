@@ -20,11 +20,12 @@
 }}} */
 #include "ssl_util.h"
 
-namespace asio = boost::asio;
+#include <boost/asio/ssl.hpp>
 
 #include <stdexcept>
-#include <iomanip>
+
 using namespace std;
+namespace asio = boost::asio;
 
 namespace Net {
 

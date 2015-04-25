@@ -27,11 +27,10 @@ using namespace Memory;
 #include <exception.h>
 
 #include <boost/log/sources/record_ostream.hpp>
-#include <boost/log/attributes/named_scope.hpp>
+//#include <boost/log/attributes/named_scope.hpp>
 #include <boost/system/error_code.hpp>
 
 #include <sstream>
-#include <stdexcept>
 #include <string>
 #include <functional>
 using namespace std;

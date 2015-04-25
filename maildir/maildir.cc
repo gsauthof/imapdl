@@ -20,15 +20,18 @@
 }}} */
 #include "maildir.h"
 
+#include <utility>
 #include <sstream>
 #include <random>
 #include <array>
+#include <exception>
+#include <stdexcept>
 using namespace std;
 
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/replace.hpp> 
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
 #include <boost/io/ios_state.hpp>

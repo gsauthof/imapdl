@@ -24,16 +24,13 @@
 #include <net/client.h>
 
 #include <log/log.h>
-#include <trace/trace.h>
 
-#include <functional>
 #include <vector>
-#include <queue>
-#include <stack>
 #include <string>
 
 #include <boost/asio.hpp>
-#include <boost/asio/ssl.hpp>
+#include <boost/asio/ssl/stream.hpp>
+namespace boost { namespace asio { namespace ssl { class context; } } }
 
 namespace Net {
 

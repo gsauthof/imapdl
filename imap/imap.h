@@ -23,6 +23,7 @@
 
 #include <ostream>
 #include <vector>
+#include <string>
 
 namespace IMAP {
 

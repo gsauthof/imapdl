@@ -19,9 +19,12 @@
 
 }}} */
 #include "trace.h"
+#include <algorithm>
 #include <memory>
 #include <fstream>
 #include <chrono>
+#include <utility>
+#include <stdexcept>
 #include <boost/archive/text_oarchive.hpp>
 
 using namespace std;

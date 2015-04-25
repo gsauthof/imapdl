@@ -29,7 +29,10 @@
 
 #include <string>
 #include <map>
+#include <vector>
 #include <functional>
+#include <utility>
+#include <stdint.h>
 
 namespace IMAP {
 

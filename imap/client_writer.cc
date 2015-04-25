@@ -24,8 +24,8 @@
 #include <limits>
 using namespace std;
 
-#include <boost/interprocess/streams/vectorstream.hpp>
-namespace bi = boost::interprocess;
+//#include <boost/interprocess/streams/vectorstream.hpp>
+//namespace bi = boost::interprocess;
 #include <boost/regex.hpp>
 
 namespace IMAP {

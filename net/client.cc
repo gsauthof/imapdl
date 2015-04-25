@@ -21,6 +21,7 @@
 #include "client.h"
 
 #include <exception.h>
+#include <utility>
 
 #include <boost/log/sources/record_ostream.hpp>
 

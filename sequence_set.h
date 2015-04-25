@@ -21,9 +21,10 @@
 #ifndef SEQUENCE_SET_H
 #define SEQUENCE_SET_H
 
-#include <vector>
-#include <inttypes.h>
+#include <stdint.h>
 #include <stddef.h>
+#include <utility>
+#include <vector>
 
 class Sequence_Set_Priv;
 class Sequence_Set {

@@ -21,9 +21,9 @@
 #ifndef SSL_UTIL_H
 #define SSL_UTIL_H
 
-#include <boost/asio/ssl.hpp>
 #include <ostream>
-#include <string>
+
+namespace boost { namespace asio { namespace ssl { class context; } } }
 
 namespace Net {
 

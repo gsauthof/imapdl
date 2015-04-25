@@ -20,10 +20,11 @@
 }}} */
 #include "fetch_timer.h"
 
+#include <net/client.h>
 #include <exception.h>
 
 #include <boost/log/sources/record_ostream.hpp>
-#include <boost/log/attributes/named_scope.hpp>
+//#include <boost/log/attributes/named_scope.hpp>
 
 using namespace std;
 

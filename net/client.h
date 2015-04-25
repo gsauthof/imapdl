@@ -29,9 +29,11 @@
 #include <queue>
 #include <stack>
 #include <string>
+#include <stddef.h>
 
-#include <boost/asio.hpp>
-#include <boost/asio/ssl.hpp>
+#include <boost/asio/ip/tcp.hpp>
+namespace boost { namespace asio { class io_service; } }
+namespace boost { namespace system { class error_code; } }
 
 namespace Net {
 

@@ -20,10 +20,12 @@
 }}} */
 #include "sequence_set.h"
 
-using namespace std;
+#include <functional>
 
 #include <boost/icl/interval_map.hpp>
+
 namespace icl = boost::icl;
+using namespace std;
 
 using ISet = icl::interval_set<uint32_t, std::less, icl::closed_interval<uint32_t> >;
 

@@ -21,7 +21,7 @@
 #include "client_base.h"
 
 #include <boost/log/sources/record_ostream.hpp>
-#include <boost/log/attributes/named_scope.hpp>
+//#include <boost/log/attributes/named_scope.hpp>
 
 #include "exception.h"
 

@@ -41,10 +41,10 @@
 #include <string>
 #include <unordered_set>
 #include <chrono>
-#include <map>
+#include <vector>
 #include <functional>
 
-#include <boost/asio/steady_timer.hpp>
+#include <boost/asio/basic_waitable_timer.hpp>
 
 namespace IMAP {
   namespace Copy {

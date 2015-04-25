@@ -24,6 +24,7 @@
 #include "ssl_verification.h"
 #include "exception.h"
 
+#include <boost/asio/ssl.hpp>
 #include <boost/log/sources/record_ostream.hpp>
 
 using namespace std;

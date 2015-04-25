@@ -26,6 +26,7 @@
 #include <ostream>
 #include <memory>
 #include <limits>
+#include <stddef.h>
 
 // needed when serializing std::vector ...
 //#include <boost/serialization/vector.hpp>

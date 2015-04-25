@@ -22,11 +22,13 @@
 #define COPY_FETCH_TIMER_H
 
 #include <log/log.h>
-#include <net/client.h>
 
+#include <stddef.h>
 #include <chrono>
 
-#include <boost/asio/steady_timer.hpp>
+#include <boost/asio/basic_waitable_timer.hpp>
+
+namespace Net { namespace Client { class Base; } }
 
 namespace IMAP {
   namespace Copy {

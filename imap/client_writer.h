@@ -27,8 +27,8 @@
 #include <sstream>
 #include <map>
 #include <set>
-#include <ostream>
-#include <inttypes.h>
+#include <stdint.h>
+#include <stddef.h> 
 
 #include <boost/interprocess/streams/vectorstream.hpp>
 

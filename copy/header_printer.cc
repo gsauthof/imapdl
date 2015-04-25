@@ -22,10 +22,11 @@
 #include "options.h"
 
 #include <boost/log/sources/record_ostream.hpp>
-#include <boost/log/attributes/named_scope.hpp>
-#include <boost/algorithm/string.hpp>
+//#include <boost/log/attributes/named_scope.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 
 #include <iomanip>
+#include <stdexcept>
 
 using namespace std;
 

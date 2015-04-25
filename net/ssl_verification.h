@@ -22,7 +22,12 @@
 #define SSL_VERIFICATION_H
 
 #include <log/log.h>
-#include <boost/asio/ssl.hpp>
+
+#include <boost/asio/ssl/rfc2818_verification.hpp>
+
+#include <string>
+
+namespace boost { namespace asio { namespace ssl { class verify_context; } } }
 
 namespace Net {
 

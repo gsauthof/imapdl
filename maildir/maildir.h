@@ -24,6 +24,7 @@
 #include <string>
 #include <random>
 #include <ostream>
+#include <stddef.h> 
 
 class Maildir {
   private:

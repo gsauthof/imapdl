@@ -24,27 +24,29 @@
 
 #include <exception.h>
 #include <net/ssl_util.h>
-using namespace Net::SSL;
 #include <ixxx/ansi.h>
-using namespace ixxx;
 
 #include <unordered_set>
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
-#include <typeinfo>
-#include <cstring>
-using namespace std;
+#include <iostream>
 
+#include <string.h>
+#include <stdlib.h>
 #include <cstring.h>
 
 
 #include <boost/program_options.hpp>
-namespace po = boost::program_options;
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/filesystem.hpp>
+
+namespace po = boost::program_options;
 namespace fs = boost::filesystem;
+using namespace std;
+using namespace ixxx;
+using namespace Net::SSL;
 
 namespace OPT {
   static const char HELP_S[]         = "help,h"        ;
