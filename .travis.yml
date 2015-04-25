@@ -1,10 +1,14 @@
 language: cpp
 
 env:
-  - MYCXX=g++-4.8 CMAKE_BUILD_TYPE=Debug
-  #- CXX=g++-4.9 CMAKE_BUILD_TYPE=Debug
-  #- CXX=g++-5   CMAKE_BUILD_TYPE=Debug
-  #- CXX=g++-4.8 CMAKE_BUILD_TYPE=Release
+  - MYCXX=g++-4.8     CMAKE_BUILD_TYPE=Debug
+  - MYCXX=g++-4.9     CMAKE_BUILD_TYPE=Debug
+  - MYCXX=g++-5       CMAKE_BUILD_TYPE=Debug
+  - MYCXX=g++-4.8     CMAKE_BUILD_TYPE=Release
+  - MYCXX=g++-4.9     CMAKE_BUILD_TYPE=Release
+  - MYCXX=g++-5       CMAKE_BUILD_TYPE=Release
+  - MYCXX=clang++-3.5 CMAKE_BUILD_TYPE=Debug
+  - MYCXX=clang++-3.5 CMAKE_BUILD_TYPE=Release
 
 compiler:
   - gcc
@@ -38,7 +42,7 @@ before_script:
   - mkdir build
   - cd build && CXX=$MYCXX cmake -G Ninja -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE ..
 
-script: pwd && ninja imapdl ut && ./ut
+script: pwd && ninja -j1 imapdl ut && ./ut
 
 # use the defaults
 #notifications:
