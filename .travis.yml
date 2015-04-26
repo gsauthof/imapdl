@@ -7,9 +7,7 @@ env:
   - MYCXX=g++-4.8     CMAKE_BUILD_TYPE=Release
   - MYCXX=g++-4.9     CMAKE_BUILD_TYPE=Release
   - MYCXX=g++-5       CMAKE_BUILD_TYPE=Release
-# disable clang for now, since the version from the upstream repo doesn't play well
-# with the ppa-boost ...
-#  - MYCXX=clang++-3.5 CMAKE_BUILD_TYPE=Debug
+  - MYCXX=clang++-3.5 CMAKE_BUILD_TYPE=Debug   LSAN_OPTIONS=suppressions=../example/leak_suppression_ubuntu_12.04_clang_3.5.dat  BOOST_ROOT=/opt/boost/1.58-clang-3.5
 #  - MYCXX=clang++-3.5 CMAKE_BUILD_TYPE=Release
 
 compiler:
@@ -28,7 +26,7 @@ before_install:
   - sudo add-apt-repository ppa:ubuntu-toolchain-r/test  -y
   - if echo $MYCXX | grep clang > /dev/null ; then sudo add-apt-repository 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.5 main' -y; fi
   - if echo $MYCXX | grep clang > /dev/null ; then sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 15CF4D18AF4F7421 ; fi
-  - sudo add-apt-repository ppa:boost-latest/ppa -y
+  - if echo $MYCXX | grep g++ > /dev/null   ; then sudo add-apt-repository ppa:boost-latest/ppa -y ; fi
   - sudo add-apt-repository ppa:kalakris/cmake -y
   - sudo apt-get update -qq
   - if [ $MYCXX = g++-4.8 ]; then sudo apt-get install -qq gcc-4.8 g++-4.8 ; fi
@@ -36,15 +34,19 @@ before_install:
   - if [ $MYCXX = g++-5   ]; then sudo apt-get install -qq gcc-5   g++-5   ; fi
   - if echo $MYCXX | grep clang > /dev/null ; then sudo apt-get install -qq clang-3.5 ; fi
   - sudo apt-get install -qq cmake ragel libssl-dev libbotan1.10-dev ninja-build
-  - sudo apt-get install -qq libboost1.55-dev libboost-system1.55-dev libboost-filesystem1.55-dev libboost-regex1.55-dev libboost-test1.55-dev libboost-program-options1.55-dev libboost-serialization1.55-dev libboost-log1.55-dev libboost-thread1.55-dev libboost-locale1.55-dev libboost-regex1.55-dev
+  - if echo $MYCXX | grep g++ > /dev/null   ; then sudo apt-get install -qq libboost1.55-dev libboost-system1.55-dev libboost-filesystem1.55-dev libboost-regex1.55-dev libboost-test1.55-dev libboost-program-options1.55-dev libboost-serialization1.55-dev libboost-log1.55-dev libboost-thread1.55-dev libboost-locale1.55-dev libboost-regex1.55-dev ; fi
+  - if echo $MYCXX | grep clang > /dev/null ; then wget https://georg.so/pub/travisci/boost-1.58-clang-3.5-ubuntu-12.04-64.tar.xz ; fi
+  - if echo $MYCXX | grep clang > /dev/null ; then sudo tar -C / -x -f boost-1.58-clang-3.5-ubuntu-12.04-64.tar.xz ;fi
 
 #install: make install-deps
 
 before_script:
   - mkdir build
-  - cd build && CXX=$MYCXX cmake -G Ninja -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE ..
+# PWD -> build
+  - CXX=$MYCXX cmake -G Ninja -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE ..
 
-script: pwd && ninja -j1 imapdl ut && ./ut
+# PWD -> build
+script: ninja -j1 imapdl ut && ./ut
 
 # use the defaults
 #notifications:
