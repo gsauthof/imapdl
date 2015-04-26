@@ -26,6 +26,7 @@
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/utility.hpp>
 #include <boost/serialization/version.hpp>
+#include <boost/serialization/tracking.hpp>
 
 #include <fstream>
 using namespace std;
@@ -45,6 +46,7 @@ namespace boost {
 
   }
 }
+BOOST_CLASS_TRACKING(IMAP::Copy::Journal, boost::serialization::track_never)
 
 namespace IMAP {
   namespace Copy {

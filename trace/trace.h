@@ -33,6 +33,7 @@
 
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
+#include <boost/serialization/tracking.hpp>
 
 namespace Trace {
   enum class Type {
@@ -98,5 +99,6 @@ namespace Trace {
   };
 }
 BOOST_CLASS_VERSION(Trace::Record, 1)
+BOOST_CLASS_TRACKING(Trace::Record, boost::serialization::track_never)
 
 #endif
