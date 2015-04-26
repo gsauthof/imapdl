@@ -42,6 +42,7 @@ before_install:
 
 before_script:
   - mkdir build
+  - cd build
 # PWD -> build
   - CXX=$MYCXX cmake -G Ninja -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE ..
 
