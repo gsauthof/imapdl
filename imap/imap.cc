@@ -78,8 +78,8 @@ namespace IMAP {
   Section_Attribute::Section_Attribute(Section section, std::vector<string> &&headers)
     :
       section_(section),
-      // no std::move() because headers is an r-value reference
-      headers_(headers)
+      // std::move() still needed for an r-value reference
+      headers_(std::move(headers))
   {
     if (!(   section_ == Section::HEADER_FIELDS
           || section_ == Section::HEADER_FIELDS_NOT))
@@ -190,7 +190,7 @@ namespace IMAP {
         Section_Attribute &&section)
       :
         fetch_(fetch),
-        section_(section)
+        section_(std::move(section))
     {
       if (!(fetch_ == Fetch::BODY || fetch_ == Fetch::BODY_PEEK))
         throw logic_error("sections only allowed with BODY/BODY_PEEK attributes");
