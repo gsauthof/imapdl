@@ -136,13 +136,6 @@ target_link_libraries(ut
   ${OPENSSL_SSL_LIBRARY}
   ${OPENSSL_CRYPTO_LIBRARY}
   buffer_static ixxx_static
-
-  # for imapdl
-  ${Boost_LOG_LIBRARY}
-  ${Boost_LOG_SETUP_LIBRARY}
-  ${Boost_THREAD_LIBRARY}
-  ${Boost_LOCALE_LIBRARY}
-  ${Boost_REGEX_LIBRARY}
   # for ut comparison
   ${LIB_BOTAN}
 
