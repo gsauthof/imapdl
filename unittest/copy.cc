@@ -104,7 +104,7 @@ Replay_Server::Replay_Server(int &rc, const string &filename,
   opts_.use_ssl = use_ssl;
   opts_.key = prefix + "server.key";
   opts_.cert =  prefix + "server.crt";
-  opts_.dhparam = prefix + "dh512.pem";
+  opts_.dhparam = prefix + "dh768.pem";
   opts_.replayfile = prefix + filename_;
 
   opts_.use_replay = true;

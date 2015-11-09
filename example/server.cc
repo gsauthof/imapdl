@@ -84,7 +84,7 @@ namespace Server {
        "private key file")
       (OPT::CERTIFICATE, po::value<string>(&cert)->default_value("server.crt"),
        "public key file")
-      (OPT::DHPARAM, po::value<string>(&dhparam)->default_value("dh512.pem"),
+      (OPT::DHPARAM, po::value<string>(&dhparam)->default_value("dh768.pem"),
        "dh param file")
       (OPT::CIPHER, po::value<string>(&cipher)->default_value(""),
        "openssl cipher list - default: only ones with forward secrecy")
