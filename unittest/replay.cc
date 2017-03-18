@@ -55,7 +55,7 @@ static void basic_server_in_child()
     opts.use_ssl = true;
     opts.key = prefix + "server.key";
     opts.cert =  prefix + "server.crt";
-    opts.dhparam = prefix + "dh768.pem";
+    opts.dhparam = prefix + "dh1024.pem";
     opts.replayfile = prefix + "simple.log";
     // XXX remove from that class
     opts.use_replay = true;
