@@ -143,6 +143,8 @@ target_link_libraries(ut
 SET_TARGET_PROPERTIES(ut
   PROPERTIES LINK_FLAGS "-pthread")
 
+add_custom_target(check COMMAND ut)
+
 RAGEL_TARGET(length example/length.rl ${CMAKE_CURRENT_BINARY_DIR}/length.cc)
 
 add_executable(length ${RAGEL_length_OUTPUTS})

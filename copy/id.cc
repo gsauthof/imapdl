@@ -25,10 +25,10 @@ namespace IMAP {
   namespace Copy {
     namespace ID {
 
-      const char version[] = "0.5";
+      const char version[] = "0.6";
       const char author[]  = "Georg Sauthoff";
       const char mail[]    = "mail@georg.so";
-      const char date[]    = "2014-06-03";
+      const char date[]    = "2017-03-18";
       const char argv0[]   = "imapdl";
       const char licence[] = "GPLv3";
 

@@ -63,19 +63,19 @@ namespace Log {
     return o;
   }
 
+  static void format_console(boost::log::record_view const& rec,
+      boost::log::formatting_ostream& strm)
+  {
+    strm << std::fixed << std::setprecision(1) << std::setw(6)
+      << rec[timeline]->total_milliseconds()/1000.0;
+    strm << " [" << rec[severity] << "] "
+      << rec[boost::log::expressions::smessage];
+  }
+
   static void setup_console(Severity severity_threshold)
   {
     auto clog = boost::log::add_console_log();
-    clog->set_formatter(
-        boost::log::expressions::stream
-        << std::setw(5) << std::setfill('0')
-        << boost::log::expressions::attr< unsigned >("LineID")
-        << ' '
-        << timeline
-        << ' '
-        << ": [" << severity
-        << "] " << boost::log::expressions::smessage
-        );
+    clog->set_formatter(&format_console);
     clog->set_filter(severity <= severity_threshold);
   }
   void setup_file(Severity severity_threshold, const std::string &filename)
