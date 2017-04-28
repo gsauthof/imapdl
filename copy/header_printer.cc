@@ -54,17 +54,20 @@ namespace IMAP {
     void Header_Printer::print()
     {
       if (    opts_.task != Task::FETCH_HEADER
-           && static_cast<Log::Severity>(opts_.severity)      < Log::Severity::INFO
-           && static_cast<Log::Severity>(opts_.file_severity) < Log::Severity::INFO)
+           && static_cast<Log::Severity>(opts_.severity)
+                 < Log::Severity::MSG
+           && static_cast<Log::Severity>(opts_.file_severity)
+                 < Log::Severity::MSG)
         return;
 
-      if (    static_cast<Log::Severity>(opts_.severity)      >= Log::Severity::DEBUG
-           || static_cast<Log::Severity>(opts_.file_severity) >= Log::Severity::DEBUG) 
-      {
+      if (static_cast<Log::Severity>(opts_.severity) >= Log::Severity::DEBUG
+          || static_cast<Log::Severity>(opts_.file_severity)
+                 >= Log::Severity::DEBUG) {
         string s(buffer_.begin(), buffer_.end());
         BOOST_LOG_SEV(lg_, Log::DEBUG) << "Header: |" << s << "|";
       }
-
+      header_decoder_.clear();
+      fields_.clear();
       try {
         header_decoder_.read(buffer_.begin(), buffer_.end());
         header_decoder_.verify_finished();
@@ -72,11 +75,26 @@ namespace IMAP {
         BOOST_LOG_SEV(lg_, Log::ERROR) << e.what();
       }
       for (auto &i : fields_) {
-        BOOST_LOG_SEV(lg_, opts_.task == Task::FETCH_HEADER ? Log::MSG : Log::INFO)
+        BOOST_LOG_SEV(lg_, Log::INFO)
           << setw(10) << left << i.first << ' ' << i.second;
       }
-      header_decoder_.clear();
-      fields_.clear();
+      pretty_print();
+    }
+
+    void Header_Printer::pretty_print()
+    {
+      int j = 0;
+      line_.clear();
+      for (auto f : { "SUBJECT", "FROM", "DATE" } ) {
+        auto i = fields_.find(f);
+        if (i == fields_.end())
+          continue;
+        line_.append((*i).second);
+        if (j+1 < 3)
+          line_.append(" / ");
+        ++j;
+      }
+      BOOST_LOG_SEV(lg_, Log::MSG) << line_;
     }
 
 

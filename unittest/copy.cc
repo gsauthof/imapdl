@@ -389,15 +389,9 @@ static void test_fetch_header()
   BOOST_CHECK_EQUAL(rc, 0);
 
   const char ref[] =
-R"([MSG] DATE       Mon, 2 Jun 2014 23:09:55 +0200
-[MSG] FROM       Georg Sauthoff <mail@georg.so>
-[MSG] SUBJECT    test1
-[MSG] DATE       Mon, 2 Jun 2014 23:10:13 +0200
-[MSG] FROM       Georg Sauthoff <mail@georg.so>
-[MSG] SUBJECT    test2
-[MSG] DATE       Mon, 2 Jun 2014 23:10:25 +0200
-[MSG] FROM       Georg Sauthoff <mail@georg.so>
-[MSG] SUBJECT    test3
+R"([MSG] test1 / Georg Sauthoff <mail@georg.so> / Mon, 2 Jun 2014 23:09:55 +0200
+[MSG] test2 / Georg Sauthoff <mail@georg.so> / Mon, 2 Jun 2014 23:10:13 +0200
+[MSG] test3 / Georg Sauthoff <mail@georg.so> / Mon, 2 Jun 2014 23:10:25 +0200
 )";
   std::array<char, 512> buffer = {{0}};
   {

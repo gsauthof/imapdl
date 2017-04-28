@@ -43,6 +43,9 @@ namespace IMAP {
         Memory::Buffer::Vector field_name_;
         Memory::Buffer::Vector field_body_;
         std::map<std::string, std::string> fields_;
+        std::string line_;
+
+        void pretty_print();
       public:
         Header_Printer(
             const IMAP::Copy::Options &opts,
