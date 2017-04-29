@@ -11,7 +11,7 @@ other IMAP clients/servers because it includes [Ragel][ragel] based parsers for
 the client and server side of the IMAP protocol. For such use cases it is
 recommended to include this repository as Git [submodule][gitm].
 
-(last change to this readme file: 2014-05-30)
+(last change to this readme file: 2017-04-29)
 
 ## Features
 
@@ -93,6 +93,19 @@ For setting some CMake variables:
 
 Or supply a custom cache initialization file via `cmake -C`.
 
+### Meson
+
+Alternatively, this project can be built with
+[Meson](http://mesonbuild.com/). The Meson build configuration is
+located in `meson.build`. The Meson build system is younger than
+CMake, it has more useful defaults, a saner syntax and some nice
+features.
+
+Example:
+
+    $ meson --buildtype=release build
+    $ cd build
+    $ ninja-build imapdl
 
 ### Dependencies
 
