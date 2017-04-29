@@ -132,6 +132,10 @@ ut = executable('ut',
   cpp_args: '-DBOOST_LOG_DYN_LINK'
 )
 
+# note that this creates a target named test that
+# depends on ALL executables
+# (cf. https://github.com/mesonbuild/meson/issues/1579)
+# thus, as-is it make more sense to just do `ninja-build ut && ./ut`
 # default timeout 30s
 test('unittest', ut, timeout: 100)
 
