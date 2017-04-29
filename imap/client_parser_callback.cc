@@ -26,6 +26,8 @@ namespace IMAP {
 
       using namespace IMAP::Server::Response;
 
+      Base::~Base() =default;
+
       void Null::imap_tagged_status_begin()
       {
       }

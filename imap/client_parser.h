@@ -42,6 +42,8 @@ namespace IMAP {
         private:
           friend class IMAP::Client::Parser;
         protected:
+          virtual ~Base();
+
           //virtual void imap_continuation_request_begin() = 0;
           //virtual void imap_continuation_request_end() = 0;
           //virtual void imap_response_begin(Group g, Kind k) = 0;

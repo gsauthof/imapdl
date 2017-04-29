@@ -39,6 +39,7 @@ namespace IMAP {
       class Base {
         private:
         public:
+          virtual ~Base();
           virtual bool imapd_login(const Memory::Buffer::Base &userid,
               const Memory::Buffer::Base &password) = 0;
       };

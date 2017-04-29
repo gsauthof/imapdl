@@ -644,6 +644,7 @@ namespace IMAP {
 
     namespace Callback {
 
+      Base::~Base() =default;
       bool Null::imapd_login(const Memory::Buffer::Base &userid,
           const Memory::Buffer::Base &password)
       {
