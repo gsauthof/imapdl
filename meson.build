@@ -139,6 +139,13 @@ ut = executable('ut',
 # default timeout 30s
 test('unittest', ut, timeout: 100)
 
+# thus, workaround
+# not quite - as run_target executes the command in the source
+# directory and there is no way to specify the build-dir as working direcotry
+#run_target('check', command: [ ut ] )
+
+#run_target('runtargetpwd', command: [ 'pwd' ] )
+
 # default workdir: meson.build_root()
 #pwd = find_program('pwd')
 #test('unittest', pwd)
