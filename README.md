@@ -1,3 +1,5 @@
+[![C++](https://img.shields.io/badge/C++-11-blue.svg)](https://en.wikipedia.org/wiki/C++11) [![License](https://img.shields.io/badge/license-GPL--3-blue.svg)][lgpl] [![Build Status](https://travis-ci.org/gsauthof/imapdl.svg?branch=master)](https://travis-ci.org/gsauthof/imapdl) [![Code Coverage](https://codecov.io/github/gsauthof/imapdl/coverage.svg?branch=master)](https://codecov.io/github/gsauthof/imapdl)
+
 IMAP4v1 Download Client
 
 2014, Georg Sauthoff <mail@georg.so>
@@ -38,7 +40,6 @@ recommended to include this repository as Git [submodule][gitm].
   verifies that it doesn't violate [RFC3501][rfc3501] in any obvious way.
 - High test coverage with unittests
 
-[![Build Status](https://travis-ci.org/gsauthof/imapdl.svg)](https://travis-ci.org/gsauthof/imapdl)
 
 ## Design Choices
 
