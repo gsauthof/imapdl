@@ -92,6 +92,10 @@ namespace ASCII {
     }
     bool Sanitizer::seen_ctl() const
     {
+      (void)control_sanitizer_first_final;
+      (void)control_sanitizer_error;
+      (void)control_sanitizer_en_main;
+
       return seen_ctl_;
     }
 

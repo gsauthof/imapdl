@@ -457,6 +457,10 @@ namespace MIME {
     }
     void Decoder::set_ending_policy(Ending e)
     {
+      (void)header_decoder_first_final;
+      (void)header_decoder_error;
+      (void)header_decoder_en_header_main;
+
       ending_ = e;
     }
   }

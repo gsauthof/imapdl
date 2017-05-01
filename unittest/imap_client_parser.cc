@@ -700,7 +700,7 @@ BOOST_AUTO_TEST_SUITE( imap_client_parser )
         {
           ++a[3];
         }
-        void imap_tagged_status_begin()
+        void imap_tagged_status_begin() override
         {
           ++a[4];
           proxy.set(&buffer);
@@ -791,7 +791,7 @@ BOOST_AUTO_TEST_SUITE( imap_client_parser )
         {
           ++a[3];
         }
-        void imap_tagged_status_begin()
+        void imap_tagged_status_begin() override
         {
           ++a[4];
           proxy.set(&buffer);
@@ -859,7 +859,7 @@ BOOST_AUTO_TEST_SUITE( imap_client_parser )
           proxy.set(nullptr);
           file.close();
         }
-        void imap_tagged_status_begin()
+        void imap_tagged_status_begin() override
         {
           string t(tag_buffer.begin(), tag_buffer.end());
           if (t == "a4") {

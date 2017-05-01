@@ -1173,6 +1173,13 @@ namespace IMAP {
     // e.g. for mailbox/maildir we want to convert - which is the default
     void Parser::set_convert_crlf(bool b)
     {
+      (void)imap_first_final;
+      (void)imap_en_literal_tail;
+      (void)imap_en_literal_tail_convert;
+      (void)imap_en_capability;
+      (void)imap_en_continue_req_tail;
+      (void)imap_en_main;
+
       convert_crlf_ = b;
     }
 

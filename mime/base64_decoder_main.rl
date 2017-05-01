@@ -96,6 +96,10 @@ namespace MIME {
     }
     const char *Decoder::next() const
     {
+      (void)base64_decoder_main_first_final;
+      (void)base64_decoder_main_error;
+      (void)base64_decoder_main_en_base64_main;
+
       return next_;
     }
   }

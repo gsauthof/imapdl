@@ -637,6 +637,15 @@ namespace IMAP {
 
     void Parser::verify_finished() const
     {
+      (void)imapd_error;
+      (void)imapd_en_literal_tail;
+      (void)imapd_en_literal_tail_convert;
+      (void)imapd_en_search_key;
+      (void)imapd_en_selected;
+      (void)imapd_en_authenticated;
+      (void)imapd_en_main;
+      (void)imapd_en_main_requests_not_authenticated;
+
       if (!finished())
         throw runtime_error("IMAP client automaton not in final state");
     }

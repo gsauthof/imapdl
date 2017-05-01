@@ -91,6 +91,10 @@ namespace MIME {
     }
     const char *Decoder::next() const
     {
+      (void)q_main_first_final;
+      (void)q_main_error;
+      (void)q_main_en_q_main;
+
       return next_;
     }
   }

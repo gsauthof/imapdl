@@ -124,7 +124,7 @@ namespace Log {
       lg.add_attribute("Timeline", boost::log::attributes::timer());
       setup_console(sev);
       setup_file(file_severity, logfile);
-      return std::move(lg);
+      return lg;
     }
 
 }
