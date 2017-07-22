@@ -119,11 +119,15 @@ namespace Net {
             BOOST_LOG_SEV(lg_, Log::DEBUG) << "shutting down connect to: " << host_;
             if (ec) {
                         // for Boost >= 1.63 (e.g. Fedora >= 26)
-              if ( (    ec.category() == boost::asio::ssl::error::get_stream_category()
-                        // for Boost <= 1.61 (e.g. Fedora <= 25)
-                     || ec.category() == boost::asio::error::get_ssl_category()
-                   )
-                  && ec.value()    == boost::asio::ssl::error::stream_errors::stream_truncated) {
+              if
+#if BOOST_VERSION >= 106300
+  (    ec.category() == boost::asio::ssl::error::get_stream_category()
+    && ec.value() == boost::asio::ssl::error::stream_errors::stream_truncated)
+#else
+  (    ec.category() == boost::asio::error::get_ssl_category()
+    && ec.value() == ERR_PACK(ERR_LIB_SSL, 0, SSL_R_SHORT_READ) )
+#endif
+              {
               } else if (   ec.category() == boost::asio::error::get_ssl_category()
                          && ERR_GET_REASON(ec.value())
                               == SSL_R_DECRYPTION_FAILED_OR_BAD_RECORD_MAC) {
