@@ -334,8 +334,10 @@ namespace Server {
           {
             out_ << "replay: ";
             if (ec) {
-              if (ec.category() == asio::error::get_ssl_category() &&
-                   ec.value() == ERR_PACK(ERR_LIB_SSL, 0, SSL_R_SHORT_READ))
+              if ( (     ec.category() == asio::error::get_ssl_category() // Boost <= 1.61
+                      || ec.category() == boost::asio::error::get_ssl_category()
+                   )
+                   && ec.value() == boost::asio::ssl::error::stream_errors::stream_truncated)
               {
                 out_ << "got SSL notfied\n";
                 signals_.cancel();
@@ -372,8 +374,10 @@ namespace Server {
             if (ec) {
               out_ << "SSL shutdown error: " << ec.message() << '\n';
 
-              if (ec.category() == asio::error::get_ssl_category() &&
-                   ec.value() == ERR_PACK(ERR_LIB_SSL, 0, SSL_R_SHORT_READ))
+              if ( (    ec.category() == asio::error::get_ssl_category() // Boost <= 1.61
+                     || ec.category() == boost::asio::ssl::error::get_stream_category() // Boost >= 1.63
+                   )
+                  && ec.value() == boost::asio::ssl::error::stream_errors::stream_truncated)
               {
                 out_ << "(not really an error)\n";
               }

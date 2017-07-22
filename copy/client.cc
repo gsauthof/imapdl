@@ -400,8 +400,13 @@ namespace IMAP {
             BOOST_LOG_FUNCTION();
             if (ec) {
               if (          state_ == State::LOGGED_OUT
-                  && (   (    ec.category() == boost::asio::error::get_ssl_category()
-                           && ec.value()    == ERR_PACK(ERR_LIB_SSL, 0, SSL_R_SHORT_READ)
+                  && (   ( (    ec.category() == boost::asio::error::get_ssl_category() // Boost <= 1.61
+                             || ec.category() == boost::asio::ssl::error::get_stream_category() // Boost >= 1.63
+                           )
+                           // for old openssl versions
+                           // cf. /usr/include/boost/asio/ssl/error.hpp
+                           // && ec.value()    == ERR_PACK(ERR_LIB_SSL, 0, SSL_R_SHORT_READ)
+                           && ec.value() == boost::asio::ssl::error::stream_errors::stream_truncated
                          )
                       || (    ec.category() == boost::asio::error::get_misc_category()
                            && ec.value()    == boost::asio::error::eof

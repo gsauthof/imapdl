@@ -593,8 +593,10 @@ namespace Client {
               cout << "Read error: " << ec.message() << '\n';
               // either close notifier received from server
               // or shutdown(receive) was calles on lowest_layer
-              if (ec.category() == asio::error::get_ssl_category() &&
-                   ec.value() == ERR_PACK(ERR_LIB_SSL, 0, SSL_R_SHORT_READ))
+              if ( (    ec.category() == asio::error::get_ssl_category() // Boost <= 1.61
+                     || ec.category() == boost::asio::ssl::error::get_stream_category() // Boost >= 1.63
+                   )
+                   && ec.value() == boost::asio::ssl::error::stream_errors::stream_truncated)
               {
                 cout << "(not really an error)\n";
                 do_shutdown();
@@ -634,8 +636,10 @@ namespace Client {
             if (ec) {
               cout << "SSL shutdown error: " << ec.message() << '\n';
 
-              if (ec.category() == asio::error::get_ssl_category() &&
-                   ec.value() == ERR_PACK(ERR_LIB_SSL, 0, SSL_R_SHORT_READ))
+              if ( (    ec.category() == asio::error::get_ssl_category() // Boost <= 1.61
+                     || ec.category() == boost::asio::ssl::error::get_stream_category() // Boost >= 1.63
+                   )
+                   && ec.value() == boost::asio::ssl::error::stream_errors::stream_truncated)
               {
                 cout << "(not really an error)\n";
               }
