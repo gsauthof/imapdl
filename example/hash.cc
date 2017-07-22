@@ -19,11 +19,18 @@
 
 }}} */
 
-#include <botan/pipe.h>
-#include <botan/basefilt.h>
-#include <botan/filters.h>
-#include <botan/data_snk.h>
-using namespace Botan;
+#include "config.h"
+#if defined(IMAPDL_USE_BOTAN)
+  #include <botan/pipe.h>
+  #include <botan/basefilt.h>
+  #include <botan/filters.h>
+  #include <botan/data_snk.h>
+#elif defined(IMAPDL_USE_CRYPTOPP)
+  #include <cryptopp/files.h>
+  #include <cryptopp/filters.h>
+  #include <cryptopp/hex.h>
+  #include <cryptopp/sha.h>
+#endif
 
 #include <fstream>
 #include <sstream>
@@ -37,6 +44,8 @@ int main(int argc, char **argv)
     cerr << "Call: " << *argv << " FILE\n";
     return 1;
   }
+#if defined(IMAPDL_USE_BOTAN)
+  using namespace Botan;
   ifstream in(argv[1], ios::binary);
   ostringstream out;
 
@@ -48,5 +57,17 @@ int main(int argc, char **argv)
   pipe.end_msg();
 
   cout << out.str() << '\n';
+#elif defined(IMAPDL_USE_CRYPTOPP)
+  using namespace CryptoPP;
+  string out;
+  CryptoPP::SHA256 sha1;
+  FileSource source(argv[1], true,
+      new HashFilter(sha1,
+        new HexEncoder(new StringSink(out), false, 0, ""),
+        false)
+      );
+  cout << out << '\n';
+#endif
+
   return 0;
 }

@@ -1,0 +1,2 @@
+option('crypto', type: 'combo', choices: ['auto', 'botan', 'cryptopp'],
+    value: 'auto')

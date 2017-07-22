@@ -65,19 +65,31 @@ add_subdirectory(libixxx)
 add_subdirectory(libbuffer)
 
 find_package(OpenSSL REQUIRED)
-find_library(LIB_BOTAN
-  NAMES botan
-        botan-1.10 # for Fedora 20
-  )
-find_path(HEADER_BOTAN
-  NAMES botan/pipe.h
-  # e.g. Fedora 20 stores the botan header files
-  # under /usr/include/botan-1.10/botan/*.h ...
-  PATH_SUFFIXES botan-1.10
-  )
-include_directories(
-  ${HEADER_BOTAN}
-  )
+
+option(IMAPDL_USE_BOTAN "Use botan for crypto" ON)
+option(IMAPDL_USE_CRYPTOPP "Use cryptopp for crypto" OFF)
+
+if(IMAPDL_USE_BOTAN)
+  find_library(LIB_CRYPTO
+    NAMES botan
+          botan-1.10 # for Fedora 20
+    )
+  find_path(HEADER_BOTAN
+    NAMES botan/pipe.h
+    # e.g. Fedora 20 stores the botan header files
+    # under /usr/include/botan-1.10/botan/*.h ...
+    PATH_SUFFIXES botan-1.10
+    )
+  include_directories(${HEADER_BOTAN})
+elseif(IMAPDL_USE_CRYPTOPP)
+  find_library(LIB_CRYPTO NAMES cryptopp)
+  find_path(HEADER_CRYPTOPP NAMES cryptopp/sha.h)
+  include_directories(${HEADER_CRYPTOPP})
+else()
+  message(FATAL_ERROR "Either select botan or cryptopp")
+endif()
+
+configure_file(config.h.cmake_in config.h)
 
 add_executable(ut
   imap/imap.cc
@@ -130,7 +142,7 @@ target_link_libraries(ut
   ${OPENSSL_CRYPTO_LIBRARY}
   buffer_static ixxx_static
   # for ut comparison
-  ${LIB_BOTAN}
+  ${LIB_CRYPTO}
 
   )
 SET_TARGET_PROPERTIES(ut
@@ -238,5 +250,5 @@ add_executable(hash
   example/hash.cc
   )
 target_link_libraries(hash
-  ${LIB_BOTAN}
+  ${LIB_CRYPTO}
   )

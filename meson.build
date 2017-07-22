@@ -1,7 +1,30 @@
 project('imapdl', 'cpp')
 
+conf = configuration_data()
 
-botan_dep = dependency('botan-1.10')
+if get_option('crypto') == 'cryptopp'
+  crypto_dep = dependency('cryptopp')
+  conf.set('IMAPDL_USE_CRYPTOPP', true)
+elif get_option('crypto') == 'botan'
+  crypto_dep = dependency('botan-1.10')
+  conf.set('IMAPDL_USE_BOTAN', true)
+else
+  crypto_dep = dependency('botan-1.10', required: false)
+  if crypto_dep.found()
+    conf.set('IMAPDL_USE_BOTAN', true)
+  else
+    crypto_dep = dependency('cryptopp', required: false)
+    if crypto_dep.found()
+      conf.set('IMAPDL_USE_CRYPTOPP', true)
+    else
+      error('Either cryptopp or botan required for unittests')
+    endif
+  endif
+endif
+
+configure_file(output : 'config.h', configuration : conf)
+
+
 openssl_dep = dependency('openssl')
 boost_dep = dependency('boost', version: '1.55', modules : [
     'system', # needed by filesystem, log
@@ -17,7 +40,7 @@ boost_dep = dependency('boost', version: '1.55', modules : [
     'locale',
     'regex'])
 
-executable('hash', 'example/hash.cc', dependencies : botan_dep)
+executable('hash', 'example/hash.cc', dependencies : crypto_dep)
 
 # XXX create proper subprojects
 ixxx_inc = include_directories('libixxx')
@@ -125,7 +148,7 @@ ut = executable('ut',
   'unittest/lex_util.cc',
 
   dependencies: [ boost_dep, openssl_dep,
-    botan_dep # for ut comparison
+    crypto_dep # for ut comparison
   ],
   link_with: [ ixxx_lib, buffer_lib ],
   include_directories : [buffer_inc, ixxx_inc],

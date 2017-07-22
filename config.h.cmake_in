@@ -1,0 +1,2 @@
+#cmakedefine IMAPDL_USE_BOTAN
+#cmakedefine IMAPDL_USE_CRYPTOPP

@@ -41,13 +41,21 @@ using namespace ixxx;
 #include <chrono>
 #include <memory>
 #include <stdexcept>
-using namespace std;
 
-#include <botan/pipe.h>
-#include <botan/basefilt.h>
-#include <botan/filters.h>
-#include <botan/data_snk.h>
-using namespace Botan;
+#include "config.h"
+#if defined(IMAPDL_USE_BOTAN)
+  #include <botan/pipe.h>
+  #include <botan/basefilt.h>
+  #include <botan/filters.h>
+  #include <botan/data_snk.h>
+#elif defined(IMAPDL_USE_CRYPTOPP)
+  #include <cryptopp/files.h>
+  #include <cryptopp/filters.h>
+  #include <cryptopp/hex.h>
+  #include <cryptopp/sha.h>
+#endif
+
+using namespace std;
 
 static string ut_prefix()
 {
@@ -59,8 +67,10 @@ static string ut_prefix()
   return prefix;
 }
 
+#if defined(IMAPDL_USE_BOTAN)
 static string sha256_sum(const string &filename)
 {
+  using namespace Botan;
   ifstream in(filename, ios::binary);
   ostringstream out;
 
@@ -73,6 +83,20 @@ static string sha256_sum(const string &filename)
 
   return out.str();
 }
+#elif defined(IMAPDL_USE_CRYPTOPP)
+static string sha256_sum(const string &filename)
+{
+  using namespace CryptoPP;
+  string out;
+  CryptoPP::SHA256 sha1;
+  FileSource source(filename.c_str(), true,
+      new HashFilter(sha1,
+        new HexEncoder(new StringSink(out), false, 0, ""),
+        false)
+      );
+  return out;
+}
+#endif
 
 
 class Replay_Server {
