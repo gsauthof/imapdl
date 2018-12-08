@@ -26,11 +26,11 @@ configure_file(output : 'config.h', configuration : conf)
 
 
 openssl_dep = dependency('openssl')
-boost_dep = dependency('boost', version: '1.55', modules : [
+boost_dep = dependency('boost', version: '>=1.55', modules : [
     'system', # needed by filesystem, log
     'filesystem',
     'regex',
-    'test',
+    'unit_test_framework',
     'program_options',
     'serialization',
     'log',
