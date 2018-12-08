@@ -116,7 +116,7 @@ Example:
 - [Boost][boost] (>= 1.55)
 - [Ragel][ragel] (>= 6.6)
 - [OpenSSL][openssl] (tested with 1.0.1e)
-- [Botan][botan] (tested with 1.8.14, only for unittests)
+- [Crypto++][cryptopp] or [Botan][botan] (only for unittests)
 
 
 ## Basic usage
@@ -207,6 +207,7 @@ setups, yet.
 [botan]:   http://botan.randombit.net/
 [ca]:      http://en.wikipedia.org/wiki/Certificate_authority
 [cmake]:   http://www.cmake.org/
+[cryptopp]:http://www.cryptopp.com/
 [cyrus]:   https://cyrusimap.org/
 [dovecot]: http://www.dovecot.org/
 [fp]:      http://en.wikipedia.org/wiki/Public_key_fingerprint

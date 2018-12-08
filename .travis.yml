@@ -26,7 +26,7 @@ before_install:
   - ./ci/travis/"$TRAVIS_OS_NAME$tag"/before_install.sh
 
 install:
-  - docker exec --user root devel dnf -y install botan-devel
+  - docker exec --user root devel dnf -y install cryptopp-devel
   - ./ci/travis/"$TRAVIS_OS_NAME$tag"/install.sh
 
 before_script:
