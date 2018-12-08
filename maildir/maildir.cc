@@ -79,7 +79,7 @@ Maildir::~Maildir()
     posix::close(tmp_dir_fd_);
     posix::close(new_dir_fd_);
     posix::close(cur_dir_fd_);
-  } catch (std::exception) {
+  } catch (const std::exception&) {
   }
 }
 

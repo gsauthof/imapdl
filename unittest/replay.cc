@@ -40,7 +40,7 @@ static string ut_prefix()
   string prefix("../unittest");
   try {
     prefix = ansi::getenv("UT_PREFIX");
-  } catch (ixxx::runtime_error) {
+  } catch (const ixxx::runtime_error &) {
   }
   return prefix;
 }

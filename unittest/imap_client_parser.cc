@@ -1350,7 +1350,7 @@ BOOST_AUTO_TEST_SUITE( imap_client_parser )
       bool caught = false;
       try {
         p.read(begin, end);
-      } catch (exception) {
+      } catch (const exception&) {
         caught = true;
       }
       BOOST_CHECK_EQUAL(caught, true);
@@ -1374,7 +1374,7 @@ BOOST_AUTO_TEST_SUITE( imap_client_parser )
       bool caught = false;
       try {
         p.read(begin, end);
-      } catch (exception) {
+      } catch (const exception&) {
         caught = true;
       }
       BOOST_CHECK_EQUAL(caught, true);

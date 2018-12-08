@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_SUITE( maildir )
     bool caught = false;
     try {
       Maildir m(path, false);
-    } catch (std::runtime_error) {
+    } catch (const std::runtime_error&) {
       caught = true;
     }
     BOOST_CHECK_EQUAL(caught, true);
@@ -143,7 +143,7 @@ BOOST_AUTO_TEST_SUITE( maildir )
     bool caught = false;
     try {
       m.move_to_cur("XYZ");
-    } catch (std::runtime_error) {
+    } catch (const std::runtime_error&) {
       caught = true;
     }
     BOOST_CHECK_EQUAL(caught, true);
@@ -158,7 +158,7 @@ BOOST_AUTO_TEST_SUITE( maildir )
     bool caught = false;
     try {
       m.move_to_new();
-    } catch (std::runtime_error) {
+    } catch (const std::runtime_error&) {
       caught = true;
     }
     BOOST_CHECK_EQUAL(caught, true);
@@ -176,7 +176,7 @@ BOOST_AUTO_TEST_SUITE( maildir )
     bool caught = false;
     try {
       m.move_to_new();
-    } catch (std::runtime_error) {
+    } catch (const std::runtime_error&) {
       caught = true;
     }
     BOOST_CHECK_EQUAL(caught, true);
