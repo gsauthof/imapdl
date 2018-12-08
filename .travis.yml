@@ -18,7 +18,7 @@ matrix:
       services: docker
       # omit -fsanitize=undefined for now as its message inject
       # a memory leak ...
-      env: docker_img=gsauthof/fedora-cxx-devel:25 build_method=meson build_type=debug build_flags=-Db_coverage=true CXXFLAGS="-fsanitize=address" targets="ut imapdl" UT_PREFIX=/srv/src/unittest
+      env: docker_img=gsauthof/fedora-cxx-devel:29 build_method=meson build_type=debug build_flags=-Db_coverage=true CXXFLAGS="-fsanitize=address" targets="ut imapdl" UT_PREFIX=/srv/src/unittest
       python: 3.5
 
 before_install:
