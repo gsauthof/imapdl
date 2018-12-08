@@ -32,8 +32,7 @@
 #include <stddef.h>
 
 #include <boost/asio/ip/tcp.hpp>
-namespace boost { namespace asio { class io_service; } }
-namespace boost { namespace system { class error_code; } }
+#include <boost/asio/io_service.hpp>
 
 namespace Net {
 
