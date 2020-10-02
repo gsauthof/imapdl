@@ -41,6 +41,7 @@ namespace IMAP {
         boost::asio::basic_waitable_timer<std::chrono::steady_clock> timer_;
         size_t bytes_start_ {0};
         size_t messages_  {0};
+        bool stopped_ {false};
       public:
         Fetch_Timer(
             Net::Client::Base &client,

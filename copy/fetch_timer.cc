@@ -58,6 +58,7 @@ namespace IMAP {
     {
       start_ = chrono::steady_clock::now();
       bytes_start_ = client_.bytes_read();
+      stopped_ = false;
 
       resume();
     }
@@ -68,6 +69,8 @@ namespace IMAP {
       timer_.async_wait([this](const boost::system::error_code &ec)
           {
             BOOST_LOG_FUNCTION();
+            if (stopped_)
+              return;
             if (ec) {
               if (ec.value() == boost::asio::error::operation_aborted)
                 return;
@@ -80,6 +83,7 @@ namespace IMAP {
     }
     void Fetch_Timer::stop()
     {
+      stopped_ = true;
       print();
       timer_.cancel();
     }
