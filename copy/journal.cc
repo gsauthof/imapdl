@@ -37,7 +37,7 @@ namespace boost {
   namespace serialization {
 
     template<class Archive>
-      void serialize(Archive & a, IMAP::Copy::Journal &d, const unsigned int version)
+      void serialize(Archive & a, IMAP::Copy::Journal &d, const unsigned int /* version */)
       {
         a & d.mailbox_;
         a & d.uidvalidity_;

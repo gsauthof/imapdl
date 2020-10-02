@@ -51,7 +51,7 @@ namespace IMAP {
     TEXT,
     LAST_
   };
-  std::ostream &operator<<(std::ostream &o, Section &s);
+  std::ostream &operator<<(std::ostream &o, Section s);
 
   class Section_Attribute {
     private:
@@ -135,7 +135,7 @@ namespace IMAP {
       BODY_PEEK,
       LAST_
     };
-    std::ostream &operator<<(std::ostream &o, Fetch &s);
+    std::ostream &operator<<(std::ostream &o, Fetch s);
     class Fetch_Attribute {
       private:
         Fetch fetch_ { Fetch::FIRST_ };

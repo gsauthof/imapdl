@@ -360,7 +360,7 @@ header_main :=  header ;
 namespace MIME {
   namespace Header {
     void default_convert(const std::pair<const char*, const char*> &charset,
-        const std::pair<const char*, const char*> &lang,
+        const std::pair<const char*, const char*> & /* lang */,
         const std::pair<const char*, const char*> &inp,
         std::string &out)
     {

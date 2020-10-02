@@ -62,7 +62,7 @@ namespace Trace {
       }
 */
     template<class Archive>
-      void save(Archive & ar, const unsigned int version) const
+      void save(Archive & ar, const unsigned int /* version */) const
       {
         ar & type;
         ar & timestamp;

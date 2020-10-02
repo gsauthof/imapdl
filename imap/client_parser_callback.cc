@@ -31,28 +31,28 @@ namespace IMAP {
       void Null::imap_tagged_status_begin()
       {
       }
-      void Null::imap_tagged_status_end(Status c)
+      void Null::imap_tagged_status_end(Status)
       {
       }
-      void Null::imap_untagged_status_begin(Status c)
+      void Null::imap_untagged_status_begin(Status)
       {
       }
-      void Null::imap_untagged_status_end(Status c)
+      void Null::imap_untagged_status_end(Status)
       {
       }
-      void Null::imap_data_exists(uint32_t number)
+      void Null::imap_data_exists(uint32_t)
       {
       }
-      void Null::imap_data_recent(uint32_t number)
+      void Null::imap_data_recent(uint32_t)
       {
       }
-      void Null::imap_data_fetch_begin(uint32_t number)
+      void Null::imap_data_fetch_begin(uint32_t)
       {
       }
       void Null::imap_data_fetch_end()
       {
       }
-      void Null::imap_data_expunge(uint32_t number)
+      void Null::imap_data_expunge(uint32_t)
       {
       }
       void Null::imap_data_flags_begin()
@@ -61,25 +61,25 @@ namespace IMAP {
       void Null::imap_data_flags_end()
       {
       }
-      void Null::imap_flag(Flag flag)
+      void Null::imap_flag(Flag)
       {
       }
       void Null::imap_atom_flag()
       {
       }
-      void Null::imap_uid(uint32_t number)
+      void Null::imap_uid(uint32_t)
       {
       }
       void Null::imap_status_code(Status_Code)
       {
       }
-      void Null::imap_status_code_uidnext(uint32_t n)
+      void Null::imap_status_code_uidnext(uint32_t)
       {
       }
-      void Null::imap_status_code_uidvalidity(uint32_t n)
+      void Null::imap_status_code_uidvalidity(uint32_t)
       {
       }
-      void Null::imap_status_code_unseen(uint32_t n)
+      void Null::imap_status_code_unseen(uint32_t)
       {
       }
       void Null::imap_status_code_capability_begin()
@@ -91,7 +91,7 @@ namespace IMAP {
       void Null::imap_capability_begin()
       {
       }
-      void Null::imap_capability(Capability capability)
+      void Null::imap_capability(Capability)
       {
       }
       void Null::imap_capability_end()
@@ -119,13 +119,13 @@ namespace IMAP {
       void Null::imap_list_end()
       {
       }
-      void Null::imap_list_sflag(SFlag flag)
+      void Null::imap_list_sflag(SFlag)
       {
       }
-      void Null::imap_list_oflag(OFlag oflag)
+      void Null::imap_list_oflag(OFlag)
       {
       }
-      void Null::imap_quoted_char(char c)
+      void Null::imap_quoted_char(char)
       {
       }
       void Null::imap_list_mailbox()
