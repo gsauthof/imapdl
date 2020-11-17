@@ -25,15 +25,11 @@
 #include <boost/throw_exception.hpp>
 #include <boost/log/support/exception.hpp>
 
-// Replacement for BOOST_THROW_EXCEPTION
-//   Difference: it also includes ::boost::log::current_scope()
+// Previously: Replacement for BOOST_THROW_EXCEPTION
+//   used to also includes ::boost::log::current_scope()
+//   however, old construct broke with boost 1.73 ...
 
-#define THROW_LOG_EXCEPTION(x)\
-          ::boost::throw_exception( ::boost::enable_error_info(x) <<\
-                      ::boost::throw_function(BOOST_THROW_EXCEPTION_CURRENT_FUNCTION) <<\
-                      ::boost::throw_file(__FILE__) <<\
-                      ::boost::throw_line((int)__LINE__) <<\
-                      ::boost::log::current_scope() )
+#define THROW_LOG_EXCEPTION(x) BOOST_THROW_EXCEPTION(x)
 
 #define THROW_LOGIC_MSG(S) \
   THROW_LOG_EXCEPTION( \
