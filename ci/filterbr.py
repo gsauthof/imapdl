@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # 2017, Georg Sauthoff <mail@gms.tf>, GPLv3
+# 2022, Alexander Stohr, ZF Friedrichshafen AG: benign handling of UTF-8 violations
 
 import sys
 
@@ -93,7 +94,9 @@ def filter_lcov_trace(lines):
     yield line
 
 def filter_lcov_trace_file(s_filename, d_file):
-  with open(s_filename) as f:
+  # encoding is anyways the python default: utf-8
+  # standard error is "strict"; python style escaping is "backslashreplace"; alternate benign handler is "surrogateescape"
+  with open(s_filename, encoding="utf-8", errors="backslashreplace") as f:
     for l in filter_lcov_trace(f):
       print(l, end='', file=d_file)
 
