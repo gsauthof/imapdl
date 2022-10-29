@@ -139,7 +139,9 @@ namespace Net {
                 if (ec.category() == boost::asio::error::get_ssl_category()) {
                   BOOST_LOG_SEV(lg_, Log::ERROR)
                     << "ssl_category: lib " << ERR_GET_LIB(ec.value())
+#if OPENSSL_VERSION_MAJOR < 3
                     << " func " << ERR_GET_FUNC(ec.value())
+#endif
                     << " reason " << ERR_GET_REASON(ec.value());
                 }
                 BOOST_LOG_SEV(lg_, Log::DEBUG) << "do_shutdown() fail: " << ec.message();
