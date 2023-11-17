@@ -85,6 +85,12 @@ action buffer_eq_cont
   buffer_.stop(&c+1);
   buffer_.cont(p);
 }
+action buffer_eq
+{
+  char c = '=';
+  buffer_.cont(&c);
+  buffer_.stop(&c+1);
+}
 action charset_start
 {
   charset_buffer_.start(p);
@@ -300,7 +306,13 @@ header =
   ew_state: (
     encoded_word_tail      -> ew_tail_state     |
     (fa - '?')
-          @buffer_eq_cont  -> w_state
+          @buffer_eq_cont  -> w_state           |
+    WSP   @buffer_eq
+          @space_start     -> ws_state          |
+    CR    @check_cr
+          @buffer_eq       -> cr_state          |
+    LF    @check_lf
+          @buffer_eq       -> lf_state
   ),
   ew_tail_state: (
     # application of the robustness principle:

@@ -312,6 +312,28 @@ BOOST_AUTO_TEST_SUITE(mime)
         string s(v.begin(), v.end());
         BOOST_CHECK_EQUAL(s, "foo  bar HelloWorld");
       }
+      BOOST_AUTO_TEST_CASE(equalspace)
+      {
+        using namespace MIME::Header;
+        Buffer::Vector v;
+        Buffer::Proxy p;
+        Decoder d(p, v, [](){});
+        const char inp[] = "Subject: [PATCH v2] rootfs: Fix support for rootfstype= when root= is given\n";
+        d.read(inp, inp + sizeof(inp) - 1);
+        string s(v.begin(), v.end());
+        BOOST_CHECK_EQUAL(s, "[PATCH v2] rootfs: Fix support for rootfstype= when root= is given");
+      }
+      BOOST_AUTO_TEST_CASE(unfoldequal)
+      {
+        using namespace MIME::Header;
+        Buffer::Vector v;
+        Buffer::Proxy p;
+        Decoder d(p, v, [](){});
+        const char inp[] = "Subject: [PATCH v2] rootfs: Fix support for rootfstype= when root=\r\n is given\n";
+        d.read(inp, inp + sizeof(inp) - 1);
+        string s(v.begin(), v.end());
+        BOOST_CHECK_EQUAL(s, "[PATCH v2] rootfs: Fix support for rootfstype= when root= is given");
+      }
       BOOST_AUTO_TEST_CASE(header)
       {
         using namespace MIME::Header;
