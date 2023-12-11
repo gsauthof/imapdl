@@ -18,7 +18,9 @@
     along with imapdl.  If not, see <http://www.gnu.org/licenses/>.
 
 }}} */
-#define BOOST_TEST_DYN_LINK
+#ifndef BOOST_TEST_DYN_LINK
+    #define BOOST_TEST_DYN_LINK
+#endif
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_MODULE imap
 

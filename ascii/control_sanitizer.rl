@@ -19,6 +19,7 @@
 
 }}} */
 
+#include <stdint.h>
 #include <ascii/control_sanitizer.h>
 
 using namespace std;

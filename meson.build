@@ -3,7 +3,7 @@ project('imapdl', 'cpp')
 conf = configuration_data()
 
 if get_option('crypto') == 'cryptopp'
-  crypto_dep = dependency('cryptopp')
+  crypto_dep = dependency('libcryptopp')
   conf.set('IMAPDL_USE_CRYPTOPP', true)
 elif get_option('crypto') == 'botan'
   crypto_dep = dependency('botan-1.10')
@@ -13,7 +13,7 @@ else
   if crypto_dep.found()
     conf.set('IMAPDL_USE_BOTAN', true)
   else
-    crypto_dep = dependency('cryptopp', required: false)
+    crypto_dep = dependency('libcryptopp', required: false)
     if crypto_dep.found()
       conf.set('IMAPDL_USE_CRYPTOPP', true)
     else
