@@ -25,6 +25,7 @@ namespace fs = boost::filesystem;
 
 #include <copy/client.h>
 #include <copy/options.h>
+#include <copy/journal.h>
 #include <example/server.h>
 #include <net/ssl_util.h>
 using namespace Net::SSL;
@@ -542,6 +543,37 @@ BOOST_AUTO_TEST_SUITE( copy )
   {
     boost::log::core::get()->remove_all_sinks();
     test_list();
+  }
+
+
+  BOOST_AUTO_TEST_CASE(journal)
+  {
+      string filename{"tmp/foo.journal"};
+      fs::remove(filename);
+      struct Foo {
+          const string &filename;
+          Foo(const string &filename) : filename(filename) {}
+          ~Foo() {
+              IMAP::Copy::Journal j;
+              j.mailbox_     = "INBOX";
+              j.uidvalidity_ = 23;
+              j.uids_        = { { 13, 77} };
+              j.write(filename);
+          }
+      };
+      {
+          try {
+              Foo blah(filename);
+              throw 23;
+          } catch (...) { }
+      }
+      IMAP::Copy::Journal j;
+      // the read() might trigger a terminate in case the input doesn't end in a newline
+      // such that boost serialize runs into an EOF that yields a failbit,
+      // and thus an exception might be thrown, from inside a boost destructor,
+      // such as the one of a boost locale_saver ...
+      j.read(filename);
+      BOOST_CHECK(j.uidvalidity_ == 23);
   }
 
 BOOST_AUTO_TEST_SUITE_END()

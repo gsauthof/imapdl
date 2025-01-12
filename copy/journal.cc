@@ -65,8 +65,15 @@ namespace IMAP {
     void Journal::read(const std::string &filename)
     {
       ifstream f;
-      f.exceptions(ofstream::failbit | ofstream::badbit );
-      f.open(filename, ofstream::in | ofstream::binary);
+      f.exceptions(ifstream::failbit | ifstream::badbit );
+      f.open(filename, ifstream::in | ifstream::binary);
+      // when Journal::write() was called from inside a destructor,
+      // the written file doesn't end in a newline
+      // and in that case the boost deserialization triggers an EOF bit
+      // that also yields a failbit ...
+      // and we don't want to transform that into an exception that isn't caught inside
+      // a boost detructor chain ... and thus would terminate the program ...
+      f.exceptions(ifstream::badbit);
       boost::archive::text_iarchive a(f);
       a >> *this;
     }
